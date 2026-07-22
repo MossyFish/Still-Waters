@@ -124,4 +124,28 @@ function spawnRipple(x,y,strength=0.6,opts={}) {
             ctx.moveTo(rp.x + Math.cos(a0)*r0, rp.y + Math.sin(a0)*r0);
         }
     }
-    })}
+})}
+
+// Water bg 
+function drawWater(){
+    const t = Date.now()*0.0002;
+    const grad = ctx.createLinearGradient(0,0,0,H);
+
+    grad.addColorStop(0,'#1f5c53');
+    grad.addColorStop(1,'#0f3531');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,W,H);
+
+    // light bands
+    ctx.globalAlpha = 0.06;
+    for(let i=0;i<5;i++){
+        ctx.beginPath();
+        const y = (H/5)*i + Math.sin(t + i)*20;
+        ctx.strokeStyle = '#dff2ea';
+        ctx.lineWidth = 30;
+        ctx.moveTo(0,y);
+        ctx.bezierCurveTo(W*0.3, y+40, W*0.7, y-40, W, y);
+        ctx.stroke();                                 
+        ctx.globalAlpha = 1; 
+    }
+}
