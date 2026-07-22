@@ -1,0 +1,19 @@
+{
+  "name": "still-waters",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "follow-redirects": "^1.16.0",
+    "icloud-shared-album": "^1.2.1",
+    "lodash.chunk": "^4.2.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
