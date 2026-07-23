@@ -6,7 +6,7 @@ function loop(){
     dt = Math.min(0.05, (now - lastFrameTime)/1000);
     lastFrameTime = now;
 
-    createContext.clearRect(0, 0, W, H);
+    ctv.clearRect(0, 0, W, H);
     drawWater();
     drawRipples();
     screenCtx.clearRect(0, 0, W, H);
@@ -22,7 +22,12 @@ function loop(){
     leaves.forEach(l => { l.update(); l.draw(screenCtx); });
     companion.update();
     nudgeFoliageNear(f.x, f.y, 4, 0.05);
-
+    if(trailX === null){ trailX = companion.x; trailY = companion.y; }
+    if(companion.speed > 1 && Math.hypot(companion.x-trailX, companion.y-trailY) > 26){
+        spawnRipple(companion.x, companion.y, 0.55, { decay: 0.92, maxAge: 1, rings: 1 });
+        trailX = companion.x; trailY = companion.y;
+    }
+    
     if(overlayCtx) {
         overlayCtx.clearRect(0, 0, W, H); 
         companion.draw(overlayCtx); 
