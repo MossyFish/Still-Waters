@@ -50,6 +50,97 @@ window.addEventListener('mouseleave', () => mouse.active = false);
 let ripples = [];
 let trailX = null, trailY = null;
 
+// Water bg 
+function drawWater(){
+    const t = Date.now()*0.0002;
+    const grad = ctx.createLinearGradient(0,0,0,H);
+
+    grad.addColorStop(0,'#1f5c53');
+    grad.addColorStop(1,'#0f3531');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,W,H);
+
+    // light bands
+    ctx.globalAlpha = 0.06;
+    for(let i=0;i<5;i++){
+        ctx.beginPath();
+        const y = (H/5)*i + Math.sin(t + i)*20;
+        ctx.strokeStyle = '#dff2ea';
+        ctx.lineWidth = 30;
+        ctx.moveTo(0,y);
+        ctx.bezierCurveTo(W*0.3, y+40, W*0.7, y-40, W, y);
+        ctx.stroke();                                 
+        ctx.globalAlpha = 1;
+    }
+}
+
+/* color blotches in the water */
+function blobPoints(cx, cy, baseR, lobes, irregularity){
+    const pts = [];
+    for(let i=0;i<lobes;i++){
+        const a = (i/lobes)*Math.PI*2 + (Math.random()-0.5)*0.3;
+        const r = baseR*(1 - irregularity*0.5 + Math.random()*irregularity);
+        pts.push([cx+Math.cos(a)*r, cy+Math.sin(a)*r*0.82]);
+    }
+
+    return pts;
+}
+
+function fillBlob(ctx, pts, color, alpha=1){
+    ctx.beginPath();
+    const mid0 = [(pts[0][0]+pts[pts.length-1][0])/2, (pts[0][1]+pts[pts.length-1][1])/2];
+    ctx.moveTo(mid0[0], mid0[1]);
+    for(let i=0;i<pts.length;i++){
+        const p0 = pts[i], p1 = pts[(i+1)%pts.length];
+        ctx.quadraticCurveTo(p0[0], p0[1], (p0[0]+p1[0])/2, (p0[1]+p1[1])/2);
+    }
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+}
+
+const WATER_HUES = [
+  '92,196,168','58,150,148','70,132,186','122,178,110','40,100,140',
+  '34,140,120','86,176,196', '48,90,150','108,150,86','54,60,120'
+];
+
+const colorBlots = [];
+    for(let i=0;i<40;i++){
+        colorBlots.push({
+        x:Math.random()*W, y:Math.random()*H,
+        r: 70+Math.random()*180,
+        color: WATER_HUES[Math.floor(Math.random()*WATER_HUES.length)],
+        alpha: 0.36+Math.random()*0.34,
+        phase: Math.random()*Math.PI*2,
+        speed: 0.02+Math.random()*0.04
+    })
+}
+
+function drawWaterBlots(t){
+    const fxW = waterFxCanvas.width, fxH = waterFxCanvas.height;
+    waterFxCtx.clearRect(0,0,fxW,fxH);
+    colorBlots.forEach(b=>{
+        b.phase += b.speed*0.01;
+        const bx = (b.x + Math.sin(b.phase)*18) * FX_SCALE;
+        const by = (b.y + Math.cos(b.phase*0.75)*14) * FX_SCALE;
+        const baseR = b.r*FX_SCALE;
+        const rgb = `rgb(${b.color})`;
+        for(let layer=3; layer>=1; layer--) {
+            const scale = layer/3;
+            // reuse shapes every frame
+            const pts = blobPoints(bx, by, baseR*scale, 6+Math.floor(Math.random()*4), 0.65);
+            fillBlob(waterFxCtx, pts, rgb, b.alpha*(1-scale*0.3));
+        }
+    ctx.save();
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.drawImage(waterFxCanvas, 0, 0, W, H);
+    ctx.restore();
+    })
+}
+
+
 /* definitions for opts     
 decay: alpha multiplier applies at decay^(dt*60) each frame 
 maxAge: sec cutoff on the cursor trail 
@@ -125,27 +216,3 @@ function spawnRipple(x,y,strength=0.6,opts={}) {
         }
     }
 })}
-
-// Water bg 
-function drawWater(){
-    const t = Date.now()*0.0002;
-    const grad = ctx.createLinearGradient(0,0,0,H);
-
-    grad.addColorStop(0,'#1f5c53');
-    grad.addColorStop(1,'#0f3531');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0,0,W,H);
-
-    // light bands
-    ctx.globalAlpha = 0.06;
-    for(let i=0;i<5;i++){
-        ctx.beginPath();
-        const y = (H/5)*i + Math.sin(t + i)*20;
-        ctx.strokeStyle = '#dff2ea';
-        ctx.lineWidth = 30;
-        ctx.moveTo(0,y);
-        ctx.bezierCurveTo(W*0.3, y+40, W*0.7, y-40, W, y);
-        ctx.stroke();                                 
-        ctx.globalAlpha = 1; 
-    }
-}
