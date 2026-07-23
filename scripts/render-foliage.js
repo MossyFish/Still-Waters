@@ -259,3 +259,84 @@ class LilyPad {
         ctx.drawImage(this.sprite, this.x + dx - this.spriteHalf, this.y + dy - this.spriteHalf)
     }
 }
+
+class Leaf{
+    constructor(){
+        this.len = 15 + Math.random()*17;
+        const r = this.len*0.5;
+        const p = findFoliageSpot(70, r);
+        this.x = p.x; this.y = p.y;
+        placedFoliage.push({x:this.x, y:this.y, r})
+        ;
+        this.rot = Math.random()*Math.PI*2;
+        this.driftT = Math.random()*1000;
+        this.offX = 0; this.offY = 0; this.velX = 0; this.velY = 0;
+        this.color = LEAF_GREENS[Math.floor(Math.random()*LEAF_GREENS.length)];
+        this.shadowDir = lightShadowParams(this.x, this.y);
+        this.buildShadowSprite();
+    }
+
+    buildShadowSprite(){
+    const blurPx = Math.max(1, this.len*0.08);
+    const halfW = this.len*0.6 + blurPx*2.5;
+    const halfH = this.len*0.4 + blurPx*2.5;
+    const sc = document.createElement('canvas');
+    sc.width = Math.ceil(halfW*2*SPRITE_SCALE);
+    sc.height = Math.ceil(halfH*2*SPRITE_SCALE);
+    const sctx = sc.getContext('2d');
+    sctx.scale(SPRITE_SCALE, SPRITE_SCALE);
+    sctx.translate(halfW, halfH);
+    sctx.filter = `blur(${blurPx.toFixed(1)})px`;
+    sctx.beginPath();
+    sctx.moveTo(this.len*0.6,0);
+    sctx.quadraticCurveTo(0,-this.len*0.4,-this.len*0.6,0);
+    sctx.quadraticCurveTo(0,this.len*0.4,this.len*0.6,0);
+    sctx.closePath();
+    sctx.fillStyle = '#000';
+    sctx.fill();
+    this.shadowSprite = sc;
+    this.shadowOriginX = halfW;
+    this.shadowOriginY = halfH;
+    this.shadowSpriteW = halfW*2;
+    this.shadowSpriteH = halfH*2;
+    }
+    update(){
+        const step = dt*60;
+        this.driftT += 0.004*step;
+        this.velX *= Math.pow(0.88, step); this.velY *= Math.pow(0.88, step);
+        this.offX += this.velX*step;
+        this.offY += this.velY*step;
+    }
+    draw(ctx){
+        const dx = Math.sin(this.driftT)*3 + this.offX, dy = Math.cos(this.driftT*0.7)*2 + this.offY;
+        const { ux, uy, t } = this.shadowDir;
+        const shadowOffset = this.len*(0.16 + t*0.4);
+        ctx.save();
+        ctx.translate(this.x+dx+ux*shadowOffset, this.y+dy+uy*shadowOffset);
+        ctx.rotate(this.rot + Math.sin(this.driftT)*0.15);
+        ctx.globalAlpha = Math.max(0, 0.15 - t*0.06);
+        ctx.drawImage(this.shadowSprite, -this.shadowOriginX, -this.shadowOriginY, this.shadowSpriteW, this.shadowSpriteH);
+        ctx.globalAlpha = 1;
+        ctx.restore();
+        ctx.save();
+        ctx.translate(this.x + dx, this.y + dy);
+        ctx.rotate(this.rot + Math.sin(this.driftT)*0.15);
+        ctx.beginPath();
+        ctx.moveTo(this.len*0.6,0);
+        ctx.quadraticCurveTo(0, -this.len*0.4, -this.len*0.6, 0);
+        ctx.quadraticCurveTo(0, this.len*0.4, this.len*0.6, 0); 
+        ctx.closePath();
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = 0.92; 
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        
+        ctx.strokeStyle = 'rgba(14, 5, 26, 0.4)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(this.len*0.55, 0);
+        ctx.lineTo(-this.len*0.55, 0);
+        ctx.stroke();
+        ctx.restore();
+    }                     
+}
