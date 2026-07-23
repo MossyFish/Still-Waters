@@ -52,26 +52,71 @@ let trailX = null, trailY = null;
 
 // Water bg 
 function drawWater(){
-    const t = Date.now()*0.0002;
-    const grad = ctx.createLinearGradient(0,0,0,H);
-
-    grad.addColorStop(0,'#1f5c53');
-    grad.addColorStop(1,'#0f3531');
+    const t = Date.now()*0.0003;
+    const grad = ctx.createRadialGradient(W*0.32,H*0.22,80, W*0.55,H*0.6, Math.max(W,H)*0.95);
+    grad.addColorStop(0,'#7bc0d4');
+    grad.addColorStop(0.14,'#55a8bd');
+    grad.addColorStop(0.3,'#3390a2');
+    grad.addColorStop(0.46,'#227488');
+    grad.addColorStop(0.62,'#1a5a70');
+    grad.addColorStop(0.78,'#124258');
+    grad.addColorStop(0.9,'#0c2c40');
+    grad.addColorStop(1,'#06182a');
     ctx.fillStyle = grad;
     ctx.fillRect(0,0,W,H);
 
-    // light bands
-    ctx.globalAlpha = 0.06;
-    for(let i=0;i<5;i++){
+    drawWaterBlots(t);
+
+    ctx.save();
+    ctx.globalAlpha = 0.05;
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.fillStyle = getNoisePattern();
+    ctx.fillRect(0,0,W,H);
+    ctx.restore();
+
+    // add caustics
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+
+    dapples.forEach(d=>{
+        d.phase += d.speed*0.01*(dt*60);
+        const dx = d.x + Math.sin(d.phase)*18;
+        const dy = d.y + Math.cos(d.phase*0.8)*12;
+        const g = ctx.createRadialGradient(dx,dy,0,dx,dy,d.r);
+        g.addColorStop(0,'rgba(205,230,250,0.14');
+        g.addColorStop(1,'rgba(205,230,250,0');
+        ctx.fillStyle = g;
         ctx.beginPath();
-        const y = (H/5)*i + Math.sin(t + i)*20;
-        ctx.strokeStyle = '#dff2ea';
-        ctx.lineWidth = 30;
-        ctx.moveTo(0,y);
-        ctx.bezierCurveTo(W*0.3, y+40, W*0.7, y-40, W, y);
-        ctx.stroke();                                 
-        ctx.globalAlpha = 1;
-    }
+        ctx.arc(dx,dy,d.r,0,Math.PI*2);
+        ctx.fill();
+    }); 
+
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    sunspots.forEach(s=>{
+        s.phase += s.speed*0.01*(dt*60);
+        const sx = s.x + Math.sin(s.phase)*22;
+        const sy = s.y + Math.cos(s.phase*0.7)*16;
+        const g = ctx.createRadialGradient(sx,sy,0,sx,sy,s.r);
+        g.addColorStop(0,`rgba(255,248,225,${s.intensity})`);
+        g.addColorStop(1,'rgba(255,248,225,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(sx,sy,s.r,0,Math.PI*2);
+        ctx.fill();
+
+    }); 
+    ctx.restore();
+    
+    const vg = ctx.createRadialGradient(W/2,H/2,H*0.3,W/2,H/2,H*0.85);
+    vg.addColorStop(0,'rgba(0,0,0,0)');
+
+    vg.addColorStop(1,'rgba(0,6,14,0.35');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0,0,W,H);
 }
 
 const WATER_HUES = [
