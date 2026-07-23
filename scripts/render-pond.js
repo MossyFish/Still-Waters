@@ -9,6 +9,7 @@ function loop(){
     ctv.clearRect(0, 0, W, H);
     drawWater();
     drawRipples();
+    
     screenCtx.clearRect(0, 0, W, H);
     screenCtx.drawImage(Buffer,0,0);
 
@@ -27,7 +28,7 @@ function loop(){
         spawnRipple(companion.x, companion.y, 0.55, { decay: 0.92, maxAge: 1, rings: 1 });
         trailX = companion.x; trailY = companion.y;
     }
-    
+
     if(overlayCtx) {
         overlayCtx.clearRect(0, 0, W, H); 
         companion.draw(overlayCtx); 
