@@ -122,9 +122,8 @@ constructor (isCompanion=false) {
         ctx.rotate(p.rot);
         ctx.beginPath();
         ctx.ellipse(0,0,p.rx,p.ry,0,0,Math.PI*2);
-        
-      
-      ctx.globalAlpha = 0.92;
+        ctx.fillStyle = p.color;   
+        ctx.globalAlpha = 0.92;
         ctx.fill();
         ctx.restore();
       });

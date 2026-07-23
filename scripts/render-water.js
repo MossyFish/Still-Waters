@@ -29,20 +29,20 @@ function hexToRgba(hex, a){
 function randRange(a,b){ return a + Math.random()*(b-a); }
 
 let W, H;
-function resize(){ 
+function resize(){
     W = canvas.width = buffer.width = window.innerWidth;
     H = canvas.height = buffer.height = window.innerHeight;
       if(overlayCanvas){ overlayCanvas.width = W; overlayCanvas.height = H; }
+    waterFxCanvas.width = Math.max(1, Math.round(W*FX_SCALE));
+    waterFxCanvas.height = Math.max(1, Math.round(H*FX_SCALE));
+    causticCanvas.width = Math.max(1, Math.round(W*CAUSTIC_SCALE));
+    causticCanvas.height = Math.max(1, Math.round(H*CAUSTIC_SCALE));
+}
 
-  waterFxCanvas.width = Math.max(1, Math.round(W*FX_SCALE));
-  waterFxCanvas.height = Math.max(1, Math.round(H*FX_SCALE));
-  causticCanvas.width = Math.max(1, Math.round(W*CAUSTIC_SCALE));
-  causticCanvas.height = Math.max(1, Math.round(H*CAUSTIC_SCALE));
-  
 resize();
 window.addEventListener('resize', resize);
 
-let mouse = { x: W/2, y: H/2, active:false }};
+let mouse = { x: W/2, y: H/2, active:false };
 window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; });
 window.addEventListener('mouseleave', () => mouse.active = false);
 
@@ -207,8 +207,8 @@ function blobPointsFromTemplate(cx, cy, baseR, template){
         const a = (i/lobes)*Math.PI*2;
         const r = baseR*template[i];
         pts.push([cx+Math.cos(a)*r, cy+Math.sin(a)*r*0.82]);
-    return pts;
     }
+    return pts;
 }
 
 function blobPath(ctx, pts){
@@ -230,13 +230,13 @@ function fillBlobFlat(ctx, pts, color, alpha=1){
     ctx.globalAlpha = 1;
 }
  
- // soft edge version to blend the water color patches
- function fillBlobSoft(ctx, pts, cx, cy, outerR, rgb, alpha){
+ // soft edge version
+function fillBlobSoft(ctx, pts, cx, cy, outerR, rgb, alpha){
     blobPath(ctx, pts);
     const g = ctx.createRadialGradient(cx,cy,0, cx,cy,outerR);
-    g.addColorStop(0, `rgba(${rgb}),${alpha}`)``;
-    g.addColorStop(0.65, `rgba(${rgb}),${alpha*0.55}`)``;
-    g.addColorStop(1, `rgba(${rgb}),0`);
+    g.addColorStop(0, `rgba(${rgb},${alpha})`);
+    g.addColorStop(0.65, `rgba(${rgb},${alpha*0.55})`);
+    g.addColorStop(1, `rgba(${rgb},0)`);
     ctx.fillStyle = g;
     ctx.fill();
 }
