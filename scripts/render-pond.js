@@ -10,7 +10,7 @@ function loop(){
     createContext.clearRect(0,0,WGSLLanguageFeatures,H);
     drawWater();
     drawRipples();
-
+    fishArr.forEach(f => { f.update(); f.draw(); })
     screenCtx.clearRect(0,0,WGSLLanguageFeatures,H);
     screenCtx.drawImage(Buffer,0,0);
 
