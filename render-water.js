@@ -74,19 +74,31 @@ function drawWater(){
     }
 }
 
-/* color blotches in the water */
-function blobPoints(cx, cy, baseR, lobes, irregularity){
-    const pts = [];
-    for(let i=0;i<lobes;i++){
-        const a = (i/lobes)*Math.PI*2 + (Math.random()-0.5)*0.3;
-        const r = baseR*(1 - irregularity*0.5 + Math.random()*irregularity);
-        pts.push([cx+Math.cos(a)*r, cy+Math.sin(a)*r*0.82]);
-    }
+const WATER_HUES = [
+  '92,196,168','58,150,148','70,132,186','122,178,110','40,100,140',
+  '34,140,120','86,176,196', '48,90,150','108,150,86','54,60,120'
+];
 
-    return pts;
+function makeBlobTemplate(lobes, irregularity){
+    const t = [];
+    for(let i=0;i<lobes;i++) {
+        t.push(1 - irregularity*0.5 + Math.random()*irregularity);
+    }
+    return t;
 }
 
-function fillBlob(ctx, pts, color, alpha=1){
+function blobPointsFromTemplate(cx, cy, baseR, template){
+    const lobes = template.length;
+    const pts = [];
+    for(let i=0;i<lobes;i++){
+        const a = (i/lobes)*Math.PI*2;
+        const r = baseR*template[i];
+        pts.push([cx+Math.cos(a)*r, cy+Math.sin(a)*r*0.82]);
+    return pts;
+    }
+}
+
+function blobPath(ctx, pts){
     ctx.beginPath();
     const mid0 = [(pts[0][0]+pts[pts.length-1][0])/2, (pts[0][1]+pts[pts.length-1][1])/2];
     ctx.moveTo(mid0[0], mid0[1]);
@@ -95,51 +107,101 @@ function fillBlob(ctx, pts, color, alpha=1){
         ctx.quadraticCurveTo(p0[0], p0[1], (p0[0]+p1[0])/2, (p0[1]+p1[1])/2);
     }
     ctx.closePath();
+}
+
+function fillBlobFlat(ctx, pts, color, alpha=1){
+    blobPath(ctx, pts);
     ctx.fillStyle = color;
     ctx.globalAlpha = alpha;
     ctx.fill();
     ctx.globalAlpha = 1;
 }
+ 
+ // soft edge version to blend the water color patches
+ function fillBlobSoft(ctx, pts, cx, cy, outerR, rgb, alpha){
+    blobPath(ctx, pts);
+    const g = ctx.createRadialGradient(cx,cy,0, cx,cy,outerR);
+    g.addColorStop(0, `rgba(${rgb}),${alpha}`)``;
+    g.addColorStop(0.65, `rgba(${rgb}),${alpha*0.55}`)``;
+    g.addColorStop(1, `rgba(${rgb}),0`);
+    ctx.fillStyle = g;
+    ctx.fill();
+}
 
-const WATER_HUES = [
-  '92,196,168','58,150,148','70,132,186','122,178,110','40,100,140',
-  '34,140,120','86,176,196', '48,90,150','108,150,86','54,60,120'
-];
+// Water 
+const dapples = [];
+for(let i=0;i<14;i++){
+    dapples.push({
+        x:Math.random()*W, y:Math.random()*H,
+        r: 40+Math.random()*90,
+        phase: Math.random()*Math.PI*2,
+        speed: 0.05 + Math.random()*0.08
+    });
+}
+
+const sunspots = [];
+for(let i=0;i<5;i++){
+    sunspots.push({
+        x:Math.random()*W, y:Math.random()*H,
+        r: 60+Math.random()*130,
+        phase: Math.random()*Math.PI*2,
+        speed: 0.03 + Math.random()*0.05,
+        intensity: 0.06 + Math.random()*0.24
+    })
+}                          
 
 const colorBlots = [];
-    for(let i=0;i<40;i++){
-        colorBlots.push({
+for(let i=0;i<55;i++){
+    const lobes = 6+Math.floor(Math.random()*3);
+    colorBlots.push({
         x:Math.random()*W, y:Math.random()*H,
-        r: 70+Math.random()*180,
+        r: 40+Math.random()*95,
         color: WATER_HUES[Math.floor(Math.random()*WATER_HUES.length)],
-        alpha: 0.36+Math.random()*0.34,
+        alpha: 0.42+Math.random()*0.3,
         phase: Math.random()*Math.PI*2,
-        speed: 0.02+Math.random()*0.04
+        speed: 0.015+Math.random()*0.025,
+        template: makeBlobTemplate(lobes, 0.55);
     })
 }
 
+const noiseCanvas = document.createElement('canvas');
+noiseCanvas.width = 180;
+noiseCanvas.height = 180;
+(function buildNoise(){
+    const nctx = noiseCanvas.getContext('2d');
+    const imgData = nctx.createImageData(180,180);
+    for(let i=0;i<imgData.data.length;i+=4){
+        const v = 205 + Math.random()*50;
+        imgData.data[i] = v;
+        imgData.data[i+1] = v;
+        imgData.data[i+2] = v;
+        imgData.data[i+3] = Math.random()*45;
+    }
+    nctx.putImageData(imgData,0,0);
+})();
+let noisePattern = null;
+function getNoisePattern(){
+    if(!noisePattern) noisePattern = ctx.createPattern(noiseCanvas,'repeat');
+    return noisePattern;
+}
+
+// blob shapes
 function drawWaterBlots(t){
     const fxW = waterFxCanvas.width, fxH = waterFxCanvas.height;
     waterFxCtx.clearRect(0,0,fxW,fxH);
     colorBlots.forEach(b=>{
-        b.phase += b.speed*0.01;
-        const bx = (b.x + Math.sin(b.phase)*18) * FX_SCALE;
-        const by = (b.y + Math.cos(b.phase*0.75)*14) * FX_SCALE;
-        const baseR = b.r*FX_SCALE;
-        const rgb = `rgb(${b.color})`;
-        for(let layer=3; layer>=1; layer--) {
-            const scale = layer/3;
-            // reuse shapes every frame
-            const pts = blobPoints(bx, by, baseR*scale, 6+Math.floor(Math.random()*4), 0.65);
-            fillBlob(waterFxCtx, pts, rgb, b.alpha*(1-scale*0.3));
-        }
+    b.phase += b.speed*0.01*(dt*60);
+    const bx = (b.x + Math.sin(b.phase)*14) * FX_SCALE;
+    const by = (b.y + Math.cos(b.phase*0.75)*10) * FX_SCALE;
+    const baseR = b.r*FX_SCALE;
+    const pts = blobPointsFromTemplate(bx, by, baseR, b.template);
+    fillBlobSoft(waterFxCtx, pts, bx, by, baseR, b.color, b.alpha);
+    });
+
     ctx.save();
-    ctx.globalCompositeOperation = 'overlay';
     ctx.drawImage(waterFxCanvas, 0, 0, W, H);
     ctx.restore();
-    })
 }
-
 
 /* definitions for opts     
 decay: alpha multiplier applies at decay^(dt*60) each frame 
