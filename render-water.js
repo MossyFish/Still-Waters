@@ -50,6 +50,74 @@ window.addEventListener('mouseleave', () => mouse.active = false);
 let ripples = [];
 let trailX = null, trailY = null;
 
+// Adding caustics (^◕.◕^)
+const CAUSTIC_COLS = 6, CAUSTIC_ROWS = 4;
+const causticNodes = [];
+for(let ry=0; ry<=CAUSTIC_ROWS; ry++){
+  const row = [];
+  for(let rx=0; rx<=CAUSTIC_COLS; rx++){
+    row.push({
+      nx: rx/CAUSTIC_COLS + (Math.random()-0.5)*(0.7/CAUSTIC_COLS),  
+      ny: ry/CAUSTIC_ROWS + (Math.random()-0.5)*(0.7/CAUSTIC_ROWS),
+      driftPhaseX: Math.random()*Math.PI*2, 
+      driftPhaseY: Math.random()*Math.PI*2,   
+    });   
+  }  
+  causticNodes.push(row);
+}  
+
+const causticEdges = []; 
+for(let ry=0; ry<=CAUSTIC_ROWS; ry++){
+    for(let rx=0; rx<=CAUSTIC_COLS; rx++){
+        const edge = () => ({
+        bowSeed: Math.random()*10,
+        bowSpeed: 0.2 + Math.random()*0.2,
+        bowAmt: 0.18 + Math.random()*0.22,
+        alphaBase: 0.16 + Math.random()*0.1,
+        alphaPhase: Math.random()*Math.PI*2
+        });
+        if(rx < CAUSTIC_COLS) causticEdges.push({ a:[ry,rx], b:[ry,rx+1], ...edge() });
+        if(ry < CAUSTIC_ROWS) causticEdges.push({ a:[ry,rx], b:[ry+1,rx], ...edge() });
+    }
+}
+
+function drawCaustics(t){
+    const fxW = causticCanvas.width, fxH = causticCanvas.height;
+    causticCtx.clearRect(0,0,fxW,fxH);
+    causticCtx.save();
+    causticCtx.globalCompositeOperation = 'lighter';
+    causticCtx.lineCap = 'round';
+
+    const nodePos = causticNodes.map(row => row.map(n => ({
+        x: n.nx*fxW + Math.sin(t*0.15 + n.driftPhaseX)*fxW*0.02,
+        y: n.ny*fxH + Math.cos(t*0.13 + n.driftPhaseY)*fxH*0.02
+    })));
+
+    causticEdges.forEach(e=>{
+        const pa = nodePos[e.a[0]][e.a[1]], pb = nodePos[e.b[0]][e.b[1]];
+        const dx = pb.x-pa.x, dy = pb.y-pa.y;
+        const len = Math.hypot(dx,dy) || 1;
+        const perpX = -dy/len, perpY = dx/len;
+        const bow = Math.sin(t*e.bowSpeed + e.bowSeed)*e.bowAmt*len;
+        const midX = (pa.x+pb.x)/2 + perpX*bow, midY = (pa.y+pb.y)/2 + perpY*bow;
+        const alpha = e.alphaBase + Math.sin(t*0.4 + e.alphaPhase)*0.04;
+
+        causticCtx.strokeStyle = `rgba(225,245,250,${alpha.toFixed(3)})`;
+        causticCtx.lineWidth = Math.max(1, len*0.1);
+        causticCtx.beginPath();
+        causticCtx.moveTo(pa.x, pa.y);
+        causticCtx.quadraticCurveTo(midX, midY, pb.x, pb.y);
+        causticCtx.stroke();
+    });
+
+    causticCtx.restore();
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.drawImage(causticCanvas, 0, 0, W, H);
+    ctx.restore();
+}
+
 // Water bg 
 function drawWater(){
     const t = Date.now()*0.0003;
@@ -74,7 +142,7 @@ function drawWater(){
     ctx.fillRect(0,0,W,H);
     ctx.restore();
 
-    // add caustics
+    drawCaustics(t);
 
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
@@ -235,12 +303,12 @@ function drawWaterBlots(t){
     const fxW = waterFxCanvas.width, fxH = waterFxCanvas.height;
     waterFxCtx.clearRect(0,0,fxW,fxH);
     colorBlots.forEach(b=>{
-    b.phase += b.speed*0.01*(dt*60);
-    const bx = (b.x + Math.sin(b.phase)*14) * FX_SCALE;
-    const by = (b.y + Math.cos(b.phase*0.75)*10) * FX_SCALE;
-    const baseR = b.r*FX_SCALE;
-    const pts = blobPointsFromTemplate(bx, by, baseR, b.template);
-    fillBlobSoft(waterFxCtx, pts, bx, by, baseR, b.color, b.alpha);
+        b.phase += b.speed*0.01*(dt*60);
+        const bx = (b.x + Math.sin(b.phase)*14) * FX_SCALE;
+        const by = (b.y + Math.cos(b.phase*0.75)*10) * FX_SCALE;
+        const baseR = b.r*FX_SCALE;
+        const pts = blobPointsFromTemplate(bx, by, baseR, b.template);
+        fillBlobSoft(waterFxCtx, pts, bx, by, baseR, b.color, b.alpha);
     });
 
     ctx.save();
