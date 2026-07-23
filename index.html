@@ -18,18 +18,20 @@
     <button class="enter-hint" id="enterBtn">[ press enter ]</button>
 </div>
 
+
 <div id="swirl">
-    <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-        <defs>
-            <filter id="swirlFilter">
-                <feTurbulence id="turb" type="turbulence" baseFrequency="0.01" numOctaves="2" result="noise"/>
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" />
-            </filter>
-        </defs>
-    </svg>
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs>
+      <filter id="swirlFilter">
+        <feTurbulence id="turb" type="turbulence" baseFrequency="0.01" numOctaves="2" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </defs>
+  </svg>
 </div>
 
 <div id="project-overlay"></div>
-<script src="render-water.js"></script>
+<script src="scripts/render-water.js"></script>
+<script src="scripts/render-pond.js"></script>
 </html>
        
