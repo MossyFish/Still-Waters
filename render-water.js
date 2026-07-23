@@ -205,7 +205,7 @@ for(let i=0;i<55;i++){
         alpha: 0.42+Math.random()*0.3,
         phase: Math.random()*Math.PI*2,
         speed: 0.015+Math.random()*0.025,
-        template: makeBlobTemplate(lobes, 0.55);
+        template: makeBlobTemplate(lobes, 0.55),
     })
 }
 
