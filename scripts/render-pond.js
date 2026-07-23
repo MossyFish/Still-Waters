@@ -15,11 +15,13 @@ function loop(){
     fishArr.forEach(f => {
         f.update();
         f.draw(screenCtx);
+        nudgeFoliageNear(f.x, f.y, 10, 0.08);
     })
 
     lilyPads.forEach(p => { p.update(); p.draw(screenCtx); });
     leaves.forEach(l => { l.update(); l.draw(screenCtx); });
     companion.update();
+    nudgeFoliageNear(f.x, f.y, 4, 0.05);
 
     if(overlayCtx) {
         overlayCtx.clearRect(0, 0, W, H); 

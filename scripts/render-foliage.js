@@ -340,3 +340,21 @@ class Leaf{
         ctx.restore();
     }                     
 }
+
+const lilyPads = [];
+for(let i=0;i<24;i++) lilyPads.push(new LilyPad());
+const leaves = [];
+for(let i=0;i<24;i++) leaves.push(new Leaf());
+
+function nudgeFoliage(x, y, radius, strength){
+  [...lilyPads, ...leaves].forEach(item => {
+    const ddx = item.x-x, ddy = item.y-y;
+    const d = Math.hypot(ddx,ddy);
+    if(d < radius){
+      const falloff = 1 - d/radius;
+      const ux = ddx/(d||1), uy = ddy/(d||1);
+      item.velX += ux*strength*falloff;
+      item.velY += uy*strength*falloff;
+    }
+  }); 
+}
