@@ -16,7 +16,6 @@ const FX_SCALE = 0.25;
 const waterFxCanvas = document.createElement('canvas');
 const waterFxCtx = waterFxCanvas.getContext('2d'); 
 
-// super low res so upscaling gives a blurry web 
 const CAUSTIC_SCALE = 0.12;
 const causticCanvas = document.createElement('canvas');
 const causticCtx = causticCanvas.getContext('2d');
@@ -152,8 +151,8 @@ function drawWater(){
         const dx = d.x + Math.sin(d.phase)*18;
         const dy = d.y + Math.cos(d.phase*0.8)*12;
         const g = ctx.createRadialGradient(dx,dy,0,dx,dy,d.r);
-        g.addColorStop(0,'rgba(205,230,250,0.14');
-        g.addColorStop(1,'rgba(205,230,250,0');
+        g.addColorStop(0,'rgba(205,230,250,0.14)');
+        g.addColorStop(1,'rgba(205,230,250,0)');
         ctx.fillStyle = g;
         ctx.beginPath();
         ctx.arc(dx,dy,d.r,0,Math.PI*2);
@@ -182,7 +181,7 @@ function drawWater(){
     const vg = ctx.createRadialGradient(W/2,H/2,H*0.3,W/2,H/2,H*0.85);
     vg.addColorStop(0,'rgba(0,0,0,0)');
 
-    vg.addColorStop(1,'rgba(0,6,14,0.35');
+    vg.addColorStop(1,'rgba(0,6,14,0.35)');
     ctx.fillStyle = vg;
     ctx.fillRect(0,0,W,H);
 }

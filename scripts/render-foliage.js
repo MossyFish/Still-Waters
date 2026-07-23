@@ -157,3 +157,17 @@ function makePadOutline(baseR, notchWidth, notchDepth, irregularity, seedA, seed
     }
     return pts;
 }
+
+class LilyPad {
+    constructor(){
+        this.r = 16 + Math.random()*18;
+        const p = findFoliageSpot(85, this.r);
+        this.x = p.x; this.y = p.y;
+        placedFoliage.push({x:this.x, y:this.y, r:this.r});
+        this.rot = Math.random()*Math.PI*2;
+        this.driftT = Math.random()*1000;
+        // collissions nudge pads
+        this.offX = 0; this.offY = 0; this.velX = 0; this.velY = 0;
+        this.palette = PAD_MAJORITY_PALETTES[Math.floor(Math.random()*PAD_MAJORITY_PALETTES.length)];
+    }
+}
