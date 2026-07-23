@@ -166,8 +166,96 @@ class LilyPad {
         placedFoliage.push({x:this.x, y:this.y, r:this.r});
         this.rot = Math.random()*Math.PI*2;
         this.driftT = Math.random()*1000;
-        // collissions nudge pads
+
         this.offX = 0; this.offY = 0; this.velX = 0; this.velY = 0;
         this.palette = PAD_MAJORITY_PALETTES[Math.floor(Math.random()*PAD_MAJORITY_PALETTES.length)];
+        
+        this.notchWidth = 0.35 + Math.random()*0.55;
+        this.notchDepth = 0.55 + Math.random()*0.4;
+        this.irregularity = 0.05 + Math.random()*0.08;
+        this.outlinePts = makePadOutline(this.r, this.notchWidth, this.notchDepth, this.irregularity, Math.random()*10, Math.random()*10);
+
+        const [c0,c1,c2] = this.palette;
+        this.bodyColor = lerpHex(c1, c2, Math.random()*0.75);
+        this.edgeColor = lerpHex(this.bodyColor, c2, 0.3+Math.random()*0.7);
+
+        let altPalette;
+        do { altPalette = PAD_PALETTES[Math.floor(Math.random()*PAD_PALETTES.length)]; }
+
+        while(altPalette === this.palette);
+        const altTone = altPalette[Math.floor(Math.random()*altPalette.length)];
+        this.mixColor = lerpHex(altTone, this.bodyColor, 0.05+Math.random()*0.15);
+        this.mixAngle = Math.random()*Math.PI*2;
+        this.mixShare = 0.3 + Math.random()*0.1;
+        this.mixBlobTemplate = makeBlobTemplate(7, 0.45);
+
+        this.buildSprite();  
+    }  
+    buildSprite(){
+        const half = Math.ceil(this.r*2.4);
+        const size = half*2;
+
+        const sc = document.createElement('canvas');
+        sc.width = sc.height = size;
+        const sctx = sc.getContext('2d');
+        sctx.translate(half, half);
+
+        // shadow in the pad's outline shape, offset toward light source
+        const { ux, uy, t } = lightShadowParams(this.x, this.y);
+        {
+        const blurPx = Math.max(1.5, this.r*0.1);
+        const shadowOffset = this.r*(0.2 + t*0.6);
+        sctx.save();
+        sctx.translate(ux*shadowOffset, uy*shadowOffset);
+        sctx.rotate(this.rot);
+        sctx.filter = `blur(${blurPx.toFixed(1)}px)`;
+        blobPath(sctx, this.outlinePts);
+        sctx.fillStyle = `rgba(0,8,14,${Math.max(0, 0.16 - t*0.07).toFixed(3)})`;
+        sctx.fill();
+        sctx.restore();
+        }
+
+        sctx.rotate(this.rot);
+
+        sctx.save();
+        blobPath(sctx, this.outlinePts);
+        sctx.clip();
+
+        blobPath(sctx, this.outlinePts);
+        const padGrad = sctx.createRadialGradient(0,0,0, 0,0,this.r);
+        padGrad.addColorStop(0, hexToRgba(this.bodyColor,1));
+        padGrad.addColorStop(1, hexToRgba(this.edgeColor,1));
+        sctx.fillStyle = padGrad;
+        sctx.fill();
+
+            // wavy edge patch of a second palette
+        {
+            const centerDist = this.r*(0.85 - this.mixShare*0.8);
+            const bx = Math.cos(this.mixAngle)*centerDist, by = Math.sin(this.mixAngle)*centerDist;
+            const blobR = this.r*(0.55 + this.mixShare*1.0);
+            const pts = blobPointsFromTemplate(bx, by, blobR, this.mixBlobTemplate);
+            blobPath(sctx, pts);
+            const mixGrad = sctx.createRadialGradient(bx,by,0, bx,by,blobR*0.85);
+            mixGrad.addColorStop(0, hexToRgba(this.mixColor, 0.85));
+            mixGrad.addColorStop(0.55, hexToRgba(this.mixColor, 0.5));
+            mixGrad.addColorStop(1, hexToRgba(this.mixColor, 0));
+            sctx.fillStyle = mixGrad;
+            sctx.fill();
+        }
+        sctx.restore();
+        this.sprite = sc;
+        this.spriteHalf = half;
+    }
+    update(){
+        const step = dt*60;
+        this.driftT += 0.003*step;
+        this.velX *= Math.pow(0.88, step);
+        this.offX += this.velX*step;
+        this.offY += this.velY*step;
+    } 
+    draw(ctx) {
+        const dx = Math.sin(this.driftT)*3 + this.offX;
+        const dy = Math.cos(this.driftT*0.8)*2 + this.offY;
+        ctx.drawImage(this.sprite, this.x + dx - this.spriteHalf, this.y + dy - this.spriteHalf)
     }
 }
