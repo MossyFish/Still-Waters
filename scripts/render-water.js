@@ -4,7 +4,6 @@ const screenCtx = canvas.getContext('2d');
 const buffer = document.createElement('canvas');
 const ctx = buffer.getContext('2d');
 
-// cursor koi renders above the content panel 
 const overlayCanvas = document.getElementById('cursorOverlay');
 const overlayCtx = overlayCanvas ? overlayCanvas.getContext('2d') : null;
 
@@ -19,13 +18,6 @@ const waterFxCtx = waterFxCanvas.getContext('2d');
 const CAUSTIC_SCALE = 0.12;
 const causticCanvas = document.createElement('canvas');
 const causticCtx = causticCanvas.getContext('2d');
-
-function hexToRgba(hex, a){
-  const v = parseInt(hex.slice(1),16); 
-  return `rgba(${(v>>16)&255},${(v>>8)&255},${v&255},${a})`;
-}
-
-function randRange(a,b){ return a + Math.random()*(b-a); }
 
 let W, H;
 function resize(){
@@ -45,29 +37,27 @@ let mouse = { x: W/2, y: H/2, active:false };
 window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; });
 window.addEventListener('mouseleave', () => mouse.active = false);
 
-/* RIPPLES */
+// Ripples and caustics 
 let ripples = [];
-let trailX = null, trailY = null;
 
-// Adding caustics (^◕.◕^)
 const CAUSTIC_COLS = 6, CAUSTIC_ROWS = 4;
 const causticNodes = [];
-for(let ry=0; ry<=CAUSTIC_ROWS; ry++){
-  const row = [];
-  for(let rx=0; rx<=CAUSTIC_COLS; rx++){
-    row.push({
-      nx: rx/CAUSTIC_COLS + (Math.random()-0.5)*(0.7/CAUSTIC_COLS),  
-      ny: ry/CAUSTIC_ROWS + (Math.random()-0.5)*(0.7/CAUSTIC_ROWS),
-      driftPhaseX: Math.random()*Math.PI*2, 
-      driftPhaseY: Math.random()*Math.PI*2,   
-    });   
-  }  
-  causticNodes.push(row);
+for (let ry = 0; ry <= CAUSTIC_ROWS; ry++){
+    const row = [];
+    for (let rx = 0; rx <= CAUSTIC_COLS; rx++){
+        row.push({
+            nx: rx / CAUSTIC_COLS + (Math.random() - 0.5) * (0.7 / CAUSTIC_COLS),  
+            ny: ry / CAUSTIC_ROWS + (Math.random() - 0.5) * (0.7 / CAUSTIC_ROWS),
+            driftPhaseX: Math.random() * Math.PI * 2, 
+            driftPhaseY: Math.random() * Math.PI * 2,   
+        });   
+    }  
+    causticNodes.push(row);
 }  
 
 const causticEdges = []; 
-for(let ry=0; ry<=CAUSTIC_ROWS; ry++){
-    for(let rx=0; rx<=CAUSTIC_COLS; rx++){
+for (let ry = 0; ry <= CAUSTIC_ROWS; ry++) {
+    for (let rx = 0; rx <= CAUSTIC_COLS; rx++) {
         const edge = () => ({
         bowSeed: Math.random()*10,
         bowSpeed: 0.2 + Math.random()*0.2,
@@ -75,30 +65,29 @@ for(let ry=0; ry<=CAUSTIC_ROWS; ry++){
         alphaBase: 0.16 + Math.random()*0.1,
         alphaPhase: Math.random()*Math.PI*2
         });
-        if(rx < CAUSTIC_COLS) causticEdges.push({ a:[ry,rx], b:[ry,rx+1], ...edge() });
-        if(ry < CAUSTIC_ROWS) causticEdges.push({ a:[ry,rx], b:[ry+1,rx], ...edge() });
-    }
+        if (rx < CAUSTIC_COLS) causticEdges.push({ a: [ry, rx], b: [ry, rx + 1], ...edge() });
+        if (ry < CAUSTIC_ROWS) causticEdges.push({ a: [ry, rx], b: [ry + 1, rx], ...edge() });}
 }
 
 function drawCaustics(t){
     const fxW = causticCanvas.width, fxH = causticCanvas.height;
-    causticCtx.clearRect(0,0,fxW,fxH);
+    causticCtx.clearRect(0, 0, fxW, fxH);
     causticCtx.save();
     causticCtx.globalCompositeOperation = 'lighter';
     causticCtx.lineCap = 'round';
 
     const nodePos = causticNodes.map(row => row.map(n => ({
-        x: n.nx*fxW + Math.sin(t*0.15 + n.driftPhaseX)*fxW*0.02,
-        y: n.ny*fxH + Math.cos(t*0.13 + n.driftPhaseY)*fxH*0.02
+        x: n.nx * fxW + Math.sin(t * 0.15 + n.driftPhaseX) * fxW * 0.02,
+        y: n.ny * fxH + Math.cos(t * 0.13 + n.driftPhaseY) * fxH * 0.02
     })));
 
     causticEdges.forEach(e=>{
         const pa = nodePos[e.a[0]][e.a[1]], pb = nodePos[e.b[0]][e.b[1]];
-        const dx = pb.x-pa.x, dy = pb.y-pa.y;
-        const len = Math.hypot(dx,dy) || 1;
+        const dx = pb.x - pa.x, dy = pb.y - pa.y;
+        const len = Math.hypot(dx ,dy) || 1;
         const perpX = -dy/len, perpY = dx/len;
         const bow = Math.sin(t*e.bowSpeed + e.bowSeed)*e.bowAmt*len;
-        const midX = (pa.x+pb.x)/2 + perpX*bow, midY = (pa.y+pb.y)/2 + perpY*bow;
+        const midX = (pa.x + pb.x)/2 + perpX*bow, midY = (pa.y + pb.y)/2 + perpY*bow;
         const alpha = e.alphaBase + Math.sin(t*0.4 + e.alphaPhase)*0.04;
 
         causticCtx.strokeStyle = `rgba(225,245,250,${alpha.toFixed(3)})`;
@@ -117,7 +106,6 @@ function drawCaustics(t){
     ctx.restore();
 }
 
-// Water bg 
 function drawWater(){
     const t = Date.now()*0.0003;
     const grad = ctx.createRadialGradient(W*0.32,H*0.22,80, W*0.55,H*0.6, Math.max(W,H)*0.95);
@@ -327,21 +315,22 @@ function spawnRipple(x,y,strength=0.6,opts={}) {
     const { decay = 0.96, maxAge = Infinity, wobble = false, rings = null, alphaBoot = 1, widthBoost = 1, ringGap = 5/60, speedMul = 1 }= opts;
     const ringCount = rings != null ? rings : 3 + Math.floor(Math.random()*3);
     const baseAngle = Math.random()*Math.PI*2;
+
     for(let i=0;i<ringCount;i++){
         const alpha0 = (0.5 - i*0.1)*strength*alphaBoost;
         const maxR = (90 + i*24)*strength;
-        // growth speed from how long the ring actually stays visible
         const life = Math.max(0.15, Math.min(maxAge, Math.log(0.02/alpha0)/(60*Math.log(decay))));
+        
         ripples.push({
-            x, y, r:2,
+            x, y, r: 2,
             age: 0,
             maxAge,
             decay,
             delay: i === 0 ? 0 : i*ringGap + Math.random()*(2/60),
             alpha: alpha0, maxR,
-            speed: (maxR-2)/(60*life)*speedMul,
+            speed: (maxR - 2)/(60*life)*speedMul,
             width: Math.max(0.9, 2.4 - i*0.4)*widthBoost,
-            peakAngle: baseAngle + (Math.random()-0.5)*1.1,
+            peakAngle: baseAngle + (Math.random() - 0.5)*1.1,
             wobbleAmt: wobble ? 0.025 + Math.random()*0.035 : 0,
             wobbleSeedA: Math.random()*10,
             wobbleSeedB: Math.random()*10,
@@ -350,43 +339,70 @@ function spawnRipple(x,y,strength=0.6,opts={}) {
         });
         if (ripples.length > 150) ripples.splice(0, ripples.length - 150);
     }
-    canvas.addEventListener('click', e => {
-        // click ripple set should die
-        spawnRipple(e.clientX, e.clientY, 1.3, { wobble: true, rings: 2 + Math.floor(Math.random()*3), decay: 0.9, alphaBoost: 1.35, widthBoost: 1.45, ringGap: 0.08, speedMul: 0.825 });
-        fleeFrom(e.clientX, e.clientY, 90);
-        nudgeFoliageNear(e.clientX, e.clientY, 110, 3.2);  
-        
-        function ripplePointRadius(rp, angle) {
-              if(rp.wobbleAmt <= 0) return rp.r;
-                const n = Math.sin(angle*rp.wobbleFreqA + rp.wobbleSeedA)*0.6 + Math.sin(angle*rp.wobbleFreqB + rp.wobbleSeedB)*0.4;
-                  return rp.r * (1 + rp.wobbleAmt*n);  
-        }
-     
-        function drawRipples(){
-            const step = dt*60;
-                ripples.forEach(rp => { 
-                  rp.age += dt;
-                      if(rp.delay > 0){ rp.delay -= dt; return;}
-            })
+}
+    
+canvas.addEventListener('click', e => {
+spawnRipple(e.clientX, e.clientY, 1.3, { 
+    wobble: true, 
+    rings: 2 + Math.floor(Math.random() * 3), 
+    decay: 0.9, 
+    alphaBoost: 1.35, 
+    widthBoost: 1.45, 
+    ringGap: 0.08, 
+    speedMul: 0.825 
+});
+});
+
+function ripplePointRadius(rp, angle) {
+    if (rp.wobbleAmt <= 0) return rp.r;
+    const n = Math.sin(angle * rp.wobbleFreqA + rp.wobbleSeedA) * 0.6 + 
+            Math.sin(angle * rp.wobbleFreqB + rp.wobbleSeedB) * 0.4;
+    return rp.r * (1 + rp.wobbleAmt * n);  
+}
+
+function drawRipples(dt = 0.016) {
+    const step = dt * 60;
+    for (let i = ripples.length - 1; i >= 0; i--) {
+        const rp = ripples[i];
+        rp.age += dt;
+
+        if (rp.delay > 0) { 
+            rp.delay -= dt; 
+            continue; 
         }
 
-    rp.r += rp.speed*step;
-    rp.alpha *= Math.pow(rp.decay, step);
-    const segments = rp.wobbleAmt > 0 ? 40 : 18;
-    for(let i=0;i<segments;i++){
-        const a0 = (i/segments)*Math.PI*2;
-        const a1 = ((i+1)/segments)*Math.PI*2;
-        let diff = ((a0+a1)/2) - rp.peakAngle;
-        diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-        const falloff = (Math.cos(diff)+1)/2;
-        const segAlpha = rp.alpha * (0.12 + falloff*0.95);
-        if(segAlpha < 0.015) continue;
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(220,238,248,${segAlpha})`;
-            ctx.lineWidth = rp.width * (0.35 + falloff*1.1);
-        if(rp.wobbleAmt > 0){
-            const r0 = ripplePointRadius(rp, a0), r1 = ripplePointRadius(rp, a1);
-            ctx.moveTo(rp.x + Math.cos(a0)*r0, rp.y + Math.sin(a0)*r0);
+        rp.r += rp.speed * step;
+        rp.alpha *= Math.pow(rp.decay, step);
+
+        if (rp.alpha < 0.015 || (rp.maxAge !== Infinity && rp.age >= rp.maxAge)) {
+            ripples.splice(i, 1);
+            continue;
         }
+
+        const segments = rp.wobbleAmt > 0 ? 40 : 18;
+        ctx.save();
+        ctx.beginPath();
+
+        for (let j = 0; j < segments; j++) {
+            const a0 = (j / segments) * Math.PI * 2;
+            const a1 = ((j + 1) / segments) * Math.PI * 2;
+            let diff = ((a0 + a1) / 2) - rp.peakAngle;
+            diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+            const falloff = (Math.cos(diff) + 1) / 2;
+            const segAlpha = rp.alpha * (0.12 + falloff * 0.95);
+
+            if (segAlpha < 0.015) continue;
+
+            ctx.strokeStyle = `rgba(220,238,248,${segAlpha})`;
+            ctx.lineWidth = rp.width * (0.35 + falloff * 1.1);
+
+            const r0 = ripplePointRadius(rp, a0);
+            const r1 = ripplePointRadius(rp, a1);
+
+            ctx.beginPath();
+            ctx.arc(rp.x, rp.y, r0, a0, a1);
+            ctx.stroke();
+        }
+        ctx.restore();
     }
-})}
+}

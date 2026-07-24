@@ -1,6 +1,4 @@
 const intro = document.getElementById('intro');
-
-const intro = document.getElementById('intro');
 const content = document.getElementById('content');
 const swirl = document.getElementById('swirl');
 const backBtn = document.getElementById('backBtn');
@@ -27,7 +25,7 @@ function warpTransition(outEl, inEl, onSwap) {
     function tick(now) {
         const progress = Math.min(1, (now - start) / TRANSITION_MS);
         const s = WARP_PEAK * Math.sin(Math.PI * progress);
-        applyWarpWarp(s);
+        applyWarp(s);
         if(!swapped) {
             outEl.style.opacity = 1 - s / WARP_PEAK;
         }
@@ -36,8 +34,8 @@ function warpTransition(outEl, inEl, onSwap) {
             swapped = true;
             outEl.style.display = 'none';
             outEl.classList.remove('warping');
-            onSwap();
-            inEl.style.display = inl === intro ? 'flex' : 'block';
+            if (inEl === intro) inEl.style.display = 'flex';
+            else inEl.style.display = 'block';
             inEl.classList.add('warping');
         }
         if(swapped) {

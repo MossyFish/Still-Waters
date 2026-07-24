@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
-<html lang="en"> 
-
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/intro.css">
-    <link rel="stylesheet" href="css/content.css">
-    <title>Fish Pond</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/intro.css">
+<link rel="stylesheet" href="css/content.css">
+<title>Fish Pond</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 
+<body>
 <canvas id="pond"></canvas>
 <canvas id="cursorOverlay"></canvas>
 <button class="back-hint" id="backBtn">[ press esc to exit ]</button>
@@ -19,7 +20,6 @@
     <div class="sub">a fish pond</div>
     <button class="enter-hint" id="enterBtn">[ press enter ]</button>
 </div>
-
 
 <div id="swirl">
   <svg viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -34,32 +34,30 @@
 
 <div id="project-overlay"></div>
 
-<div id="content"> 
+<div id="content">
   <div class="panel">
     <h1 class="name"> fish </h1>
     <div class="role"> UW CS '31 &middot; they/them &middot; mossyfish</div>
-  </div>
-</div>
 
-<section>
-  <h2 class="section-title"> About </h2>
-  <p class="body-text"> I'l add a description here one day in the future </p>
-</section>
+    <section>
+      <h2 class="section-title"> About </h2>
+      <p class="body-text"> I'l add a description here one day in the future </p>
+    </section>
 
-<section>
-  <h2 class="section-title"> Photo album as of <span class="clock" id="liveClock:"></span></h2>
-  <br>
-  <div class="carousel-viewport" id="carousel">
-    <div class="carousel-track" id="carouselTrack"></div>
-    <div class="carousel-fade left"></div>
-    <div class="carousel-fade right"></div>
-  </div>
-</section>
+    <section>
+      <h2 class="section-title"> Photo album as of <span class="clock" id="liveClock"></span></h2>
+      <br>
+      <div class="carousel-viewport" id="carousel">
+        <div class="carousel-track" id="carouselTrack"></div>
+        <div class="carousel-fade left"></div>
+        <div class="carousel-fade right"></div>
+      </div>
+    </section>
 
     <section> <h3 class="section-title">Volunteering </h3> </section>
 
     <section> <h3 class="section-title">Honors & Awards </h3> </section>
-  </div> 
+  </div>
 </div>
 
 <script src="scripts/render-water.js"></script>
@@ -69,5 +67,5 @@
 <script src="scripts/transition.js"></script>
 <script src="scripts/carousel.js"></script>
 <script src="scripts/clock.js"></script>
+</body>
 </html>
-       
