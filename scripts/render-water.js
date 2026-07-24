@@ -37,6 +37,14 @@ let mouse = { x: W/2, y: H/2, active:false };
 window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; });
 window.addEventListener('mouseleave', () => mouse.active = false);
 
+function hexToRgba(hex, alpha) {
+    const v = parseInt(hex.slice(1), 16);
+    const r = (v >> 16) & 255;
+    const g = (v >> 8) & 255;
+    const b = v & 255;
+    return `rgba(${r},${g},${b},${alpha})`;
+}
+
 // Ripples and caustics 
 let ripples = [];
 
@@ -317,7 +325,7 @@ function spawnRipple(x,y,strength=0.6,opts={}) {
     const baseAngle = Math.random()*Math.PI*2;
 
     for(let i=0;i<ringCount;i++){
-        const alpha0 = (0.5 - i*0.1)*strength*alphaBoost;
+        const alpha0 = (0.5 - i*0.1)*strength*alphaBoot;
         const maxR = (90 + i*24)*strength;
         const life = Math.max(0.15, Math.min(maxAge, Math.log(0.02/alpha0)/(60*Math.log(decay))));
         
@@ -360,7 +368,7 @@ function ripplePointRadius(rp, angle) {
     return rp.r * (1 + rp.wobbleAmt * n);  
 }
 
-function drawRipples(dt = 0.016) {
+function drawRipples() {
     const step = dt * 60;
     for (let i = ripples.length - 1; i >= 0; i--) {
         const rp = ripples[i];

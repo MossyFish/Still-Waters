@@ -10,26 +10,32 @@ const overlayCtx = overlayCanvas ? overlayCanvas.getContext('2d') : null;
 let W = pondCanvas.width = window.innerWidth;
 let H = pondCanvas.height = window.innerHeight; 
 
+let trailX = null, trailY = null;
+
 function loop(){
     const now = performance.now();
     dt = Math.min(0.05, (now - lastFrameTime)/1000);
     lastFrameTime = now;
 
-    pondCtx.clearRect(0, 0, W, H);
-    drawWater(pondCtx);
+    ctx.clearRect(0, 0, W, H);
+
+    drawWater();
     drawRipples(pondCtx);
-    
+
+    pondCtx.clearRect(0, 0, W, H);
+    pondCtx.drawImage(buffer, 0, 0);
+
     fishArr.forEach(f => {
         f.update();
         f.draw(pondCtx);
-        nudgeFoliageNear(f.x, f.y, 10, 0.08);
+        nudgeFoliage(f.x, f.y, 10, 0.08);
     })
 
     lilyPads.forEach(p => { p.update(); p.draw(pondCtx); });
     leaves.forEach(l => { l.update(); l.draw(pondCtx); });
 
     companion.update();
-    nudgeFoliageNear(companion.x, companion.y, 4, 0.05);
+    nudgeFoliage(companion.x, companion.y, 4, 0.05);
 
     if(trailX === null){ trailX = companion.x; trailY = companion.y; }
 
@@ -42,8 +48,8 @@ function loop(){
         overlayCtx.clearRect(0, 0, W, H); 
         companion.draw(overlayCtx); 
     }
-
     else companion.draw(pondCtx);
+
     requestAnimationFrame(loop);
 }
 

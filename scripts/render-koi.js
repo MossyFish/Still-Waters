@@ -14,6 +14,10 @@ const KOI_TIERS = [
   { name: 'baby', weight: 0.2, lenRange: [18, 28] },
 ];
 
+function randRange(min, max) {
+    return min + Math.random() * (max - min);
+}
+
 function pickTier(){
   const r = Math.random();
   let acc = 0;

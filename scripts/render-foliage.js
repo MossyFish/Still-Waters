@@ -4,7 +4,7 @@
 const PAD_PALETTES = [
     ['#60ac72','#2d7348','#18422a'],
     ['#7ec46e','#409442','#1e5624'],
-    ['#46968c','#226860','#03836'],
+    ['#46968c','#226860','#038336'],
     ['#96ba54','#5c8432','#2c4816'],
     ['#3a8066','#1a5242','#0c2c26'],
     ['#70b096','#348c62','#164036'],
@@ -161,7 +161,7 @@ function makePadOutline(baseR, notchWidth, notchDepth, irregularity, seedA, seed
 class LilyPad {
     constructor(){
         this.r = 16 + Math.random()*18;
-        const p = findFoliageSpot(85, this.r);
+        const p = findSpot(85, this.r);
         this.x = p.x; this.y = p.y;
         placedFoliage.push({x:this.x, y:this.y, r:this.r});
         this.rot = Math.random()*Math.PI*2;
@@ -178,6 +178,7 @@ class LilyPad {
         const [c0,c1,c2] = this.palette;
         this.bodyColor = lerpHex(c1, c2, Math.random()*0.75);
         this.edgeColor = lerpHex(this.bodyColor, c2, 0.3+Math.random()*0.7);
+        this.veinColor = lerpHex(c1, c0, 0.5+Math.random()*0.4);
 
         let altPalette;
         do { altPalette = PAD_PALETTES[Math.floor(Math.random()*PAD_PALETTES.length)]; }
@@ -189,6 +190,23 @@ class LilyPad {
         this.mixShare = 0.3 + Math.random()*0.1;
         this.mixBlobTemplate = makeBlobTemplate(7, 0.45);
 
+        // 30 to 70% veis
+        this.veins = [];
+        for(let i = 0; i < veinCount; i++) {
+            let angle;
+            let tries = 0;
+            do {
+                angle = Math.random()*Math.PI*2;
+                tries++;
+            }
+            while(angularDistance(angle, 0) < this.notchWidth*1.3 && tries < 30);
+            this.veins.push({
+                angle,
+                len: this.r*(0.3 + Math.random()*0.4),
+                width: this.r*(0.09 + Math.random()*0.07),
+                alpha: 0.18 + Math.random()*0.22
+            });
+        }
         this.buildSprite();  
     }  
     buildSprite(){
@@ -228,7 +246,7 @@ class LilyPad {
         sctx.fillStyle = padGrad;
         sctx.fill();
 
-            // wavy edge patch of a second palette
+        // wavy edge patch of a second palette
         {
             const centerDist = this.r*(0.85 - this.mixShare*0.8);
             const bx = Math.cos(this.mixAngle)*centerDist, by = Math.sin(this.mixAngle)*centerDist;
@@ -242,6 +260,18 @@ class LilyPad {
             sctx.fillStyle = mixGrad;
             sctx.fill();
         }
+
+        // vein blurring on pad
+        sctx.save(); 
+        sctx.filter = `blur(${Math.max(0.6, this.r*0.045).toFixed(1)}px)`;
+        sctx.lineCap = `round`;
+        this.veins.forEach(v => {
+            sctx.lineWidth = v.width;
+            sctx.beginPath();
+            sctx.moveTo(0,0);
+            sctx.lineTo(Math.cos(v.angle)*v.len, Math.sin(v.angle)*v.len);
+            sctx.stroke();
+        })
         sctx.restore();
         this.sprite = sc;
         this.spriteHalf = half;
@@ -264,7 +294,7 @@ class Leaf{
     constructor(){
         this.len = 15 + Math.random()*17;
         const r = this.len*0.5;
-        const p = findFoliageSpot(70, r);
+        const p = findSpot(70, r);
         this.x = p.x; this.y = p.y;
         placedFoliage.push({x:this.x, y:this.y, r})
         ;
