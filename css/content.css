@@ -217,3 +217,51 @@ p.body-text {
         grid-template-columns: 1fr; 
     }
 }
+
+.cert-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.cert-item{
+    width: 160px;
+    background: rgba(243,239,228,0.04);
+    border: 1px solid rgba(243,239,228,0.16);
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.cert-item:hover{
+    border-color: var(--gold);
+    background: rgba(227,179,92,0.08);
+    transform: translateY(-2px);
+}
+
+.cert-item img{
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.9); /* small white pad so badge art still reads clearly */
+    padding: 6px;
+}
+
+.cert-name{
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--cream);
+}
+
+.cert-issuer{
+    font-size: 0.78rem;
+    color: var(--water-light);
+}
