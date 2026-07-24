@@ -272,7 +272,46 @@ class LilyPad {
             sctx.lineTo(Math.cos(v.angle)*v.len, Math.sin(v.angle)*v.len);
             sctx.stroke();
         })
+
+        // center and white dot 
+        sctx.save();
+        sctx.filter = `blur(${Math.max(0.8, this.r*0.06).toFixed(1)}px)`;
+        sctx.beginPath();
+        sctx.arc(0,0, this.r*0.15, 0, Math.PI*2);
+        sctx.fillStyle = hexToRgba(this.centerLight, 0.95);
+        sctx.fill();
+
+        sctx.beginPath();
+        sctx.arc(0,0, this.r*this.sparkleR, 0, Math.PI*2);
+        sctx.fillStyle = `rgba(255,255,255,${this.sparkleAlpha.toFixed(2)})`;
+        sctx.fill();
+
         sctx.restore();
+
+        if(this.hasEdgeHighlight) {
+            const pts = this.outlinePts;
+            const n = pts.length;
+            const outset = 1.1;
+            const startIdx = Math.round((this.edgeHighlightStart/(Math.PI*2))*n);
+            const spanCount = Math.max(2, Math.round((this.edgeHighlightSpan/(Math.PI*2))*n));
+            sctx.lineCap = 'round';
+            for(let i=0;i<spanCount;i++){
+                const p0 = pts[(startIdx+i)%n], p1 = pts[(startIdx + i + 1)%n];
+                const tMid = (i + 0.5)/spanCount;
+                const taper = Math.sin(Math.PI*tMid);
+                if(taper <= 0.02) continue;
+                const segAngle = ((startIdx + i + 0.5)/n) * Math.PI*2;
+                const backness = angularDistance(segAngle, 0)/Math.PI;
+                const thicknessScale = 0.065 + (0.095 - 0.065)*backness;
+                sctx.strokeStyle = `rgba(255,255,255,${(0.6*taper).toFixed(3)})`;
+                sctx.lineWidth = this.r * thicknessScale*(0.3 + 0.7*taper);
+                sctx.beginPath();
+                sctx.moveTo(p0[0]*outset, p0[1]*outset);
+                sctx.lineTo(p1[0]*outset, p1[1]*outset);
+                sctx.stroke();
+            }
+        }
+        
         this.sprite = sc;
         this.spriteHalf = half;
     }
