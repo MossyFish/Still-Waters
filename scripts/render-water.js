@@ -354,7 +354,7 @@ spawnRipple(e.clientX, e.clientY, 1.3, {
     wobble: true, 
     rings: 2 + Math.floor(Math.random() * 3), 
     decay: 0.9, 
-    alphaBoost: 1.35, 
+    alphaBoot: 1.35, 
     widthBoost: 1.45, 
     ringGap: 0.08, 
     speedMul: 0.825 

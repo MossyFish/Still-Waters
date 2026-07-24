@@ -161,3 +161,59 @@ p.body-text {
     right: 0;
     background: linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0) 100%);
 }
+
+.exp-item {
+    display: flex;
+    gap: 20px;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(243, 239, 228, 0.08);
+
+}
+
+.exp-item:last-child { 
+    border-bottom: none; 
+
+}
+
+.exp-date { 
+    flex: 0 0 130px;
+    color: var(--water-light);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    padding-top: 2px;
+
+}
+
+.exp-detail h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.03em;
+    margin: 0 0 3px;
+    font-weight: 600;
+}
+
+.exp-detail .company {
+    font-size: 0.85rem;
+    color: var(--gold);
+    margin-bottom: 6px;
+}
+
+.exp-detail p {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: rgba(243, 239, 228, 0.78);
+    margin: 0;
+    line-height: 1.55;
+}
+
+.cert-panel { 
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+@media (max-width: 600px) { 
+    .projects-grid { 
+        grid-template-columns: 1fr; 
+    }
+}

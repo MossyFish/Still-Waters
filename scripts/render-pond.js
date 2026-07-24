@@ -7,8 +7,10 @@ const pondCtx = pondCanvas.getContext('2d');
 const overlayCanvas = document.getElementById('cursorOverlay');
 const overlayCtx = overlayCanvas ? overlayCanvas.getContext('2d') : null;
 
-let W = pondCanvas.width = window.innerWidth;
-let H = pondCanvas.height = window.innerHeight; 
+W = pondCanvas.width = window.innerWidth;
+H = pondCanvas.height = window.innerHeight; 
+buffer.width = W;
+buffer.height = H;
 
 let trailX = null, trailY = null;
 

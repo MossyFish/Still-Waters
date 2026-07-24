@@ -179,7 +179,9 @@ class LilyPad {
         this.bodyColor = lerpHex(c1, c2, Math.random()*0.75);
         this.edgeColor = lerpHex(this.bodyColor, c2, 0.3+Math.random()*0.7);
         this.veinColor = lerpHex(c1, c0, 0.5+Math.random()*0.4);
-
+        this.centerLight = c0; 
+        this.sparkleR = 0.08 + Math.random() * 0.12;
+        this.sparkleAlpha = 0.6 + Math.random() * 0.3;
         let altPalette;
         do { altPalette = PAD_PALETTES[Math.floor(Math.random()*PAD_PALETTES.length)]; }
 
@@ -191,6 +193,7 @@ class LilyPad {
         this.mixBlobTemplate = makeBlobTemplate(7, 0.45);
 
         // 30 to 70% veis
+        const veinCount = 1 + Math.floor(Math.random() * 4);
         this.veins = [];
         for(let i = 0; i < veinCount; i++) {
             let angle;
@@ -207,6 +210,12 @@ class LilyPad {
                 alpha: 0.18 + Math.random()*0.22
             });
         }
+
+        const rimRoll = Math.random();
+        this.rimStyle = rimRoll < 0.3 ? 'full' : rimRoll < 0.7 ? 'partial' : 'none';
+        this.rimAlpha = 0.18 + Math.random()*0.24;
+        this.rimArcStart = Math.random()*Math.PI*2;
+        this.rimArcSpan = 0.7 + Math.random()*1.7;
         this.buildSprite();  
     }  
     buildSprite(){
@@ -226,7 +235,7 @@ class LilyPad {
         sctx.save();
         sctx.translate(ux*shadowOffset, uy*shadowOffset);
         sctx.rotate(this.rot);
-        sctx.filter = `blur(${blurPx.toFixed(1)}px)`;
+        sctx.filter = `blur(${blurPx.toFixed(1)}px)`; 
         blobPath(sctx, this.outlinePts);
         sctx.fillStyle = `rgba(0,8,14,${Math.max(0, 0.16 - t*0.07).toFixed(3)})`;
         sctx.fill();

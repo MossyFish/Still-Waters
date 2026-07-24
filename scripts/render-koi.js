@@ -3,7 +3,6 @@ const KOI_HUES = {
   yellow: ['#f0c14b', '#d99a2b', '#b87a1e'],
 };
 const SUMI = '#221d1a';
-const RED_PROB = randRange(0.55, 0.70);
 
 const PANIC_SECONDS = 1.0;
 const CALM_SECONDS = 2.0;
@@ -17,6 +16,8 @@ const KOI_TIERS = [
 function randRange(min, max) {
     return min + Math.random() * (max - min);
 }
+
+const RED_PROB = randRange(0.55, 0.70);
 
 function pickTier(){
   const r = Math.random();
