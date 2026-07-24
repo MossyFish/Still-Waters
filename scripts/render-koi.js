@@ -689,6 +689,7 @@ for(let i=0; i<9; i++) fishArr.push(new Fish());
 const companion = new Fish(true);
 
 function fleeFrom(x, y, radius){
+  let fled = false;
   fishArr.forEach(f => {
     const d = Math.hypot(f.x - x, f.y - y);
     if(d < radius){
@@ -697,8 +698,10 @@ function fleeFrom(x, y, radius){
       f.fleeing = PANIC_SECONDS;
       f.calming = 0;
       f.panicSpeed = 4.5 + Math.random() * 1.3;
+      fled = true;
     }
   });
+  return fled;
 }
 
 function lightShadowParams(x, y){

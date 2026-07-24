@@ -37,6 +37,7 @@ function warpTransition(outEl, inEl, onSwap) {
             if (inEl === intro) inEl.style.display = 'flex';
             else inEl.style.display = 'block';
             inEl.classList.add('warping');
+            if(onSwap) onSwap();    
         }
         if(swapped) {
             inEl.style.opacity = 1 - s / WARP_PEAK;
@@ -60,6 +61,7 @@ function enterContent(){
   inContent = true;
   warpTransition(intro, content, () => {
     content.classList.add('visible');
+    document.getElementById('spotifyWidget').classList.add('visible');
     backBtn.classList.add('visible');
     window.dispatchEvent(new Event('resize'));
   });
@@ -72,6 +74,7 @@ function exitToIntro(){
   backBtn.classList.remove('visible');
   warpTransition(content, intro, () => {
     content.classList.remove('visible');
+    document.getElementById('spotifyWidget').classList.remove('visible');
   });
 }
 

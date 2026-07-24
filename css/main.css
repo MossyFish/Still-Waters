@@ -64,3 +64,33 @@ html, body {
 #content.warping { 
     filter: url(#swirlFilter);
 }
+
+.mute-btn {
+  position: fixed;
+  top: 22px;
+  right: 26px;
+  z-index: 12;
+  width: 36px;
+  height: 36px;
+  background: rgba(243,239,228,0.04);
+  border: 1px solid rgba(243,239,228,0.16);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cream);
+  cursor: none;
+  transition: all 0.2s ease;
+  padding: 0;
+  cursor: none;
+}
+
+.mute-btn:hover {
+  border-color: var(--gold);
+  background: rgba(227,179,92,0.08);
+}
+
+.mute-btn i {
+  font-size: 16px;
+  color: var(--cream);
+}

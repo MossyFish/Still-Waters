@@ -350,17 +350,23 @@ function spawnRipple(x,y,strength=0.6,opts={}) {
 }
     
 canvas.addEventListener('click', e => {
-spawnRipple(e.clientX, e.clientY, 1.3, { 
-    wobble: true, 
-    rings: 2 + Math.floor(Math.random() * 3), 
-    decay: 0.9, 
-    alphaBoot: 1.35, 
-    widthBoost: 1.45, 
-    ringGap: 0.18, 
-    speedMul: 0.6
-});
-fleeFrom(e.clientX, e.clientY, 90);
-nudgeFoliage(e.clientX, e.clientY, 110, 3.2);
+    spawnRipple(e.clientX, e.clientY, 1.3, { 
+        wobble: true, 
+        rings: 2 + Math.floor(Math.random() * 3), 
+        decay: 0.9, 
+        alphaBoot: 1.35, 
+        widthBoost: 1.45, 
+        ringGap: 0.18, 
+        speedMul: 0.6
+    });
+    fleeFrom(e.clientX, e.clientY, 90);
+    nudgeFoliage(e.clientX, e.clientY, 110, 3.2);
+    playRippleSound();
+    playFleeSound();
+
+    const fishFled = fleeFrom(e.clientX, e.clientY, 90);
+    playRippleSound();
+    if(fishFled) playFleeSound();
 });
 
 function ripplePointRadius(rp, angle) {

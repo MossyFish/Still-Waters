@@ -6,14 +6,17 @@
 <link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/intro.css">
 <link rel="stylesheet" href="css/content.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@latest/font/lucide.min.css">
 <title>Fish Pond</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 </head>
 
 <body>
 <canvas id="pond"></canvas>
 <canvas id="cursorOverlay"></canvas>
 <button class="back-hint" id="backBtn">[ press esc to exit ]</button>
+<div class="mute-btn" id="muteBtn"></div>
 
 <div id="intro">
     <h1 class="title">still waters</h1>
@@ -76,15 +79,32 @@
 
     <section> <h3 class="section-title">Honors & Awards </h3> </section>
   </div>
+
+  <div class="spotify-widget" id="spotifyWidget">
+  <iframe 
+    src="https://open.spotify.com/embed/playlist/YOUR_ID?theme=0"
+    width="280" 
+    height="152" 
+    frameBorder="0" 
+    allowfullscreen=""
+    title="Spotify player"
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
+</iframe>
+</div>
 </div>
 
+<audio id="ambience" src="sounds/pond-ambience.mp3" loop preload="auto"></audio>
+<audio id="sfxRipple" src="sounds/water-drop.mp3" preload="auto"></audio>
+<audio id="sfxSplash1" src="sounds/fish-splash-1.mp3" preload="auto"></audio>
+<audio id="sfxSplash2" src="sounds/fish-splash-2.mp3" preload="auto"></audio>
+<audio id="sfxSplash3" src="sounds/fish-splash-3.mp3" preload="auto"></audio>
 <script src="scripts/render-water.js"></script>
 <script src="scripts/render-koi.js"></script>
 <script src="scripts/render-foliage.js"></script>
 <script src="scripts/render-pond.js"></script>
+<script src="scripts/audio.js"></script>
 <script src="scripts/transition.js"></script>
 <script src="scripts/carousel.js"></script>
 <script src="scripts/clock.js"></script>
-<script type="text/javascript" async src="https://cdn.credly.com/assets/utilities/embed.js"></script>
-</body>
+<script type="text/javascript" async src="https://cdn.credly.com/assets/utilities/embed.js"></script></body>
 </html>

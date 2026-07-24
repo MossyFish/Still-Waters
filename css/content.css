@@ -224,7 +224,7 @@ p.body-text {
     gap: 16px;
 }
 
-.cert-item{
+.cert-item {
     width: 160px;
     background: rgba(243,239,228,0.04);
     border: 1px solid rgba(243,239,228,0.16);
@@ -239,13 +239,13 @@ p.body-text {
     transition: all 0.2s ease;
 }
 
-.cert-item:hover{
+.cert-item:hover {
     border-color: var(--gold);
     background: rgba(227,179,92,0.08);
     transform: translateY(-2px);
 }
 
-.cert-item img{
+.cert-item img {
     width: 110px;
     height: 110px;
     object-fit: contain;
@@ -254,14 +254,40 @@ p.body-text {
     padding: 6px;
 }
 
-.cert-name{
+.cert-name {
     font-family: 'Rajdhani', sans-serif;
     font-size: 1rem;
     font-weight: 600;
     color: var(--cream);
 }
 
-.cert-issuer{
+.cert-issuer {
     font-size: 0.78rem;
     color: var(--water-light);
+}
+
+.spotify-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 12;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(243,239,228,0.12);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+    transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.spotify-widget.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.spotify-widget:hover {
+    border-color: var(--gold);
+    box-shadow: 0 4px 24px rgba(227,179,92,0.25), 0 0 0 1px rgba(227,179,92,0.15);
 }
