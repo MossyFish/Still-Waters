@@ -1,17 +1,6 @@
 let lastFrameTime = performance.now();
 let dt = 1/60;
 
-const pondCanvas = document.getElementById('pond');
-const pondCtx = pondCanvas.getContext('2d');
-
-const overlayCanvas = document.getElementById('cursorOverlay');
-const overlayCtx = overlayCanvas ? overlayCanvas.getContext('2d') : null;
-
-W = pondCanvas.width = window.innerWidth;
-H = pondCanvas.height = window.innerHeight; 
-buffer.width = W;
-buffer.height = H;
-
 let trailX = null, trailY = null;
 
 function loop(){
@@ -22,19 +11,19 @@ function loop(){
     ctx.clearRect(0, 0, W, H);
 
     drawWater();
-    drawRipples(pondCtx);
+    drawRipples();
 
-    pondCtx.clearRect(0, 0, W, H);
-    pondCtx.drawImage(buffer, 0, 0);
+    screenCtx.clearRect(0, 0, W, H);
+    screenCtx.drawImage(buffer, 0, 0);
 
     fishArr.forEach(f => {
         f.update();
-        f.draw(pondCtx);
+        f.draw(screenCtx);
         nudgeFoliage(f.x, f.y, 10, 0.08);
     })
 
-    lilyPads.forEach(p => { p.update(); p.draw(pondCtx); });
-    leaves.forEach(l => { l.update(); l.draw(pondCtx); });
+    lilyPads.forEach(p => { p.update(); p.draw(screenCtx); });
+    leaves.forEach(l => { l.update(); l.draw(screenCtx); });
 
     companion.update();
     nudgeFoliage(companion.x, companion.y, 4, 0.05);
@@ -50,7 +39,7 @@ function loop(){
         overlayCtx.clearRect(0, 0, W, H); 
         companion.draw(overlayCtx); 
     }
-    else companion.draw(pondCtx);
+    else companion.draw(screenCtx);
 
     requestAnimationFrame(loop);
 }

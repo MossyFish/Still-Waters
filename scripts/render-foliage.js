@@ -4,7 +4,7 @@
 const PAD_PALETTES = [
     ['#60ac72','#2d7348','#18422a'],
     ['#7ec46e','#409442','#1e5624'],
-    ['#46968c','#226860','#038336'],
+    ['#46968c','#226860','#103836'],
     ['#96ba54','#5c8432','#2c4816'],
     ['#3a8066','#1a5242','#0c2c26'],
     ['#70b096','#348c62','#164036'],
@@ -14,10 +14,10 @@ const PAD_PALETTES = [
 
 const LEAF_GREENS = ['#4f9a5c','#6bb36f','#3f7a52','#7fb35a','#356b48','#5aa76a','#8cc26a','#2f6b46'];
 
-const hexLuma = hex => {
+function hexLuma(hex){
     const v = parseInt(hex.slice(1), 16);
     return 0.299 * ((v >> 16) & 255) + 0.587 * ((v >> 8) & 255) + 0.114 * (v & 255);
-};
+}
 
 const PAD_MAJORITY_PALETTES = PAD_PALETTES.filter(p => (hexLuma(p[1]) + hexLuma(p[2])) / 2 > 65);
 
@@ -48,8 +48,8 @@ function whereCluster(spread) {
 }
 
 // foliage at edges
-const EXCLUSION_PADDING = 36;
-const getExclusionRect = () => {
+const EXCLUDE = 36;
+function getExclusionRect () {
     const els = ['#intro .title', '#intro .sub', '#intro .enter-hint']
         .map(sel => document.querySelector(sel))
         .filter(Boolean);
@@ -65,16 +65,16 @@ const getExclusionRect = () => {
         y1 = Math.max(y1, r.bottom);
     });
     
-    return { x0: x0 - EXCLUSION_PADDING, y0: y0 - EXCLUSION_PADDING, x1: x1 + EXCLUSION_PADDING, y1: y1 + EXCLUSION_PADDING };
-};
+    return { x0: x0 - EXCLUDE, y0: y0 - EXCLUDE, x1: x1 + EXCLUDE, y1: y1 + EXCLUDE };
+}
 
 let introExclusionRect = getExclusionRect();
 window.addEventListener('resize', () => { introExclusionRect = getExclusionRect(); });
 
-const isExcluded = (x, y, r, rect) => {
+function isExcluded(x, y, r, rect) {
     if (!rect) return false;
     return x + r > rect.x0 && x - r < rect.x1 && y + r > rect.y0 && y - r < rect.y1;
-};
+}
 
 // tracker so they don't overlap too much 
 const placedFoliage = [];
@@ -179,9 +179,9 @@ class LilyPad {
         this.bodyColor = lerpHex(c1, c2, Math.random()*0.75);
         this.edgeColor = lerpHex(this.bodyColor, c2, 0.3+Math.random()*0.7);
         this.veinColor = lerpHex(c1, c0, 0.5+Math.random()*0.4);
-        this.centerLight = c0; 
-        this.sparkleR = 0.08 + Math.random() * 0.12;
-        this.sparkleAlpha = 0.6 + Math.random() * 0.3;
+        this.centerLight = lerpHex(c0, '#d1ffdb', 0.1+Math.random()*0.2);
+        this.sparkleR = 0.04 + Math.random() * 0.065;
+        this.sparkleAlpha = 0.8 + Math.random() * 0.95;
         let altPalette;
         do { altPalette = PAD_PALETTES[Math.floor(Math.random()*PAD_PALETTES.length)]; }
 
@@ -206,7 +206,7 @@ class LilyPad {
             this.veins.push({
                 angle,
                 len: this.r*(0.3 + Math.random()*0.4),
-                width: this.r*(0.09 + Math.random()*0.07),
+                width: this.r*(0.05 + Math.random()*0.07),
                 alpha: 0.18 + Math.random()*0.22
             });
         }
@@ -216,6 +216,13 @@ class LilyPad {
         this.rimAlpha = 0.18 + Math.random()*0.24;
         this.rimArcStart = Math.random()*Math.PI*2;
         this.rimArcSpan = 0.7 + Math.random()*1.7;
+
+        this.hasEdgeHighlight = Math.random() < 0.50;
+
+        if (this.hasEdgeHighlight) {
+            this.edgeHighlightStart = Math.random() * Math.PI * 2;
+            this.edgeHighlightSpan = (0.12 + Math.random()*0.20)*Math.PI*2;
+        }
         this.buildSprite();  
     }  
     buildSprite(){
@@ -227,7 +234,6 @@ class LilyPad {
         const sctx = sc.getContext('2d');
         sctx.translate(half, half);
 
-        // shadow in the pad's outline shape, offset toward light source
         const { ux, uy, t } = lightShadowParams(this.x, this.y);
         {
         const blurPx = Math.max(1.5, this.r*0.1);
@@ -273,8 +279,9 @@ class LilyPad {
         // vein blurring on pad
         sctx.save(); 
         sctx.filter = `blur(${Math.max(0.6, this.r*0.045).toFixed(1)}px)`;
-        sctx.lineCap = `round`;
+        sctx.lineCap = 'round';
         this.veins.forEach(v => {
+            sctx.strokeStyle = hexToRgba(this.veinColor, v.alpha) 
             sctx.lineWidth = v.width;
             sctx.beginPath();
             sctx.moveTo(0,0);
@@ -295,6 +302,7 @@ class LilyPad {
         sctx.fillStyle = `rgba(255,255,255,${this.sparkleAlpha.toFixed(2)})`;
         sctx.fill();
 
+        sctx.restore();
         sctx.restore();
 
         if(this.hasEdgeHighlight) {
@@ -320,7 +328,25 @@ class LilyPad {
                 sctx.stroke();
             }
         }
-        
+
+        if (this.rimStyle !== 'none') {
+            sctx.save();
+            if(this.rimStyle === 'partial') {
+                sctx.beginPath();
+                sctx.moveTo(0, 0);
+                sctx.arc(0, 0, this.r*0.5, this.rimArcStart, this.rimarcStart + this.rimArcSpan);
+                sctx.closePath();
+                sctx.clip();
+            }
+            blobPath(sctx, this.outlinePts);
+            const rimGrad = sctx.createRadialGradient(0,0,this.r*0.45, 0,0,this.r);
+            rimGrad.addColorStop(0, 'rgba(0,0,0,0)');
+            rimGrad.addColorStop(0.75, `rgba(0,0,0,${(this.rimAlpha*0.55).toFixed(3)})`);
+            rimGrad.addColorStop(1, `rgba(0,0,0,${this.rimAlpha})`);
+            sctx.fillStyle = rimGrad;
+            sctx.fill();
+            sctx.restore();
+        }
         this.sprite = sc;
         this.spriteHalf = half;
     }
@@ -328,13 +354,14 @@ class LilyPad {
         const step = dt*60;
         this.driftT += 0.003*step;
         this.velX *= Math.pow(0.88, step);
+        this.velY *= Math.pow(0.88, step);
         this.offX += this.velX*step;
         this.offY += this.velY*step;
     } 
     draw(ctx) {
         const dx = Math.sin(this.driftT)*3 + this.offX;
         const dy = Math.cos(this.driftT*0.8)*2 + this.offY;
-        ctx.drawImage(this.sprite, this.x + dx - this.spriteHalf, this.y + dy - this.spriteHalf)
+        ctx.drawImage(this.sprite, this.x + dx - this.spriteHalf, this.y + dy - this.spriteHalf);
     }
 }
 
@@ -364,7 +391,7 @@ class Leaf{
     const sctx = sc.getContext('2d');
     sctx.scale(SPRITE_SCALE, SPRITE_SCALE);
     sctx.translate(halfW, halfH);
-    sctx.filter = `blur(${blurPx.toFixed(1)})px`;
+    sctx.filter = `blur(${blurPx.toFixed(1)}px)`;
     sctx.beginPath();
     sctx.moveTo(this.len*0.6,0);
     sctx.quadraticCurveTo(0,-this.len*0.4,-this.len*0.6,0);
@@ -381,7 +408,8 @@ class Leaf{
     update(){
         const step = dt*60;
         this.driftT += 0.004*step;
-        this.velX *= Math.pow(0.88, step); this.velY *= Math.pow(0.88, step);
+        this.velX *= Math.pow(0.88, step); 
+        this.velY *= Math.pow(0.88, step);
         this.offX += this.velX*step;
         this.offY += this.velY*step;
     }
@@ -409,7 +437,7 @@ class Leaf{
         ctx.fill();
         ctx.globalAlpha = 1;
         
-        ctx.strokeStyle = 'rgba(14, 5, 26, 0.4)';
+        ctx.strokeStyle = 'rgba(14,50,26,0.4)';
         ctx.lineWidth = 0.8;
         ctx.beginPath();
         ctx.moveTo(this.len*0.55, 0);
@@ -426,11 +454,11 @@ for(let i=0;i<24;i++) leaves.push(new Leaf());
 
 function nudgeFoliage(x, y, radius, strength){
   [...lilyPads, ...leaves].forEach(item => {
-    const ddx = item.x-x, ddy = item.y-y;
-    const d = Math.hypot(ddx,ddy);
+    const ddx = item.x-x, ddy = item.y - y;
+    const d = Math.hypot(ddx, ddy);
     if(d < radius){
       const falloff = 1 - d/radius;
-      const ux = ddx/(d||1), uy = ddy/(d||1);
+      const ux = ddx/(d || 1), uy = ddy/(d || 1);
       item.velX += ux*strength*falloff;
       item.velY += uy*strength*falloff;
     }

@@ -356,9 +356,11 @@ spawnRipple(e.clientX, e.clientY, 1.3, {
     decay: 0.9, 
     alphaBoot: 1.35, 
     widthBoost: 1.45, 
-    ringGap: 0.08, 
-    speedMul: 0.825 
+    ringGap: 0.18, 
+    speedMul: 0.6
 });
+fleeFrom(e.clientX, e.clientY, 90);
+nudgeFoliage(e.clientX, e.clientY, 110, 3.2);
 });
 
 function ripplePointRadius(rp, angle) {
