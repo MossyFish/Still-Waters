@@ -356,16 +356,12 @@ canvas.addEventListener('click', e => {
         decay: 0.9, 
         alphaBoot: 1.35, 
         widthBoost: 1.45, 
-        ringGap: 0.18, 
-        speedMul: 0.6
+        ringGap: 0.14, 
+        speedMul: 0.3
     });
-    fleeFrom(e.clientX, e.clientY, 90);
     nudgeFoliage(e.clientX, e.clientY, 110, 3.2);
     playRippleSound();
-    playFleeSound();
-
     const fishFled = fleeFrom(e.clientX, e.clientY, 90);
-    playRippleSound();
     if(fishFled) playFleeSound();
 });
 

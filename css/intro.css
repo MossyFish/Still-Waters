@@ -16,9 +16,8 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--cream);
-    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.35);
     margin: 0;
-
+    text-shadow: 0 2px 20px rgba(0,0,0,0.4), 0 4px 40px rgba(0,0,0,0.2);
 } 
 
 #intro .sub {
@@ -29,6 +28,7 @@
     letter-spacing: 0.28em;
     text-transform: uppercase;
     opacity: 0.9;
+    text-shadow: 0 1px 12px rgba(0,0,0,0.5);
 }
 
 #intro .enter-hint {
