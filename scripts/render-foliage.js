@@ -1,6 +1,3 @@
-/* Lilypad layout: tries to find a spot overlapping existing foliage 
-   by <=30%. Falls back to the least-crowded option so it never breaks. */
-
 const PAD_PALETTES = [
     ['#60ac72','#2d7348','#18422a'],
     ['#7ec46e','#409442','#1e5624'],
@@ -14,12 +11,10 @@ const PAD_PALETTES = [
 
 const LEAF_GREENS = ['#4f9a5c','#6bb36f','#3f7a52','#7fb35a','#356b48','#5aa76a','#8cc26a','#2f6b46'];
 
-function hexLuma(hex){
-    const v = parseInt(hex.slice(1), 16);
-    return 0.299 * ((v >> 16) & 255) + 0.587 * ((v >> 8) & 255) + 0.114 * (v & 255);
-}
-
-const PAD_MAJORITY_PALETTES = PAD_PALETTES.filter(p => (hexLuma(p[1]) + hexLuma(p[2])) / 2 > 65);
+const PAD_MAJORITY_PALETTES = PAD_PALETTES.filter(p => {
+    const mid = p[1], dark = p[2];
+    return (parseInt(mid.slice(1),16) + parseInt(dark.slice(1),16)) / 2 > 0x414141;
+});
 
 // Jittered grid for cluster centers
 const padCluster = []; (() => {
@@ -78,19 +73,8 @@ function isExcluded(x, y, r, rect) {
 
 // tracker so they don't overlap too much 
 const placedFoliage = [];
-const MAX_LAP = 0.3;
+const OVERLAP = 0.3;
 const TRIES = 40;
-
-function circleOverlapArea(x1, y1, r1, x2, y2, r2) {
-    const d = Math.hypot(x2 - x1, y2 - y1);
-    if (d >= r1 + r2) return 0;
-    if (d <= Math.abs(r1 - r2)) return Math.PI * Math.min(r1, r2) ** 2;
-    
-    const r1sq = r1 * r1, r2sq = r2 * r2;
-    const alpha = Math.acos((d * d + r1sq - r2sq) / (2 * d * r1)) * 2;
-    const beta = Math.acos((d * d + r2sq - r1sq) / (2 * d * r2)) * 2;
-    return 0.5 * r1sq * (alpha - Math.sin(alpha)) + 0.5 * r2sq * (beta - Math.sin(beta));
-}
 
 function findSpot(spread, r) {
     let best = null, bestFrac = Infinity;
@@ -104,14 +88,22 @@ function findSpot(spread, r) {
         validAttempts++;
 
         let worstFrac = 0;
+        // overlap check
         for (const other of placedFoliage) {
-            const overlap = circleOverlapArea(p.x, p.y, r, other.x, other.y, other.r);
-            const smallerArea = Math.PI * Math.min(r, other.r) ** 2;
-            const frac = smallerArea > 0 ? overlap / smallerArea : 0;
+            const d = Math.hypot(p.x - other.x, p.y - other.y);
+            const minR = Math.min(r, other.r);
+            if (d >= r + other.r) continue;
+            if (d <= Math.abs(r - other.r)) {
+                worstFrac = 1;
+                break;
+            }
+            const depth = (r + other.r - d) / 2;
+            const frac = Math.min(1, depth / minR);
+            
             if (frac > worstFrac) worstFrac = frac;
         }
 
-        if (worstFrac <= MAX_LAP) return p;
+        if (worstFrac <= OVERLAP) return p;
         if (worstFrac < bestFrac) {
             bestFrac = worstFrac;
             best = p;
@@ -145,7 +137,6 @@ function angularDistance(a, ref) {
     return Math.abs(d);
 }
 
-// Wabi-sabi leaf shaping
 function makePadOutline(baseR, notchWidth, notchDepth, irregularity, seedA, seedB, samples = 48) {
     const pts = [];
     for (let i = 0; i < samples; i++) {
@@ -170,12 +161,14 @@ class LilyPad {
         this.offX = 0; this.offY = 0; this.velX = 0; this.velY = 0;
         this.palette = PAD_MAJORITY_PALETTES[Math.floor(Math.random()*PAD_MAJORITY_PALETTES.length)];
         
+        // shape 
         this.notchWidth = 0.35 + Math.random()*0.55;
         this.notchDepth = 0.55 + Math.random()*0.4;
         this.irregularity = 0.05 + Math.random()*0.08;
         this.outlinePts = makePadOutline(this.r, this.notchWidth, this.notchDepth, this.irregularity, Math.random()*10, Math.random()*10);
-
         const [c0,c1,c2] = this.palette;
+
+        // color 
         this.bodyColor = lerpHex(c1, c2, Math.random()*0.75);
         this.edgeColor = lerpHex(this.bodyColor, c2, 0.3+Math.random()*0.7);
         this.veinColor = lerpHex(c1, c0, 0.5+Math.random()*0.4);
@@ -288,7 +281,7 @@ class LilyPad {
             sctx.lineTo(Math.cos(v.angle)*v.len, Math.sin(v.angle)*v.len);
             sctx.stroke();
         })
-
+        sctx.restore();
         // center and white dot 
         sctx.save();
         sctx.filter = `blur(${Math.max(0.8, this.r*0.06).toFixed(1)}px)`;
@@ -334,7 +327,7 @@ class LilyPad {
             if(this.rimStyle === 'partial') {
                 sctx.beginPath();
                 sctx.moveTo(0, 0);
-                sctx.arc(0, 0, this.r*0.5, this.rimArcStart, this.rimarcStart + this.rimArcSpan);
+                sctx.arc(0, 0, this.r*0.5, this.rimArcStart, this.rimArcStart + this.rimArcSpan);
                 sctx.closePath();
                 sctx.clip();
             }
