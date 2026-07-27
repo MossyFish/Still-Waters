@@ -23,16 +23,16 @@ const SHADOW_FOR_FISH  = { 1:1, 2:2, 3:3, 4:4, 5:5, 6:5 };
 // I screwed up the coloring because I thought it would just be a base layer
 // but fixing it in code because there's 0 shot I'm spending more time coloring fish
 const KOI_PALETTE = [
-  { hue:  0, sat: 110 },
-  { hue:  0, sat: 150 },
-  { hue:150, sat: 260 },
-  { hue:150, sat: 190 },
-  { hue:165, sat: 240 },
-  { hue:165, sat: 180 },
-  { hue:185, sat: 200 },
-  { hue:185, sat: 150 },
-  { hue:140, sat: 200 },
-  { hue:140, sat: 150 },
+  { hue: 0, sat: 110 },
+  { hue: 0, sat: 150 },
+  { hue: 150, sat: 260 },
+  { hue: 150, sat: 190 },
+  { hue: 165, sat: 240 },
+  { hue: 165, sat: 180 },
+  { hue: 185, sat: 200 },
+  { hue: 185, sat: 150 },
+  { hue: 140, sat: 200 },
+  { hue: 140, sat: 150 },
   { hue: 10, sat: 130 },
   { hue: 20, sat: 170 },
 ];
@@ -56,6 +56,8 @@ function pickTier() {
 
 const fishScratch = document.createElement('canvas');
 const fishScratchCtx = fishScratch.getContext('2d');
+const shadowScratch = document.createElement('canvas');
+const shadowScratchCtx = shadowScratch.getContext('2d');
 
 class Fish {
   constructor(isCursorFish = false) {
@@ -78,8 +80,8 @@ class Fish {
     
     else {
       const tier = pickTier();
-      this.tier  = tier.name;
-      this.len   = randRange(...tier.lenRange);
+      this.tier = tier.name;
+      this.len = randRange(...tier.lenRange);
       this.cruiseSpeed = randRange(0.5, 1.4);
       this.speed = this.cruiseSpeed;
       this.turnRate = randRange(0.035, 0.075);
@@ -200,36 +202,42 @@ class Fish {
     const { ux, uy, t } = lightShadowParams(this.x, this.y);
     const shadowOff = this.len * (0.14 + t*0.5);
 
-    this.drawShadow(ctx, i0, 1 - blend, ux, uy, t, shadowOff);
-    if (blend > 0.02) this.drawShadow(ctx, i1, blend, ux, uy, t, shadowOff);
+    this.drawShadow(ctx, i0, i1, blend, ux, uy, t, shadowOff);
     this.drawBody(ctx, i0, i1, blend);
   }
 
-    drawShadow(ctx, fi, alpha, ux, uy, t, shadowOff) {
-      const fa = this.def.anchors[fi];
-      const sa = this.shadowDef.anchors[fi];
+    drawShadow(ctx, i0, i1, blend, ux, uy, t, shadowOff) {
+      const shadow0 = assets.shadows[this.shadowType]?.[i0];
+      if (!shadow0) return;
+      const shadow1 = assets.shadows[this.shadowType]?.[i1];
+      const sa0 = this.shadowDef.anchors[i0];
+      const sa1 = this.shadowDef.anchors[i1];
 
-      const shadow = assets.shadows[this.shadowType]?.[fi];
-      if (shadow) {
-        ctx.save();
-        ctx.translate(this.x + ux*shadowOff, this.y + uy*shadowOff);
-        ctx.rotate(this.angle + Math.PI/2);
-        ctx.globalAlpha = Math.max(0, 0.3 - t*0.12) * alpha;
-        ctx.drawImage(shadow, -sa.x*this.spriteScale, -sa.y*this.spriteScale, this.drawW, this.drawH);
-        ctx.globalAlpha = 1;
-        ctx.restore();
+      const sw = Math.ceil(this.drawW * 1.6);
+      const sh = Math.ceil(this.drawH * 1.6);
+      const cx = sw / 2, cy = sh / 2;
+
+      if (shadowScratch.width !== sw || shadowScratch.height !== sh) {
+        shadowScratch.width = sw;
+        shadowScratch.height = sh;
+      }
+      shadowScratchCtx.clearRect(0, 0, sw, sh);
+      shadowScratchCtx.globalAlpha = 1;
+      shadowScratchCtx.drawImage(shadow0, cx - sa0.x*this.spriteScale, cy - sa0.y*this.spriteScale, this.drawW, this.drawH);
+
+      if (blend > 0.02 && shadow1) {
+        shadowScratchCtx.globalAlpha = blend;
+        shadowScratchCtx.drawImage(shadow1, cx - sa1.x*this.spriteScale, cy - sa1.y*this.spriteScale, this.drawW, this.drawH);
+        shadowScratchCtx.globalAlpha = 1;
       }
 
-        const body = this.tintedFrames ? this.tintedFrames[fi] : assets.fish[this.fishType]?.[fi];
-      if (body) {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle + Math.PI/2);
-        ctx.globalAlpha = alpha;
-        ctx.drawImage(body, -fa.x*this.spriteScale, -fa.y*this.spriteScale, this.drawW, this.drawH);
-        ctx.globalAlpha = 1;
-        ctx.restore();
-      }
+      ctx.save();
+      ctx.translate(this.x + ux*shadowOff, this.y + uy*shadowOff);
+      ctx.rotate(this.angle + Math.PI/2);
+      ctx.globalAlpha = Math.max(0, 0.3 - t*0.12);
+      ctx.drawImage(shadowScratch, -cx, -cy, sw, sh);
+      ctx.globalAlpha = 1;
+      ctx.restore();
     }
 
     drawBody(ctx, i0, i1, blend) {

@@ -16,8 +16,8 @@ function loadImage(src) {
 
  
 async function loadAssets() {
-  const waterP = Promise.all(Array.from({length:5}, (_,i) => loadImage(`assets/Water/Water-${i+1}.png`)));
-  const causticsP = Promise.all(Array.from({length:7}, (_,i) => loadImage(`assets/Caustics/Caustics-${i+1}.png`)));
+  const waterP = Promise.all(Array.from({length:5}, (_,i) => loadImage(`assets/Water/Water-${i+1}.webp`)));
+  const causticsP = Promise.all(Array.from({length:7}, (_,i) => loadImage(`assets/Caustics/Caustics-${i+1}.webp`)));
  
   const fishTypes = [1,2,3,4,5,6];
   const fishP = Promise.all(fishTypes.map(type =>
@@ -32,7 +32,7 @@ async function loadAssets() {
  
   const [water, caustics, fishResults, shadowResults] = await Promise.all([waterP, causticsP, fishP, shadowP]);
  
-  assets.water    = water;
+  assets.water = water;
   assets.caustics = caustics;
   fishTypes.forEach((type, i) => { assets.fish[type] = fishResults[i]; });
   shadowSlots.forEach((s, i)  => { assets.shadows[s] = shadowResults[i]; });
