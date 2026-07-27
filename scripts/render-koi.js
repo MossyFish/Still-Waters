@@ -41,9 +41,9 @@ const KOI_PALETTE = [
 const PANIC_SECONDS = 1.0;
 const CALM_SECONDS  = 2.0;
 const KOI_TIERS = [
-  { name:'large', weight: 0.50, lenRange:[95,135] },
+  { name:'large', weight: 0.45, lenRange:[95,135] },
   { name:'medium', weight: 0.40, lenRange:[58,80] },
-  { name:'baby', weight: 0.10, lenRange:[32,46] },
+  { name:'baby', weight: 0.15, lenRange:[32,46] },
 ];
 
 function randRange(min, max) { return min + Math.random()*(max-min); }

@@ -151,32 +151,6 @@ function drawWaterFrames() {
   ctx.restore();
 }
 
-function drawAmbientLight() {
-  ctx.save();
-  ctx.globalCompositeOperation = 'screen';
-  for (const d of dapples) {
-    d.phase += d.speed * 0.01 * (dt*60);
-    const dx = d.x + Math.sin(d.phase)*18;
-    const dy = d.y + Math.cos(d.phase*0.8)*12;
-    const g = ctx.createRadialGradient(dx, dy, 0, dx, dy, d.r);
-    g.addColorStop(0, 'rgba(205,230,250,0.09)');
-    g.addColorStop(1, 'rgba(205,230,250,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(dx, dy, d.r, 0, Math.PI*2); ctx.fill();
-  }
-  for (const s of sunspots) {
-    s.phase += s.speed * 0.01 * (dt*60);
-    const sx = s.x + Math.sin(s.phase)*22;
-    const sy = s.y + Math.cos(s.phase*0.7)*16;
-    const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, s.r);
-    g.addColorStop(0, `rgba(255,248,225,${s.intensity})`);
-    g.addColorStop(1, 'rgba(255,248,225,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(sx, sy, s.r, 0, Math.PI*2); ctx.fill();
-  }
-  ctx.restore();
-}
-
 function drawVignette() {
   const vg = ctx.createRadialGradient(W/2, H/2, H*0.3, W/2, H/2, H*0.85);
   vg.addColorStop(0, 'rgba(0,0,0,0)');
@@ -187,7 +161,6 @@ function drawVignette() {
 
 function drawWater() {
   drawWaterFrames();
-  drawAmbientLight();
   drawVignette();
   drawRipples();
 }
