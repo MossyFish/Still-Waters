@@ -60,7 +60,6 @@ function enterContent(){
   inContent = true;
   warpTransition(intro, content, () => {
     content.classList.add('visible');
-    document.getElementById('spotifyWidget').classList.add('visible');
     backBtn.classList.add('visible');
     window.dispatchEvent(new Event('resize'));
   });
@@ -72,7 +71,6 @@ function exitToIntro(){
   backBtn.classList.remove('visible');
   warpTransition(content, intro, () => {
     content.classList.remove('visible');
-    document.getElementById('spotifyWidget').classList.remove('visible');
   });
 }
 

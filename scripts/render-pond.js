@@ -55,6 +55,8 @@ function loop() {
     screenCtx.clearRect(0, 0, W, H);
     screenCtx.drawImage(buffer, 0, 0);
 
+    minFish(); 
+    
     for (const f of fishArr) {
         f.update();
         f.draw(screenCtx);

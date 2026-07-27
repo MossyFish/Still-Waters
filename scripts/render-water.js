@@ -63,9 +63,9 @@ function drawWaterFrames() {
 
   driftT += dt;
 
-  const wZoom = 1.045 + Math.sin(driftT * 0.15) * 0.028;
-  const wDx   = Math.sin(driftT * 0.13) * 30;
-  const wDy   = Math.cos(driftT * 0.10) * 22;
+  const wZoom = 1.09 + Math.sin(driftT * 0.15) * 0.06;
+  const wDx   = Math.sin(driftT * 0.13) * 60;
+  const wDy   = Math.cos(driftT * 0.10) * 45;
 
   waterPhase += dt * 0.8;
   const wt = waterPhase % WATER.length;
@@ -88,12 +88,12 @@ function drawWaterFrames() {
   ctx.restore();
 
   // caustics
-  const cZoom = 1.1 + Math.sin(driftT * 0.22 + 1.7) * 0.05;
-  const cDx   = Math.sin(driftT * 0.2 + 2.1) * 46;
-  const cDy   = Math.cos(driftT * 0.17 + 0.6) * 34;
-  const cRot = Math.sin(driftT * 0.08) * 0.035;
+  const cZoom = 1.25 + Math.sin(driftT * 0.20 + 2.0) * 0.1;
+  const cDx   = Math.sin(driftT * 0.2 + 2.0) * 75;
+  const cDy   = Math.cos(driftT * 0.2 + 0.4) * 60;
+  const cRot = Math.sin(driftT * 0.1) * 0.05;
 
-  causticPhase += dt * 0.6;
+  causticPhase += dt;
   const ct = causticPhase % CAUSTICS.length;
   const ciA = CAUSTICS[Math.floor(ct) % CAUSTICS.length];
   const ciB = CAUSTICS[(Math.floor(ct)+1) % CAUSTICS.length];
@@ -110,17 +110,16 @@ function drawWaterFrames() {
   ctx.drawImage(assets.caustics[ciB], 0, 0, W, H);
   ctx.restore();
 
-
   // second caustic layer
   const ct2 = (causticPhase * 1.4 + CAUSTICS.length * 0.5) % CAUSTICS.length;
   const ci2A = CAUSTICS[Math.floor(ct2) % CAUSTICS.length];
   const ci2B = CAUSTICS[(Math.floor(ct2)+1) % CAUSTICS.length];
   const cb2 = ct2 - Math.floor(ct2);
 
-  const c2Zoom = 1.18 + Math.sin(driftT * 0.31 + 4.2) * 0.06;
-  const c2Dx = -Math.sin(driftT * 0.25 + 0.9) * 40;
-  const c2Dy = -Math.cos(driftT * 0.19 + 3.0) * 30;
-  const c2Rot = -Math.sin(driftT * 0.11 + 1.2) * 0.045;
+  const c2Zoom = 1.3 + Math.sin(driftT * 0.31 + 4.2) * 0.01;
+  const c2Dx = -Math.sin(driftT * 0.25 + 0.9) * 75;
+  const c2Dy = -Math.cos(driftT * 0.19 + 3.0) * 50;
+  const c2Rot = -Math.sin(driftT * 0.11 + 1.2) * 0.08;
 
   ctx.save();
   ctx.translate(W/2 + c2Dx, H/2 + c2Dy);
@@ -128,28 +127,29 @@ function drawWaterFrames() {
   ctx.scale(c2Zoom, c2Zoom);
   ctx.translate(-W/2, -H/2);
   ctx.globalCompositeOperation = 'screen';
-  ctx.globalAlpha = 0.55 * (1 - cb2);
+  ctx.globalAlpha = 0.8 * (1 - cb2);
   ctx.drawImage(assets.caustics[ci2A], 0, 0, W, H);
-  ctx.globalAlpha = 0.55 * cb2;
+  ctx.globalAlpha = 0.8 * cb2;
   ctx.drawImage(assets.caustics[ci2B], 0, 0, W, H);
+
+  ctx.restore();
+
+  // more sunlight 
+  const sunT = driftT * 0.12;
+  const sunX = W * (0.35 + Math.sin(sunT*0.7) * 0.12);
+  const sunY = H * (0.2 + Math.cos(sunT*0.5) * 0.08);
+  const sunR = Math.max(W,H) * (0.35 + Math.sin(sunT*0.9) * 0.08);
+  const sunAlpha = 0.18 + Math.sin(sunT*1.3) * 0.09;
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  const sunGrad = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunR);
+  sunGrad.addColorStop(0, `rgba(255,250,230,${sunAlpha})`);
+  sunGrad.addColorStop(1, 'rgba(255,250,230,0)');
+  ctx.fillStyle = sunGrad;
+  ctx.fillRect(0, 0, W, H);
   ctx.restore();
 }
-
-// light shimmer idk if this has any impact ngl
-const dapples = Array.from({length: 10}, () => ({
-  x: Math.random()*2000, y: Math.random()*1200,
-  r: 40 + Math.random()*80,
-  phase: Math.random()*Math.PI*2,
-  speed: 0.04 + Math.random()*0.06
-}));
-
-const sunspots = Array.from({length: 4}, () => ({
-  x: Math.random()*2000, y: Math.random()*1200,
-  r: 60 + Math.random()*110,
-  phase: Math.random()*Math.PI*2,
-  speed: 0.02 + Math.random()*0.04,
-  intensity: 0.04 + Math.random()*0.14
-}));
 
 function drawAmbientLight() {
   ctx.save();

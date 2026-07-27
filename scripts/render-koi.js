@@ -41,16 +41,15 @@ const KOI_PALETTE = [
 const PANIC_SECONDS = 1.0;
 const CALM_SECONDS  = 2.0;
 const KOI_TIERS = [
-  { name:'large',  weight:0.5, lenRange:[95,135] },
-  { name:'medium', weight:0.3, lenRange:[58,80]  },
-  { name:'baby',   weight:0.2, lenRange:[32,46]  },
+  { name:'large', weight: 0.50, lenRange:[95,135] },
+  { name:'medium', weight: 0.40, lenRange:[58,80] },
+  { name:'baby', weight: 0.10, lenRange:[32,46] },
 ];
 
 function randRange(min, max) { return min + Math.random()*(max-min); }
 
 function pickTier() {
   let r = Math.random(), acc = 0;
-  for (const t of KOI_TIERS) { acc += t.weight; if (r < acc) return t; }
   return KOI_TIERS.at(-1);
 }
 
@@ -189,8 +188,8 @@ class Fish {
       this.x += Math.cos(this.angle) * this.speed * step;
       this.y += Math.sin(this.angle) * this.speed * step;
       
-      if (this.x < -60) this.x = W+60; if (this.x > W+60) this.x = -60;
-      if (this.y < -60) this.y = H+60; if (this.y > H+60) this.y = -60;
+      if (this.x < -280) this.x = W+280; if (this.x > W+280) this.x = -280;
+      if (this.y < -280) this.y = H+280; if (this.y > H+280) this.y = -280;
     }
   }
 
@@ -330,7 +329,7 @@ class Fish {
 }
 
 const fishArr = [];
-for (let i = 0; i < 9; i++) fishArr.push(new Fish());
+for (let i = 0; i < 15; i++) fishArr.push(new Fish());
 const cursorFish = new Fish(true);
 
 function fleeFrom(x, y, radius) {
@@ -354,4 +353,19 @@ function lightShadowParams(x, y) {
   const dist = Math.hypot(dx, dy);
   const t = Math.min(1, dist / (Math.hypot(W,H)*0.6));
   return { ux: dist>0.001 ? dx/dist : 0, uy: dist>0.001 ? dy/dist : 1, t };
+}
+
+function minFish() {
+  const onscreen = f => f.tier === 'large' || 'medium' && f.x >= 0 && f.x <= W && f.y >= 0 && f.y <= H;
+  const visible = fishArr.filter(onscreen).length;
+  if (visibleCount >= 6) return;
+
+  const offscreen = fishArr.filter(f => f.tier === 'large' || 'medium' && !onscreen(f));
+  const needed = 6 - visibleCount;
+
+  offscreenLarge.slice(0, needed).forEach(f => {
+    const targetAngle = Math.atan2(H/2 - f.y, W/2 - f.x);
+    f.baseAngle = targetAngle;
+    f.angle = targetAngle;
+  });
 }
