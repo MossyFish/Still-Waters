@@ -57,7 +57,7 @@ function loop() {
     for (const f of fishArr) {
         f.update();
         f.draw(screenCtx);
-        nudgeFoliage(f.x, f.y, 10, 0.08);
+        nudgeFoliage(f.x, f.y, Math.max(18, f.len * 0.55), 0.08);
     };
 
     lilyPads.forEach(p => { p.update(); p.draw(screenCtx); });

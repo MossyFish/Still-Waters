@@ -77,17 +77,17 @@ class Fish {
       const tier = pickTier();
       this.tier  = tier.name;
       this.len   = randRange(...tier.lenRange);
-      this.cruiseSpeed  = randRange(0.7, 2.1);
-      this.speed        = this.cruiseSpeed;
-      this.turnRate     = randRange(0.035, 0.075);
-      this.panicSpeed   = 3.2;
+      this.cruiseSpeed = randRange(0.5, 1.4);
+      this.speed = this.cruiseSpeed;
+      this.turnRate = randRange(0.035, 0.075);
+      this.panicSpeed = 3.2;
       this.calmFromSpeed = this.cruiseSpeed;
 
-      const types      = TIER_FISH_TYPES[this.tier];
-      this.fishType    = types[Math.floor(Math.random() * types.length)];
-      this.shadowType  = SHADOW_FOR_FISH[this.fishType];
-      this.def         = FISH_DEFS[this.fishType];
-      this.shadowDef   = SHADOW_DEFS[this.shadowType];
+      const types = TIER_FISH_TYPES[this.tier];
+      this.fishType = types[Math.floor(Math.random() * types.length)];
+      this.shadowType = SHADOW_FOR_FISH[this.fishType];
+      this.def = FISH_DEFS[this.fishType];
+      this.shadowDef = SHADOW_DEFS[this.shadowType];
       this.spriteScale = this.len / this.def.bodyLen;
       this.drawW = IMG_W * this.spriteScale;
       this.drawH = IMG_H * this.spriteScale;
@@ -173,8 +173,12 @@ class Fish {
       this.speed += (this.cruiseSpeed-this.speed) * (1 - Math.pow(1-0.02, step));
     }
 
-    const speedFactor = Math.min(1.7, this.speed/2.2);
-    this.swimPhase += 0.09 * (0.30 + speedFactor*1.6) * step;
+    if (this.isCursorFish) {
+      this.swimPhase += 0.12 * step;
+    } else {
+      const speedFactor = Math.min(1.2, this.speed/2.2);
+      this.swimPhase += 0.09 * (0.30 + speedFactor*1.6) * step;
+    }
 
     if (!this.isCursorFish) {
       this.x += Math.cos(this.angle) * this.speed * step;
@@ -238,31 +242,31 @@ class Fish {
     ctx.lineWidth   = 1.2;
  
     // tail
-    const tx = -L*0.42, tw = wag*L*0.55;
+    const tx = -L * 0.42, tw = wag * L * 0.4;
     ctx.beginPath();
     ctx.moveTo(tx, 0);
-    ctx.quadraticCurveTo(-L*0.75, L*0.16, -L*1.05 + tw, L*0.38 + tw*0.4);
-    ctx.quadraticCurveTo(-L*0.85, L*0.05, -L*0.95 + tw, -L*0.02);
-    ctx.quadraticCurveTo(-L*0.85, -L*0.05, -L*1.05 + tw, -L*0.38 + tw*0.4);
-    ctx.quadraticCurveTo(-L*0.75, -L*0.16, tx, 0);
+    ctx.quadraticCurveTo(-L*0.62, L*0.24, -L*0.78 + tw, L*0.5 + tw*0.4);
+    ctx.quadraticCurveTo(-L*0.6, L*0.08, -L*0.68 + tw, -L*0.03);
+    ctx.quadraticCurveTo(-L*0.6, -L*0.08, -L*0.78 + tw, -L*0.5 + tw*0.4);
+    ctx.quadraticCurveTo(-L*0.62, -L*0.24, tx, 0);
     ctx.fill();
  
     // fins
     for (const side of [1, -1]) {
       ctx.beginPath();
-      ctx.moveTo(L*0.08, side*L*0.1);
-      ctx.quadraticCurveTo(-L*0.1, side*L*0.32, -L*0.3, side*L*0.22);
-      ctx.quadraticCurveTo(-L*0.12, side*L*0.14, L*0.08, side*L*0.1);
+      ctx.moveTo(L * 0.08, side * L * 0.14);
+      ctx.quadraticCurveTo(-L * 0.1, side * L * 0.4, -L * 0.3, side * L * 0.28);
+      ctx.quadraticCurveTo(-L * 0.12, side * L * 0.18, L * 0.08, side * L * 0.14);
       ctx.fill();
     }
  
     // body
     ctx.beginPath();
-    ctx.moveTo(L*0.5, 0);
-    ctx.quadraticCurveTo(L*0.35, L*0.16, 0, L*0.15);
-    ctx.quadraticCurveTo(-L*0.3, L*0.13, tx, 0);
-    ctx.quadraticCurveTo(-L*0.3, -L*0.13, 0, -L*0.15);
-    ctx.quadraticCurveTo(L*0.35, -L*0.16, L*0.5, 0);
+    ctx.moveTo(L * 0.5, 0);
+    ctx.quadraticCurveTo(L * 0.35, L * 0.24, 0, L * 0.22);
+    ctx.quadraticCurveTo(-L * 0.3, L * 0.19, tx, 0);
+    ctx.quadraticCurveTo(-L * 0.3, -L * 0.19, 0, -L * 0.22);
+    ctx.quadraticCurveTo(L * 0.35, -L * 0.24, L * 0.5, 0);
     ctx.fill();
     ctx.stroke();
  
@@ -270,14 +274,14 @@ class Fish {
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgba(30,30,30,0.9)';
     ctx.beginPath();
-    ctx.arc(L*0.33, 0, L*0.045, 0, Math.PI*2);
+    ctx.arc(L * 0.33, 0, L * 0.05, 0, Math.PI * 2);
     ctx.fill();
  
     ctx.restore();
   }
 }
 
-const fishArr   = [];
+const fishArr = [];
 for (let i = 0; i < 9; i++) fishArr.push(new Fish());
 const cursorFish = new Fish(true);
 

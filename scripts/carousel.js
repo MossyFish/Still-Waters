@@ -14,7 +14,7 @@ function layoutCarousel() {
 function positionCarousel(animate) {
     const viewportWidth = carouselViewport.clientWidth;
     const slideWidth = viewportWidth * 0.5;
-    const offset = (viewportWidth * 0.25) - (slideIdx * slideWidth);
+    const offset = (viewportWidth - slideWidth) / 2 - slideIdx * slideWidth;
     carouselTrack.style.transition = animate ? '' : 'none';
     carouselTrack.style.transform = `translateX(${offset}px)`;
     slides.forEach((slide, i) => slide.classList.toggle('is-active', i === slideIdx));
@@ -29,6 +29,7 @@ function advanceCarousel() {
 // photo order
 function buildSlides(photos) {
     carouselTrack.innerHTML = '';
+
     slides = photos.map(photo => {
         const slide = document.createElement('div');
         slide.className = 'slide';
@@ -38,15 +39,19 @@ function buildSlides(photos) {
         carouselTrack.appendChild(slide);
         return slide;
     });
+
     slideIdx = 0;
     layoutCarousel();
     clearInterval(carouselTimer);
     carouselTimer = setInterval(advanceCarousel, 5000);
 }
 
-fetch('tos.json')
-.then(res => res.json())
-.then(buildSlides)
-.catch(err => console.error('Failed to load:', err));
+fetch('/api/photos')
+  .then(res => {
+    if (!res.ok) throw new Error(`/api/photos failed (${res.status})`);
+    return res.json();
+  })
+  .then(buildSlides)
+  .catch(err => console.error('Failed to load photo list:', err));
     
 window.addEventListener('resize', layoutCarousel);

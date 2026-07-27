@@ -48,8 +48,8 @@ function blobPath(ctx, pts) {
 }
 
 // water frame cycling
-const WATER_PP   = [0,1,2,3,4,3,2,1];
-const CAUSTIC_PP = [0,1,2,3,4,5,6,5,4,3,2,1];
+const WATER   = [0,1,2,3,4,3,2,1];
+const CAUSTICS = [0,1,2,3,4,5,6,5,4,3,2,1];
 
 let waterPhase = 0;
 let causticPhase = 0;
@@ -63,14 +63,14 @@ function drawWaterFrames() {
 
   driftT += dt;
 
-  const wZoom = 1.035 + Math.sin(driftT * 0.11) * 0.02;
-  const wDx   = Math.sin(driftT * 0.09) * 22;
-  const wDy   = Math.cos(driftT * 0.07) * 16;
+  const wZoom = 1.045 + Math.sin(driftT * 0.15) * 0.028;
+  const wDx   = Math.sin(driftT * 0.13) * 30;
+  const wDy   = Math.cos(driftT * 0.10) * 22;
 
   waterPhase += dt * 0.8;
-  const wt = waterPhase % WATER_PP.length;
-  const wiA = WATER_PP[Math.floor(wt) % WATER_PP.length];
-  const wiB = WATER_PP[(Math.floor(wt)+1) % WATER_PP.length];
+  const wt = waterPhase % WATER.length;
+  const wiA = WATER[Math.floor(wt) % WATER.length];
+  const wiB = WATER[(Math.floor(wt)+1) % WATER.length];
   const wb = wt - Math.floor(wt);
 
   ctx.save();
@@ -78,22 +78,25 @@ function drawWaterFrames() {
   ctx.scale(wZoom, wZoom);
   ctx.translate(-W/2, -H/2);
   ctx.drawImage(assets.water[wiA], 0, 0, W, H);
+
   if (wb > 0.001) {
     ctx.globalAlpha = wb;
     ctx.drawImage(assets.water[wiB], 0, 0, W, H);
     ctx.globalAlpha = 1;
   }
+
   ctx.restore();
 
   // caustics
-  const cZoom = 1.06 + Math.sin(driftT * 0.16 + 1.7) * 0.03;
-  const cDx   = Math.sin(driftT * 0.14 + 2.1) * 34;
-  const cDy   = Math.cos(driftT * 0.12 + 0.6) * 26;
+  const cZoom = 1.1 + Math.sin(driftT * 0.22 + 1.7) * 0.05;
+  const cDx   = Math.sin(driftT * 0.2 + 2.1) * 46;
+  const cDy   = Math.cos(driftT * 0.17 + 0.6) * 34;
+  const cRot = Math.sin(driftT * 0.08) * 0.035;
 
-  causticPhase += dt * 0.35;
-  const ct = causticPhase % CAUSTIC_PP.length;
-  const ciA = CAUSTIC_PP[Math.floor(ct) % CAUSTIC_PP.length];
-  const ciB = CAUSTIC_PP[(Math.floor(ct)+1) % CAUSTIC_PP.length];
+  causticPhase += dt * 0.6;
+  const ct = causticPhase % CAUSTICS.length;
+  const ciA = CAUSTICS[Math.floor(ct) % CAUSTICS.length];
+  const ciB = CAUSTICS[(Math.floor(ct)+1) % CAUSTICS.length];
   const cb = ct - Math.floor(ct);
 
   ctx.save();
@@ -101,14 +104,38 @@ function drawWaterFrames() {
   ctx.scale(cZoom, cZoom);
   ctx.translate(-W/2, -H/2);
   ctx.globalCompositeOperation = 'screen';
-  ctx.globalAlpha = 0.9 * (1 - cb);
+  ctx.globalAlpha = 1 * (1 - cb);
   ctx.drawImage(assets.caustics[ciA], 0, 0, W, H);
-  ctx.globalAlpha = 0.9 * cb;
+  ctx.globalAlpha = 1 * cb;
   ctx.drawImage(assets.caustics[ciB], 0, 0, W, H);
+  ctx.restore();
+
+
+  // second caustic layer
+  const ct2 = (causticPhase * 1.4 + CAUSTICS.length * 0.5) % CAUSTICS.length;
+  const ci2A = CAUSTICS[Math.floor(ct2) % CAUSTICS.length];
+  const ci2B = CAUSTICS[(Math.floor(ct2)+1) % CAUSTICS.length];
+  const cb2 = ct2 - Math.floor(ct2);
+
+  const c2Zoom = 1.18 + Math.sin(driftT * 0.31 + 4.2) * 0.06;
+  const c2Dx = -Math.sin(driftT * 0.25 + 0.9) * 40;
+  const c2Dy = -Math.cos(driftT * 0.19 + 3.0) * 30;
+  const c2Rot = -Math.sin(driftT * 0.11 + 1.2) * 0.045;
+
+  ctx.save();
+  ctx.translate(W/2 + c2Dx, H/2 + c2Dy);
+  ctx.rotate(c2Rot);
+  ctx.scale(c2Zoom, c2Zoom);
+  ctx.translate(-W/2, -H/2);
+  ctx.globalCompositeOperation = 'screen';
+  ctx.globalAlpha = 0.55 * (1 - cb2);
+  ctx.drawImage(assets.caustics[ci2A], 0, 0, W, H);
+  ctx.globalAlpha = 0.55 * cb2;
+  ctx.drawImage(assets.caustics[ci2B], 0, 0, W, H);
   ctx.restore();
 }
 
-// light shimmer
+// light shimmer idk if this has any impact ngl
 const dapples = Array.from({length: 10}, () => ({
   x: Math.random()*2000, y: Math.random()*1200,
   r: 40 + Math.random()*80,
@@ -202,9 +229,10 @@ canvas.addEventListener('click', e => {
   spawnRipple(e.clientX, e.clientY, 1.3, {
     wobble: true,
     rings: 2 + Math.floor(Math.random()*3),
-    decay: 0.9, alphaBoot: 1.35, widthBoost: 1.45,
-    ringGap: 0.14, speedMul: 0.3
+    decay: 0.95, alphaBoot: 1.35, widthBoost: 1.45,
+    ringGap: 0.28, speedMul: 0.15
   });
+
   nudgeFoliage(e.clientX, e.clientY, 110, 3.2);
   playRippleSound();
   const fishFled = fleeFrom(e.clientX, e.clientY, 90);

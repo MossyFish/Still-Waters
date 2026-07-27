@@ -39,7 +39,7 @@ html, body {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 9;
+    z-index: 60;
 }
 
 /* Transitions */
@@ -101,4 +101,53 @@ html, body {
   transform: translateY(0px);
   box-shadow: 0 1px 0 rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.25);
   transition: transform 0.06s ease, box-shadow 0.06s ease;
+}
+
+h1.name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(1.9rem, 3.6vw, 2.6rem);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    margin: 0 0 6px;
+    color: var(--cream);
+    text-transform: uppercase;
+}
+
+.role {
+    color: var(--water-light);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    margin-bottom: 36px;
+}
+
+section { 
+    margin-bottom: 56px; 
+}
+
+h2.section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 16px;
+    border-bottom: 1px solid rgba(227, 179, 92, 0.25);
+    padding-bottom: 10px;
+}
+
+p.body-text { 
+    line-height: 1.7;
+    font-weight: 300;
+    color: rgba(243, 239, 228, 0.88);
+    font-size: 0.98rem;
+    max-width: 60ch;
+}
+
+#liveClock {
+    font-weight: 900;
+    font-style: normal;
+    font-size: 1.5rem;
+    color: var(--water-light);
 }
