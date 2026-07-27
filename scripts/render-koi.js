@@ -5,8 +5,8 @@ const FISH_DEFS = {
   2: { bodyLen: 203, anchors: [{x:96,y:69},{x:108,y:68},{x:115,y:63},{x:120,y:64},{x:139,y:63}] },
   3: { bodyLen: 197, anchors: [{x:102,y:70},{x:110,y:66},{x:118,y:66},{x:127,y:67},{x:138,y:66}] },
   4: { bodyLen: 156, anchors: [{x:100,y:82},{x:108,y:82},{x:116,y:82},{x:120,y:81},{x:128,y:85}] },
-  5: { bodyLen: 83, anchors: [{x:108,y:107},{x:112,y:106},{x:112,y:105},{x:114,y:105},{x:116,y:106}] },
-  6: { bodyLen: 74, anchors: [{x:109,y:112},{x:112,y:110},{x:112,y:110},{x:112,y:111},{x:115,y:111}] },
+  5: { bodyLen: 83,  anchors: [{x:108,y:107},{x:112,y:106},{x:112,y:105},{x:114,y:105},{x:116,y:106}] },
+  6: { bodyLen: 74,  anchors: [{x:109,y:112},{x:112,y:110},{x:112,y:110},{x:112,y:111},{x:115,y:111}] },
 };
 
 const SHADOW_DEFS = {
@@ -18,18 +18,18 @@ const SHADOW_DEFS = {
 };
 
 const TIER_FISH_TYPES = { large: [1,2], medium: [3,4], baby: [5,6] };
-const SHADOW_FOR_FISH  = { 1:1, 2:2, 3:3, 4:4, 5:5, 6:5 };
+const SHADOW_FOR_FISH  = { 1:1, 2:2, 3:3, 4:4, 5:5, 6:5 }; // fish 5 & 6 share shadow 5
 
 const FIN_PARAMS = {
   pectoral: { strands:5, spread:1.05, length:0.46, width:0.16, waveAmp:0.045 },
-  tail: { strands:6, spread:1.75, length:0.54, width:0.15, waveAmp:0.05  },
+  tail:     { strands:6, spread:1.75, length:0.54, width:0.15, waveAmp:0.05  },
 };
 
 function bodyGeometry(shape) {
   return {
-    rightC:    0.62  * (shape.nose || 1),
+    rightC:    0.62  * (shape.nose         || 1),
     leftC:     0.95  * (shape.tailFullness || 1),
-    halfWidth: 0.345 * (shape.depth || 1),
+    halfWidth: 0.345 * (shape.depth        || 1),
   };
 }
 
@@ -44,7 +44,7 @@ function silhouettePoints(L, shape, phase) {
   const ampTail = L * 0.15;
   const bend = xc => bendAt(xc, rightC, leftC, phase, ampTail);
   const profile = [
-    [rightC, 0], [rightC*0.82, 0.15], [rightC*0.46, 0.30 + bulge*0.5],
+    [rightC, 0], [rightC*0.82, 0.15], [rightC*0.46, 0.30+bulge*0.5],
     [rightC*0.08, 0.335], [-0.18, 0.32], [-0.42, 0.26],
     [-0.64, 0.175], [-leftC*0.88, 0.10], [-leftC, 0.028],
   ];
@@ -90,15 +90,19 @@ function drawFinFan(sctx, baseX, baseY, restAngle, spread, strandCount, length, 
   if (strandCount > 1) {
     for (const layer of [{rScale:0.80,waveMul:1.0,phaseOff:0,alpha:0.55},{rScale:0.58,waveMul:1.35,phaseOff:2.1,alpha:0.45}]) {
       const pts = [];
+
       for (let i = 0; i <= 12; i++) {
         const t = i/12, ang = restAngle - spread/2 + spread*t;
         const r   = length * layer.rScale * (0.88 + 0.12*Math.sin(t*Math.PI));
         const wob = Math.sin(t*Math.PI*1.3 + phase*1.15*layer.waveMul + layer.phaseOff) * waveAmp * layer.waveMul;
         pts.push([baseX + Math.cos(ang)*r - Math.sin(ang)*wob, baseY + Math.sin(ang)*r + Math.cos(ang)*wob]);
       }
+
       pts.push([baseX, baseY]);
       blobPath(sctx, pts);
+
       if (flatColor) { sctx.fillStyle = flatColor; sctx.fill(); }
+      
       else {
         const g = sctx.createRadialGradient(baseX, baseY, 0, baseX, baseY, length);
         g.addColorStop(0, colorMid); g.addColorStop(1, colorLight);
@@ -106,12 +110,15 @@ function drawFinFan(sctx, baseX, baseY, restAngle, spread, strandCount, length, 
       }
     }
   }
+
   for (let i = 0; i < strandCount; i++) {
     const t = strandCount <= 1 ? 0.5 : i/(strandCount-1);
     const ang = restAngle + (strandCount <= 1 ? 0 : -spread/2 + spread*t);
     const lenVar = length * (0.88 + 0.24*Math.sin(i*2.3+1.1));
     strandPath(sctx, baseX, baseY, ang, lenVar, width, waveAmp, phase*1.25+i*0.7, 0.5, 1.5);
+    
     if (flatColor) { sctx.fillStyle = flatColor; sctx.fill(); }
+    
     else {
       const g = sctx.createLinearGradient(baseX, baseY, baseX+Math.cos(ang)*lenVar, baseY+Math.sin(ang)*lenVar);
       g.addColorStop(0, colorMid); g.addColorStop(1, colorLight);
@@ -124,9 +131,9 @@ function drawFinFan(sctx, baseX, baseY, restAngle, spread, strandCount, length, 
 const PANIC_SECONDS = 1.0;
 const CALM_SECONDS  = 2.0;
 const KOI_TIERS = [
-  { name:'large',  weight:0.5, lenRange:[65,92]  },
-  { name:'medium', weight:0.3, lenRange:[36,50]  },
-  { name:'baby',   weight:0.2, lenRange:[18,28]  },
+  { name:'large',  weight:0.5, lenRange:[95,135]  },
+  { name:'medium', weight:0.3, lenRange:[58,80]  },
+  { name:'baby',   weight:0.2, lenRange:[32,46]  },
 ];
 
 function randRange(min, max) { return min + Math.random()*(max-min); }
@@ -178,13 +185,20 @@ class Fish {
       this.spriteScale = this.len / this.def.bodyLen;
       this.drawW = IMG_W * this.spriteScale;
       this.drawH = IMG_H * this.spriteScale;
+
+      const hue = randRange(0, 360);
+      const sat = randRange(240, 420);
+      this.colorFilter = `saturate(${sat.toFixed(0)}%) hue-rotate(${hue.toFixed(0)}deg)`;
     }
   }
 
-  // cosine easing gives natural slow-at-extremes tail motion
-  getFrameIndex() {
-    const t = (1 - Math.cos(this.swimPhase)) / 2;
-    return Math.min(4, Math.floor(t * 4.999));
+  getFramePos() {
+    const t = (1 - Math.cos(this.swimPhase)) / 2; 
+    const pos = t * 4;
+    const i0 = Math.min(4, Math.floor(pos));
+    const i1 = Math.min(4, i0 + 1);
+    const blend = pos - i0;
+    return { i0, i1, blend };
   }
 
   buildCursorSprites() {
@@ -307,7 +321,7 @@ class Fish {
     }
 
     const speedFactor = Math.min(1.7, this.speed/2.2);
-    this.swimPhase += 0.18 * (0.30 + speedFactor*2.8) * step;
+    this.swimPhase += 0.09 * (0.30 + speedFactor*1.6) * step;
 
     if (!this.isCursorFish) {
       this.x += Math.cos(this.angle) * this.speed * step;
@@ -320,18 +334,24 @@ class Fish {
   draw(ctx) {
     if (this.isCursorFish) { this.drawCursorFish(ctx); return; }
 
-    const fi = this.getFrameIndex();
-    const fa = this.def.anchors[fi];
-    const sa = this.shadowDef.anchors[fi];
+    const { i0, i1, blend } = this.getFramePos();
     const { ux, uy, t } = lightShadowParams(this.x, this.y);
     const shadowOff = this.len * (0.14 + t*0.5);
+
+    this.drawFishFrame(ctx, i0, 1 - blend, ux, uy, t, shadowOff);
+    if (blend > 0.02) this.drawFishFrame(ctx, i1, blend, ux, uy, t, shadowOff);
+  }
+
+  drawFishFrame(ctx, fi, alpha, ux, uy, t, shadowOff) {
+    const fa = this.def.anchors[fi];
+    const sa = this.shadowDef.anchors[fi];
 
     const shadow = assets.shadows[this.shadowType]?.[fi];
     if (shadow) {
       ctx.save();
       ctx.translate(this.x + ux*shadowOff, this.y + uy*shadowOff);
       ctx.rotate(this.angle + Math.PI/2);
-      ctx.globalAlpha = Math.max(0, 0.3 - t*0.12);
+      ctx.globalAlpha = Math.max(0, 0.3 - t*0.12) * alpha;
       ctx.drawImage(shadow, -sa.x*this.spriteScale, -sa.y*this.spriteScale, this.drawW, this.drawH);
       ctx.globalAlpha = 1;
       ctx.restore();
@@ -342,7 +362,11 @@ class Fish {
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(this.angle + Math.PI/2);
+      ctx.globalAlpha = alpha;
+      ctx.filter = this.colorFilter;
       ctx.drawImage(body, -fa.x*this.spriteScale, -fa.y*this.spriteScale, this.drawW, this.drawH);
+      ctx.filter = 'none';
+      ctx.globalAlpha = 1;
       ctx.restore();
     }
   }

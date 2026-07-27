@@ -22,7 +22,12 @@ let mouse = { x: W/2, y: H/2, active: false };
 window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; });
 window.addEventListener('mouseleave', () => mouse.active = false);
 
-// these are leftovers but cursor and pads use them so 
+function hexToRgba(hex, alpha) {
+  const v = parseInt(hex.slice(1), 16);
+  return `rgba(${(v>>16)&255},${(v>>8)&255},${v&255},${alpha})`;
+}
+
+// blob helpers — used by the cursor fish AND render-foliage.js
 function makeBlobTemplate(lobes, irregularity) {
   return Array.from({length: lobes}, () => 1 - irregularity*0.5 + Math.random()*irregularity);
 }
@@ -51,13 +56,14 @@ let waterPhase = 0;
 let causticPhase = 0;
 
 function drawWaterFrames() {
+  // solid fallback while frames are loading
   ctx.fillStyle = '#1a5a70';
   ctx.fillRect(0, 0, W, H);
 
   if (!assets?.water?.length) return;
 
-  // water crossfade
-  waterPhase += dt * 0.45;
+  // water — crossfade between adjacent frames
+  waterPhase += dt * 0.8;
   const wt = waterPhase % WATER_PP.length;
   const wiA = WATER_PP[Math.floor(wt) % WATER_PP.length];
   const wiB = WATER_PP[(Math.floor(wt)+1) % WATER_PP.length];
@@ -70,18 +76,18 @@ function drawWaterFrames() {
     ctx.globalAlpha = 1;
   }
 
-  // caustics overlay
-  causticPhase += dt * 0.25;
+  // caustics overlay — light patches, so screen (brighten) not multiply (darken)
+  causticPhase += dt * 0.35;
   const ct = causticPhase % CAUSTIC_PP.length;
   const ciA = CAUSTIC_PP[Math.floor(ct) % CAUSTIC_PP.length];
   const ciB = CAUSTIC_PP[(Math.floor(ct)+1) % CAUSTIC_PP.length];
   const cb = ct - Math.floor(ct);
 
   ctx.save();
-  ctx.globalCompositeOperation = 'multiply';
-  ctx.globalAlpha = 0.55 * (1 - cb);
+  ctx.globalCompositeOperation = 'screen';
+  ctx.globalAlpha = 0.9 * (1 - cb);
   ctx.drawImage(assets.caustics[ciA], 0, 0, W, H);
-  ctx.globalAlpha = 0.55 * cb;
+  ctx.globalAlpha = 0.9 * cb;
   ctx.drawImage(assets.caustics[ciB], 0, 0, W, H);
   ctx.restore();
 }
@@ -105,37 +111,31 @@ const sunspots = Array.from({length: 4}, () => ({
 function drawAmbientLight() {
   ctx.save();
   ctx.globalCompositeOperation = 'screen';
-  
   for (const d of dapples) {
     d.phase += d.speed * 0.01 * (dt*60);
     const dx = d.x + Math.sin(d.phase)*18;
     const dy = d.y + Math.cos(d.phase*0.8)*12;
     const g = ctx.createRadialGradient(dx, dy, 0, dx, dy, d.r);
-    
     g.addColorStop(0, 'rgba(205,230,250,0.09)');
     g.addColorStop(1, 'rgba(205,230,250,0)');
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(dx, dy, d.r, 0, Math.PI*2); ctx.fill();
   }
-
   for (const s of sunspots) {
     s.phase += s.speed * 0.01 * (dt*60);
     const sx = s.x + Math.sin(s.phase)*22;
     const sy = s.y + Math.cos(s.phase*0.7)*16;
     const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, s.r);
-    
     g.addColorStop(0, `rgba(255,248,225,${s.intensity})`);
     g.addColorStop(1, 'rgba(255,248,225,0)');
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(sx, sy, s.r, 0, Math.PI*2); ctx.fill();
   }
-
   ctx.restore();
 }
 
 function drawVignette() {
   const vg = ctx.createRadialGradient(W/2, H/2, H*0.3, W/2, H/2, H*0.85);
-  
   vg.addColorStop(0, 'rgba(0,0,0,0)');
   vg.addColorStop(1, 'rgba(0,6,14,0.35)');
   ctx.fillStyle = vg;
@@ -166,7 +166,6 @@ function spawnRipple(x, y, strength = 0.6, opts = {}) {
     const alpha0 = (0.5 - i*0.1) * strength * alphaBoot;
     const maxR = (90 + i*24) * strength;
     const life = Math.max(0.15, Math.min(maxAge, Math.log(0.02/alpha0) / (60*Math.log(decay))));
-    
     ripples.push({
       x, y, r: 2, age: 0, maxAge, decay,
       delay: i === 0 ? 0 : i*ringGap + Math.random()*(2/60),
@@ -179,7 +178,6 @@ function spawnRipple(x, y, strength = 0.6, opts = {}) {
       wobbleFreqA: 2 + Math.floor(Math.random()*3),
       wobbleFreqB: 4 + Math.floor(Math.random()*3)
     });
-
     if (ripples.length > 150) ripples.splice(0, ripples.length - 150);
   }
 }
@@ -191,17 +189,16 @@ canvas.addEventListener('click', e => {
     decay: 0.9, alphaBoot: 1.35, widthBoost: 1.45,
     ringGap: 0.14, speedMul: 0.3
   });
-
   nudgeFoliage(e.clientX, e.clientY, 110, 3.2);
   playRippleSound();
-
   const fishFled = fleeFrom(e.clientX, e.clientY, 90);
   if (fishFled) playFleeSound();
 });
 
 function rippleRadius(rp, angle) {
   if (rp.wobbleAmt <= 0) return rp.r;
-  const n = Math.sin(angle*rp.wobbleFreqA + rp.wobbleSeedA)*0.6 + Math.sin(angle*rp.wobbleFreqB + rp.wobbleSeedB)*0.4;
+  const n = Math.sin(angle*rp.wobbleFreqA + rp.wobbleSeedA)*0.6
+          + Math.sin(angle*rp.wobbleFreqB + rp.wobbleSeedB)*0.4;
   return rp.r * (1 + rp.wobbleAmt*n);
 }
 
@@ -210,19 +207,14 @@ function drawRipples() {
   for (let i = ripples.length-1; i >= 0; i--) {
     const rp = ripples[i];
     rp.age += dt;
-
     if (rp.delay > 0) { rp.delay -= dt; continue; }
-
     rp.r += rp.speed * step;
     rp.alpha *= Math.pow(rp.decay, step);
-
     if (rp.alpha < 0.015 || (rp.maxAge !== Infinity && rp.age >= rp.maxAge)) {
       ripples.splice(i, 1); continue;
     }
-
     const segments = rp.wobbleAmt > 0 ? 40 : 18;
     ctx.save();
-
     for (let j = 0; j < segments; j++) {
       const a0 = (j/segments) * Math.PI*2;
       const a1 = ((j+1)/segments) * Math.PI*2;
@@ -237,7 +229,6 @@ function drawRipples() {
       ctx.arc(rp.x, rp.y, rippleRadius(rp, a0), a0, a1);
       ctx.stroke();
     }
-
     ctx.restore();
   }
 }
