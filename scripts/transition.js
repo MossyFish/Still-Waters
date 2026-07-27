@@ -32,10 +32,10 @@ function warpTransition(outEl, inEl, onSwap) {
 
         if(!swapped  && progress >= 0.5) {
             swapped = true;
-            outEl.style.display = 'none';
+            if (outEl !== content) outEl.style.display = 'none';
             outEl.classList.remove('warping');
             if (inEl === intro) inEl.style.display = 'flex';
-            else inEl.style.display = 'block';
+            else if (inEl !== content) inEl.style.display = 'block';
             inEl.classList.add('warping');
             if(onSwap) onSwap();    
         }
@@ -55,7 +55,6 @@ function warpTransition(outEl, inEl, onSwap) {
     requestAnimationFrame(tick);
 }
 
-// from intro screen to content screen 
 function enterContent(){
   if(inContent) return;
   inContent = true;
@@ -67,7 +66,6 @@ function enterContent(){
   });
 }
 
-// from content screen to intro screen
 function exitToIntro(){
   if(!inContent) return;
   inContent = false;

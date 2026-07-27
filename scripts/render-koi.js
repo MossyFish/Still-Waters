@@ -54,6 +54,9 @@ function pickTier() {
   return KOI_TIERS.at(-1);
 }
 
+const fishScratch = document.createElement('canvas');
+const fishScratchCtx = fishScratch.getContext('2d');
+
 class Fish {
   constructor(isCursorFish = false) {
     this.isCursorFish = isCursorFish;
@@ -197,36 +200,72 @@ class Fish {
     const { ux, uy, t } = lightShadowParams(this.x, this.y);
     const shadowOff = this.len * (0.14 + t*0.5);
 
-    this.drawFishFrame(ctx, i0, 1 - blend, ux, uy, t, shadowOff);
-    if (blend > 0.02) this.drawFishFrame(ctx, i1, blend, ux, uy, t, shadowOff);
+    this.drawShadow(ctx, i0, 1 - blend, ux, uy, t, shadowOff);
+    if (blend > 0.02) this.drawShadow(ctx, i1, blend, ux, uy, t, shadowOff);
+    this.drawBody(ctx, i0, i1, blend);
   }
 
-  drawFishFrame(ctx, fi, alpha, ux, uy, t, shadowOff) {
-    const fa = this.def.anchors[fi];
-    const sa = this.shadowDef.anchors[fi];
+    drawShadow(ctx, fi, alpha, ux, uy, t, shadowOff) {
+      const fa = this.def.anchors[fi];
+      const sa = this.shadowDef.anchors[fi];
 
-    const shadow = assets.shadows[this.shadowType]?.[fi];
-    if (shadow) {
-      ctx.save();
-      ctx.translate(this.x + ux*shadowOff, this.y + uy*shadowOff);
-      ctx.rotate(this.angle + Math.PI/2);
-      ctx.globalAlpha = Math.max(0, 0.3 - t*0.12) * alpha;
-      ctx.drawImage(shadow, -sa.x*this.spriteScale, -sa.y*this.spriteScale, this.drawW, this.drawH);
-      ctx.globalAlpha = 1;
-      ctx.restore();
+      const shadow = assets.shadows[this.shadowType]?.[fi];
+      if (shadow) {
+        ctx.save();
+        ctx.translate(this.x + ux*shadowOff, this.y + uy*shadowOff);
+        ctx.rotate(this.angle + Math.PI/2);
+        ctx.globalAlpha = Math.max(0, 0.3 - t*0.12) * alpha;
+        ctx.drawImage(shadow, -sa.x*this.spriteScale, -sa.y*this.spriteScale, this.drawW, this.drawH);
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+
+        const body = this.tintedFrames ? this.tintedFrames[fi] : assets.fish[this.fishType]?.[fi];
+      if (body) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle + Math.PI/2);
+        ctx.globalAlpha = alpha;
+        ctx.drawImage(body, -fa.x*this.spriteScale, -fa.y*this.spriteScale, this.drawW, this.drawH);
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
     }
 
-      const body = this.tintedFrames ? this.tintedFrames[fi] : assets.fish[this.fishType]?.[fi];
-    if (body) {
+    drawBody(ctx, i0, i1, blend) {
+      const body0 = this.tintedFrames ? this.tintedFrames[i0] : assets.fish[this.fishType]?.[i0];
+      if (!body0) return;
+      const body1 = this.tintedFrames ? this.tintedFrames[i1] : assets.fish[this.fishType]?.[i1];
+  
+      const fa0 = this.def.anchors[i0];
+      const fa1 = this.def.anchors[i1];
+  
+      const sw = Math.ceil(this.drawW * 1.6);
+      const sh = Math.ceil(this.drawH * 1.6);
+      const cx = sw / 2, cy = sh / 2;
+  
+      if (fishScratch.width !== sw || fishScratch.height !== sh) {
+        fishScratch.width = sw;
+        fishScratch.height = sh;
+      }
+      fishScratchCtx.clearRect(0, 0, sw, sh);
+  
+      fishScratchCtx.globalAlpha = 1;
+      fishScratchCtx.drawImage(body0, cx - fa0.x*this.spriteScale, cy - fa0.y*this.spriteScale, this.drawW, this.drawH);
+  
+      if (blend > 0.02 && body1) {
+        fishScratchCtx.globalAlpha = blend;
+        fishScratchCtx.drawImage(body1, cx - fa1.x*this.spriteScale, cy - fa1.y*this.spriteScale, this.drawW, this.drawH);
+        fishScratchCtx.globalAlpha = 1;
+      }
+  
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(this.angle + Math.PI/2);
-      ctx.globalAlpha = alpha;
-      ctx.drawImage(body, -fa.x*this.spriteScale, -fa.y*this.spriteScale, this.drawW, this.drawH);
-      ctx.globalAlpha = 1;
+      ctx.drawImage(fishScratch, -cx, -cy, sw, sh);
       ctx.restore();
     }
-  }
+    
 
     drawCursorFish(ctx) {
     const L = this.len;
@@ -242,13 +281,14 @@ class Fish {
     ctx.lineWidth   = 1.2;
  
     // tail
-    const tx = -L * 0.42, tw = wag * L * 0.4;
+    const tx = -L*0.42;
+    const wagY = wag*L*0.45;
     ctx.beginPath();
     ctx.moveTo(tx, 0);
-    ctx.quadraticCurveTo(-L*0.62, L*0.24, -L*0.78 + tw, L*0.5 + tw*0.4);
-    ctx.quadraticCurveTo(-L*0.6, L*0.08, -L*0.68 + tw, -L*0.03);
-    ctx.quadraticCurveTo(-L*0.6, -L*0.08, -L*0.78 + tw, -L*0.5 + tw*0.4);
-    ctx.quadraticCurveTo(-L*0.62, -L*0.24, tx, 0);
+    ctx.quadraticCurveTo(-L*0.62, L*0.24 + wagY*0.5, -L*0.78, L*0.5 + wagY);
+    ctx.quadraticCurveTo(-L*0.6, L*0.08 + wagY*0.3, -L*0.68, -L*0.02 + wagY*0.5);
+    ctx.quadraticCurveTo(-L*0.6, -L*0.08 + wagY*0.3, -L*0.78, -L*0.5 + wagY);
+    ctx.quadraticCurveTo(-L*0.62, -L*0.24 + wagY*0.5, tx, 0);
     ctx.fill();
  
     // fins

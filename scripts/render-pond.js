@@ -14,29 +14,30 @@ function loadImage(src) {
     });
 }
 
+ 
 async function loadAssets() {
-    for (let i = 1; i <= 5; i++)
-        assets.water.push(await loadImage(`assets/Water/Water-${i}.png`));
-    
-    for (let i = 1; i <= 7; i++)
-        assets.caustics.push(await loadImage(`assets/Caustics/Caustics-${i}.png`));
-    
-    for (let type = 1; type <= 6; type++) {
-        assets.fish[type] = [];
-        for (let f = 1; f <= 5; f++)
-        assets.fish[type].push(await loadImage(`assets/Fish${type}/Fish${type}-${f}.png`));
-    }
-
-    for (let s = 1; s <= 4; s++) {
-        assets.shadows[s] = [];
-        for (let f = 1; f <= 5; f++)
-        assets.shadows[s].push(await loadImage(`assets/Fish${s}/Fish${s}Shadow-${f}.png`));
-    }
-    assets.shadows[5] = [];
-    for (let f = 1; f <= 5; f++)
-        assets.shadows[5].push(await loadImage(`assets/Fish6/Fish6Shadow-${f}.png`));
-
-    console.log('Assets loaded');
+  const waterP = Promise.all(Array.from({length:5}, (_,i) => loadImage(`assets/Water/Water-${i+1}.png`)));
+  const causticsP = Promise.all(Array.from({length:7}, (_,i) => loadImage(`assets/Caustics/Caustics-${i+1}.png`)));
+ 
+  const fishTypes = [1,2,3,4,5,6];
+  const fishP = Promise.all(fishTypes.map(type =>
+    Promise.all(Array.from({length:5}, (_,f) => loadImage(`assets/Fish${type}/Fish${type}-${f+1}.png`)))
+  ));
+ 
+  const shadowSlots = [1,2,3,4,5];
+  const shadowP = Promise.all(shadowSlots.map(s => {
+    const prefix = s <= 4 ? `Fish${s}/Fish${s}Shadow` : 'Fish6/Fish6Shadow';
+    return Promise.all(Array.from({length:5}, (_,f) => loadImage(`assets/${prefix}-${f+1}.png`)));
+  }));
+ 
+  const [water, caustics, fishResults, shadowResults] = await Promise.all([waterP, causticsP, fishP, shadowP]);
+ 
+  assets.water    = water;
+  assets.caustics = caustics;
+  fishTypes.forEach((type, i) => { assets.fish[type] = fishResults[i]; });
+  shadowSlots.forEach((s, i)  => { assets.shadows[s] = shadowResults[i]; });
+ 
+  console.log('assets loaded');
 }
 
 let lastFrameTime = performance.now();
