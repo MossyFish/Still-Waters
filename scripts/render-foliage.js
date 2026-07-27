@@ -442,7 +442,7 @@ class Leaf{
 }
 
 function foliagePop() {
-  const target = Math.max(6, Math.round(W * H * 24 / (1920 * 1080)));
+  const target = Math.max(6, Math.round(W * H * 40 / (1920 * 1080)));
 
   while (lilyPads.length < target) lilyPads.push(new LilyPad());
   while (lilyPads.length > target) {

@@ -2,13 +2,15 @@
     position: fixed;
     inset: 0;
     z-index: 8;
-    display: none;
+    visibility: hidden;
+    opacity: 0;
     overflow-y: auto;
     padding: 6vh 5vw 10vh;
 }
 
 #content.visible { 
-    display: block; 
+    display: block;
+    opacity: 1;
 }
 
 #content {
