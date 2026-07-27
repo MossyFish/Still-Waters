@@ -9,7 +9,7 @@
 }
 
 #content.visible { 
-    display: block;
+    visibility: visible;
     opacity: 1;
 }
 
@@ -136,7 +136,7 @@
 }
 
 .exp-date { 
-    flex: 0 0 130px;
+    flex: 0 0 150px;
     color: var(--water-light);
     font-size: 0.8rem;
     letter-spacing: 0.04em;
