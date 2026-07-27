@@ -22,7 +22,16 @@ let mouse = { x: W/2, y: H/2, active: false };
 window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; });
 window.addEventListener('mouseleave', () => mouse.active = false);
 
-// leftover function that the cursor fish still uses 
+// these are leftovers but cursor and pads use them so 
+function makeBlobTemplate(lobes, irregularity) {
+  return Array.from({length: lobes}, () => 1 - irregularity*0.5 + Math.random()*irregularity);
+}
+function blobPointsFromTemplate(cx, cy, baseR, template) {
+  return template.map((r, i) => {
+    const a = (i / template.length) * Math.PI * 2;
+    return [cx + Math.cos(a)*baseR*r, cy + Math.sin(a)*baseR*r*0.82];
+  });
+}
 function blobPath(ctx, pts) {
   ctx.beginPath();
   const start = [(pts[0][0]+pts[pts.length-1][0])/2, (pts[0][1]+pts[pts.length-1][1])/2];

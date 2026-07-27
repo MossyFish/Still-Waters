@@ -20,9 +20,6 @@ const SHADOW_DEFS = {
 const TIER_FISH_TYPES = { large: [1,2], medium: [3,4], baby: [5,6] };
 const SHADOW_FOR_FISH  = { 1:1, 2:2, 3:3, 4:4, 5:5, 6:5 };
 
-const N_PHASES = 16;
-const SPRITE_SCALE = 2;
-
 const FIN_PARAMS = {
   pectoral: { strands:5, spread:1.05, length:0.46, width:0.16, waveAmp:0.045 },
   tail: { strands:6, spread:1.75, length:0.54, width:0.15, waveAmp:0.05  },
