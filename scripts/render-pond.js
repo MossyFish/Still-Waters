@@ -72,7 +72,7 @@ function loop() {
     if (trailX === null) { trailX = cursorFish.x; trailY = cursorFish.y; }
     
     if (cursorFish.speed > 1 && Math.hypot(cursorFish.x-trailX, cursorFish.y-trailY) > 26) {
-        spawnRipple(cursorFish.x, cursorFish.y, 0.85, { decay:0.96, maxAge:1.4, rings:1 });
+        spawnRipple(cursorFish.x, cursorFish.y, 0.85, { decay:0.94, maxAge:1.2, rings:1 });
         trailX = cursorFish.x; trailY = cursorFish.y;
     }
     

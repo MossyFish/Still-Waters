@@ -154,7 +154,8 @@ class LilyPad {
         this.r = 16 + Math.random()*18;
         const p = findSpot(85, this.r);
         this.x = p.x; this.y = p.y;
-        placedFoliage.push({x:this.x, y:this.y, r:this.r});
+        this.placedEntry = {x:this.x, y:this.y, r:this.r};
+        placedFoliage.push(this.placedEntry);
         this.rot = Math.random()*Math.PI*2;
         this.driftT = Math.random()*1000;
 
@@ -364,8 +365,8 @@ class Leaf{
         const r = this.len*0.5;
         const p = findSpot(70, r);
         this.x = p.x; this.y = p.y;
-        placedFoliage.push({x:this.x, y:this.y, r})
-        ;
+        this.placedEntry = {x:this.x, y:this.y, r};
+        placedFoliage.push(this.placedEntry);
         this.rot = Math.random()*Math.PI*2;
         this.driftT = Math.random()*1000;
         this.offX = 0; this.offY = 0; this.velX = 0; this.velY = 0;
@@ -440,10 +441,28 @@ class Leaf{
     }                     
 }
 
+function foliagePop() {
+  const target = Math.max(6, Math.round(W * H * 24 / (1920 * 1080)));
+
+  while (lilyPads.length < target) lilyPads.push(new LilyPad());
+  while (lilyPads.length > target) {
+    const removed = lilyPads.pop();
+    const idx = placedFoliage.indexOf(removed.placedEntry);
+    if (idx !== -1) placedFoliage.splice(idx, 1);
+  }
+
+  while (leaves.length < target) leaves.push(new Leaf());
+  while (leaves.length > target) {
+    const removed = leaves.pop();
+    const idx = placedFoliage.indexOf(removed.placedEntry);
+    if (idx !== -1) placedFoliage.splice(idx, 1);
+  }
+}
+
 const lilyPads = [];
-for(let i=0;i<24;i++) lilyPads.push(new LilyPad());
 const leaves = [];
-for(let i=0;i<24;i++) leaves.push(new Leaf());
+foliagePop();
+window.addEventListener('resize', foliagePop);
 
 function nudgeFoliage(x, y, radius, strength){
   [...lilyPads, ...leaves].forEach(item => {

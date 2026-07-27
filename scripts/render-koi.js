@@ -62,6 +62,17 @@ const fishScratchCtx = fishScratch.getContext('2d');
 const shadowScratch = document.createElement('canvas');
 const shadowScratchCtx = shadowScratch.getContext('2d');
 
+let maxDrawDim = 0;
+for (const tier of KOI_TIERS) {
+  for (const type of TIER_FISH_TYPES[tier.name]) {
+    const scale = tier.lenRange[1] / FISH_DEFS[type].bodyLen;
+    maxDrawDim = Math.max(maxDrawDim, IMG_W*scale, IMG_H*scale);
+  }
+}
+const SCRATCH_MAX = Math.ceil(maxDrawDim * 1.6) + 8;
+fishScratch.width = fishScratch.height = SCRATCH_MAX;
+shadowScratch.width = shadowScratch.height = SCRATCH_MAX;
+
 class Fish {
   constructor(isCursorFish = false) {
     this.isCursorFish = isCursorFish;
@@ -111,7 +122,8 @@ class Fish {
     const pos = t * 4;
     const i0 = Math.min(4, Math.floor(pos));
     const i1 = Math.min(4, i0 + 1);
-    const blend = pos - i0;
+    let blend = pos - i0;
+    blend = blend*blend*(3-2*blend); 
     return { i0, i1, blend };
   }
 
@@ -216,8 +228,8 @@ class Fish {
       const sa0 = this.shadowDef.anchors[i0];
       const sa1 = this.shadowDef.anchors[i1];
 
-      const sw = Math.ceil(this.drawW * 1.6);
-      const sh = Math.ceil(this.drawH * 1.6);
+      const sw = SCRATCH_MAX;
+      const sh = SCRATCH_MAX;
       const cx = sw / 2, cy = sh / 2;
 
       if (shadowScratch.width !== sw || shadowScratch.height !== sh) {
@@ -225,7 +237,7 @@ class Fish {
         shadowScratch.height = sh;
       }
       shadowScratchCtx.clearRect(0, 0, sw, sh);
-      shadowScratchCtx.globalAlpha = 1;
+      shadowScratchCtx.globalAlpha = 1 - blend
       shadowScratchCtx.drawImage(shadow0, cx - sa0.x*this.spriteScale, cy - sa0.y*this.spriteScale, this.drawW, this.drawH);
 
       if (blend > 0.02 && shadow1) {
@@ -251,8 +263,8 @@ class Fish {
       const fa0 = this.def.anchors[i0];
       const fa1 = this.def.anchors[i1];
   
-      const sw = Math.ceil(this.drawW * 1.6);
-      const sh = Math.ceil(this.drawH * 1.6);
+      const sw = SCRATCH_MAX;
+      const sh = SCRATCH_MAX;
       const cx = sw / 2, cy = sh / 2;
   
       if (fishScratch.width !== sw || fishScratch.height !== sh) {
@@ -261,9 +273,9 @@ class Fish {
       }
       fishScratchCtx.clearRect(0, 0, sw, sh);
   
-      fishScratchCtx.globalAlpha = 1;
+      fishScratchCtx.globalAlpha = 1 - blend;
       fishScratchCtx.drawImage(body0, cx - fa0.x*this.spriteScale, cy - fa0.y*this.spriteScale, this.drawW, this.drawH);
-  
+      
       if (blend > 0.02 && body1) {
         fishScratchCtx.globalAlpha = blend;
         fishScratchCtx.drawImage(body1, cx - fa1.x*this.spriteScale, cy - fa1.y*this.spriteScale, this.drawW, this.drawH);
@@ -332,8 +344,15 @@ class Fish {
   }
 }
 
+function fishPop() {
+  const target = Math.max(4, Math.round(W * H * 15 / (1920 * 1080)));
+  while (fishArr.length < target) fishArr.push(new Fish());
+  while (fishArr.length > target) fishArr.pop(); 
+}
+
 const fishArr = [];
-for (let i = 0; i < 15; i++) fishArr.push(new Fish());
+fishPop();
+window.addEventListener('resize', fishPop);
 const cursorFish = new Fish(true);
 
 function fleeFrom(x, y, radius) {

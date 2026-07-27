@@ -63,7 +63,7 @@ function drawWaterFrames() {
 
   driftT += dt;
 
-  const wZoom = 1.09 + Math.sin(driftT * 0.15) * 0.06;
+  const wZoom = 1.15 + Math.sin(driftT * 0.15) * 0.04;
   const wDx   = Math.sin(driftT * 0.13) * 60;
   const wDy   = Math.cos(driftT * 0.10) * 45;
 
@@ -88,7 +88,7 @@ function drawWaterFrames() {
   ctx.restore();
 
   // caustics
-  const cZoom = 1.25 + Math.sin(driftT * 0.20 + 2.0) * 0.1;
+  const cZoom = 1.35 + Math.sin(driftT * 0.20 + 2.0) * 0.05;
   const cDx   = Math.sin(driftT * 0.2 + 2.0) * 75;
   const cDy   = Math.cos(driftT * 0.2 + 0.4) * 60;
   const cRot = Math.sin(driftT * 0.1) * 0.05;
@@ -116,7 +116,7 @@ function drawWaterFrames() {
   const ci2B = CAUSTICS[(Math.floor(ct2)+1) % CAUSTICS.length];
   const cb2 = ct2 - Math.floor(ct2);
 
-  const c2Zoom = 1.3 + Math.sin(driftT * 0.31 + 4.2) * 0.01;
+  const c2Zoom = 1.4 + Math.sin(driftT * 0.31 + 4.2) * 0.06;
   const c2Dx = -Math.sin(driftT * 0.25 + 0.9) * 75;
   const c2Dy = -Math.cos(driftT * 0.19 + 3.0) * 50;
   const c2Rot = -Math.sin(driftT * 0.11 + 1.2) * 0.08;
@@ -170,13 +170,12 @@ let ripples = [];
 
 function spawnRipple(x, y, strength = 0.6, opts = {}) {
   const {
-    decay = 0.96, maxAge = Infinity, wobble = false,
-    rings = null, alphaBoot = 1, widthBoost = 1,
-    ringGap = 5/60, speedMul = 1
+    decay = 0.96, maxAge = Infinity, wobble = false, rings = null, 
+    alphaBoot = 1, widthBoost = 1, ringGap = 5/60, speedMul = 1, angle = null
   } = opts;
 
-  const ringCount = rings ?? 3 + Math.floor(Math.random()*3);
-  const baseAngle = Math.random() * Math.PI * 2;
+  const ringCount = rings != null ? rings : 3 + Math.floor(Math.random()*3);
+  const baseAngle = angle !== null ? angle : Math.random()*Math.PI*2;
 
   for (let i = 0; i < ringCount; i++) {
     const alpha0 = (0.5 - i*0.1) * strength * alphaBoot;
@@ -202,9 +201,9 @@ canvas.addEventListener('click', e => {
   spawnRipple(e.clientX, e.clientY, 1.3, {
     wobble: true,
     rings: 2 + Math.floor(Math.random()*3),
-    maxAge: 1.0,
-    decay: 0.95, alphaBoot: 1.35, widthBoost: 1.45, 
-    ringGap: 0.35
+    maxAge: 1.5,
+    decay: 0.97, alphaBoot: 1.35, widthBoost: 1.4, 
+    ringGap: 0.10
   });
 
   nudgeFoliage(e.clientX, e.clientY, 110, 3.2);
