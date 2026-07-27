@@ -18,120 +18,30 @@ const SHADOW_DEFS = {
 };
 
 const TIER_FISH_TYPES = { large: [1,2], medium: [3,4], baby: [5,6] };
-const SHADOW_FOR_FISH  = { 1:1, 2:2, 3:3, 4:4, 5:5, 6:5 }; // fish 5 & 6 share shadow 5
+const SHADOW_FOR_FISH  = { 1:1, 2:2, 3:3, 4:4, 5:5, 6:5 };
 
-const FIN_PARAMS = {
-  pectoral: { strands:5, spread:1.05, length:0.46, width:0.16, waveAmp:0.045 },
-  tail:     { strands:6, spread:1.75, length:0.54, width:0.15, waveAmp:0.05  },
-};
-
-function bodyGeometry(shape) {
-  return {
-    rightC:    0.62  * (shape.nose         || 1),
-    leftC:     0.95  * (shape.tailFullness || 1),
-    halfWidth: 0.345 * (shape.depth        || 1),
-  };
-}
-
-function bendAt(xCoeff, rightC, leftC, phase, ampTail) {
-  const u = Math.min(1, Math.max(0, (rightC - xCoeff) / (rightC + leftC)));
-  return Math.sin(phase - u*2.7) * ampTail * Math.pow(u, 1.6);
-}
-
-function silhouettePoints(L, shape, phase) {
-  const { rightC, leftC } = bodyGeometry(shape);
-  const depth = shape.depth || 1, bulge = shape.bulge || 0;
-  const ampTail = L * 0.15;
-  const bend = xc => bendAt(xc, rightC, leftC, phase, ampTail);
-  const profile = [
-    [rightC, 0], [rightC*0.82, 0.15], [rightC*0.46, 0.30+bulge*0.5],
-    [rightC*0.08, 0.335], [-0.18, 0.32], [-0.42, 0.26],
-    [-0.64, 0.175], [-leftC*0.88, 0.10], [-leftC, 0.028],
-  ];
-  const top = profile.map(([xc,h]) => [L*xc, L*h*depth + bend(xc)]);
-  const bot = [];
-  for (let i = profile.length-2; i > 0; i--) {
-    const [xc,h] = profile[i];
-    bot.push([L*xc, -L*h*depth + bend(xc)]);
-  }
-  return top.concat(bot);
-}
-
-function bodySilhouette(ctx, L, shape, phase) {
-  blobPath(ctx, silhouettePoints(L, shape, phase));
-}
-
-function finAttachInfo(kind, shape) {
-  const params = FIN_PARAMS[kind];
-  if (!params) return null;
-  const { rightC, leftC } = bodyGeometry(shape);
-  let xc, sideOffsetCoeff, mirror;
-  if (kind === 'pectoral') { xc = rightC*0.40; sideOffsetCoeff = 0.30*shape.depth; mirror = true;  }
-  else                     { xc = -leftC;      sideOffsetCoeff = 0;               mirror = false; }
-  return { params, xc, sideOffsetCoeff, mirror };
-}
-
-function strandPath(ctx, x0, y0, angle, length, width, waveAmp, wavePhase, taper, curve) {
-  const N = 9, fx = Math.cos(angle), fy = Math.sin(angle), px = -fy, py = fx;
-  const top = [], bot = [];
-  for (let i = 0; i <= N; i++) {
-    const s = i/N;
-    const wob = Math.sin(s*Math.PI*curve + wavePhase) * waveAmp * s;
-    const cx = x0 + fx*s*length + px*wob;
-    const cy = y0 + fy*s*length + py*wob;
-    const w = width * (1 - s*taper) * 0.5;
-    top.push([cx+px*w, cy+py*w]);
-    bot.push([cx-px*w, cy-py*w]);
-  }
-  blobPath(ctx, top.concat(bot.reverse()));
-}
-
-function drawFinFan(sctx, baseX, baseY, restAngle, spread, strandCount, length, width, waveAmp, phase, colorLight, colorMid, flatColor) {
-  if (strandCount > 1) {
-    for (const layer of [{rScale:0.80,waveMul:1.0,phaseOff:0,alpha:0.55},{rScale:0.58,waveMul:1.35,phaseOff:2.1,alpha:0.45}]) {
-      const pts = [];
-
-      for (let i = 0; i <= 12; i++) {
-        const t = i/12, ang = restAngle - spread/2 + spread*t;
-        const r   = length * layer.rScale * (0.88 + 0.12*Math.sin(t*Math.PI));
-        const wob = Math.sin(t*Math.PI*1.3 + phase*1.15*layer.waveMul + layer.phaseOff) * waveAmp * layer.waveMul;
-        pts.push([baseX + Math.cos(ang)*r - Math.sin(ang)*wob, baseY + Math.sin(ang)*r + Math.cos(ang)*wob]);
-      }
-
-      pts.push([baseX, baseY]);
-      blobPath(sctx, pts);
-
-      if (flatColor) { sctx.fillStyle = flatColor; sctx.fill(); }
-      
-      else {
-        const g = sctx.createRadialGradient(baseX, baseY, 0, baseX, baseY, length);
-        g.addColorStop(0, colorMid); g.addColorStop(1, colorLight);
-        sctx.fillStyle = g; sctx.globalAlpha = layer.alpha; sctx.fill(); sctx.globalAlpha = 1;
-      }
-    }
-  }
-
-  for (let i = 0; i < strandCount; i++) {
-    const t = strandCount <= 1 ? 0.5 : i/(strandCount-1);
-    const ang = restAngle + (strandCount <= 1 ? 0 : -spread/2 + spread*t);
-    const lenVar = length * (0.88 + 0.24*Math.sin(i*2.3+1.1));
-    strandPath(sctx, baseX, baseY, ang, lenVar, width, waveAmp, phase*1.25+i*0.7, 0.5, 1.5);
-    
-    if (flatColor) { sctx.fillStyle = flatColor; sctx.fill(); }
-    
-    else {
-      const g = sctx.createLinearGradient(baseX, baseY, baseX+Math.cos(ang)*lenVar, baseY+Math.sin(ang)*lenVar);
-      g.addColorStop(0, colorMid); g.addColorStop(1, colorLight);
-      sctx.fillStyle = g; sctx.globalAlpha = 0.85; sctx.fill(); sctx.globalAlpha = 1;
-    }
-  }
-}
+// I screwed up the coloring because I thought it would just be a base layer
+// but fixing it in code because there's 0 shot I'm spending more time coloring fish
+const KOI_PALETTE = [
+  { hue:  0, sat: 110 },
+  { hue:  0, sat: 150 },
+  { hue:150, sat: 260 },
+  { hue:150, sat: 190 },
+  { hue:165, sat: 240 },
+  { hue:165, sat: 180 },
+  { hue:185, sat: 200 },
+  { hue:185, sat: 150 },
+  { hue:140, sat: 200 },
+  { hue:140, sat: 150 },
+  { hue: 10, sat: 130 },
+  { hue: 20, sat: 170 },
+];
 
 // fish behaviour
 const PANIC_SECONDS = 1.0;
 const CALM_SECONDS  = 2.0;
 const KOI_TIERS = [
-  { name:'large',  weight:0.5, lenRange:[95,135]  },
+  { name:'large',  weight:0.5, lenRange:[95,135] },
   { name:'medium', weight:0.3, lenRange:[58,80]  },
   { name:'baby',   weight:0.2, lenRange:[32,46]  },
 ];
@@ -160,11 +70,7 @@ class Fish {
     if (isCursorFish) {
       this.speed = 0;
       this.cruiseSpeed = 0;
-      this.len   = 15;
-      this.shape = { depth:1, nose:1, tailFullness:1.05, bulge:0 };
-      this.buildCursorSprites();
-      this.pectoralFin = this.buildFinSprite('pectoral', 1.7);
-      this.tailFin     = this.buildFinSprite('tail', 2.0);
+      this.len = 22;
     } 
     
     else {
@@ -186,14 +92,14 @@ class Fish {
       this.drawW = IMG_W * this.spriteScale;
       this.drawH = IMG_H * this.spriteScale;
 
-      const hue = randRange(0, 360);
-      const sat = randRange(240, 420);
-      this.colorFilter = `saturate(${sat.toFixed(0)}%) hue-rotate(${hue.toFixed(0)}deg)`;
+      const pick = KOI_PALETTE[Math.floor(Math.random() * KOI_PALETTE.length)];
+      this.colorFilter = `saturate(${pick.sat}%) hue-rotate(${pick.hue}deg)`;
+      this.tintedFrames = null;
     }
   }
 
   getFramePos() {
-    const t = (1 - Math.cos(this.swimPhase)) / 2; 
+    const t = (1 - Math.cos(this.swimPhase)) / 2;
     const pos = t * 4;
     const i0 = Math.min(4, Math.floor(pos));
     const i1 = Math.min(4, i0 + 1);
@@ -201,78 +107,19 @@ class Fish {
     return { i0, i1, blend };
   }
 
-  buildCursorSprites() {
-    const L = this.len;
-    const { rightC, leftC, halfWidth } = bodyGeometry(this.shape);
-    const pad = 40;
-    this.cursorW = L*(rightC+leftC) + pad*2;
-    this.cursorH = L*halfWidth*2 + pad*2;
-    this.cursorOX = pad + L*leftC;
-    this.cursorOY = this.cursorH / 2;
-
-    this.cursorSprites = [];
-    for (let i = 0; i < N_PHASES; i++) {
-      const phase = (i/N_PHASES) * Math.PI * 2;
-      const sc = document.createElement('canvas');
-      sc.width  = Math.ceil(this.cursorW * SPRITE_SCALE);
-      sc.height = Math.ceil(this.cursorH * SPRITE_SCALE);
-      const sctx = sc.getContext('2d');
-      sctx.scale(SPRITE_SCALE, SPRITE_SCALE);
-      sctx.translate(this.cursorOX, this.cursorOY);
-
-      sctx.save();
-      sctx.shadowColor = 'rgba(255,255,255,0.95)';
-      sctx.shadowBlur  = 18;
-      bodySilhouette(sctx, L, this.shape, phase);
-      sctx.fillStyle = 'rgba(255,255,255,0.92)';
-      sctx.fill();
-      sctx.restore();
-
-      sctx.save();
-      sctx.shadowColor = 'rgba(255,255,255,0.9)';
-      sctx.shadowBlur  = 6;
-      bodySilhouette(sctx, L, this.shape, phase);
-      sctx.strokeStyle = 'rgba(255,255,255,0.95)';
-      sctx.lineWidth   = 1.4;
-      sctx.stroke();
-      sctx.restore();
-
-      sctx.beginPath();
-      sctx.arc(L*0.46, -L*0.05, L*0.045, 0, Math.PI*2);
-      sctx.fillStyle = 'rgba(30,30,30,0.9)';
-      sctx.fill();
-
-      this.cursorSprites.push(sc);
-    }
-  }
-
-  buildFinSprite(kind, sizeMul = 1) {
-    const info = finAttachInfo(kind, this.shape);
-    if (!info) return null;
-    const { params, xc, sideOffsetCoeff, mirror } = info;
-    const L = this.len;
-    const length  = L * params.length  * sizeMul;
-    const waveAmp = L * params.waveAmp * sizeMul;
-    const width   = L * params.width   * sizeMul;
-    const sideOff = L * sideOffsetCoeff;
-    const reach   = length + waveAmp + width + sideOff + L*0.15;
-    const S       = Math.ceil(reach*2 + 12);
-
-    const sprites = [];
-    for (let i = 0; i < N_PHASES; i++) {
-      const phase = (i/N_PHASES) * Math.PI * 2;
-      const sc = document.createElement('canvas');
-      sc.width = sc.height = Math.ceil(S * SPRITE_SCALE);
-      const sctx = sc.getContext('2d');
-      sctx.scale(SPRITE_SCALE, SPRITE_SCALE);
-      sctx.translate(S/2, S/2);
-      sctx.filter = 'blur(0.6px)';
-      drawFinFan(sctx, 0, sideOff, Math.PI, params.spread, params.strands,
-                 length, width, waveAmp, phase,
-                 'rgba(255,255,255,0.45)', 'rgba(255,255,255,0.55)');
-      sprites.push(sc);
-    }
-    return { sprites, size:S, originX:S/2, originY:S/2, attachX:L*xc, xc, mirror };
+  ensureTintedFrames() {
+    if (this.tintedFrames) return;
+    const frames = assets.fish[this.fishType];
+    if (!frames || frames.some(f => !f)) return;
+    this.tintedFrames = frames.map(img => {
+      const c = document.createElement('canvas');
+      c.width = img.width;
+      c.height = img.height;
+      const cctx = c.getContext('2d');
+      cctx.filter = this.colorFilter;
+      cctx.drawImage(img, 0, 0);
+      return c;
+    });
   }
 
   steerWander(step) {
@@ -292,30 +139,36 @@ class Fish {
       const ease = 1 - Math.pow(1-0.32, step);
       this.x += dx * ease;
       this.y += dy * ease;
+
       if (dist > 1) {
         const diff = Math.atan2(Math.sin(Math.atan2(dy,dx)-this.angle), Math.cos(Math.atan2(dy,dx)-this.angle));
         this.angle += diff * (1 - Math.pow(1-0.9, step));
       }
+
       this.speed = Math.min(dist*ease, 20);
       this.x = Math.max(20, Math.min(W-20, this.x));
       this.y = Math.max(20, Math.min(H-20, this.y));
 
-    } else if (this.fleeing > 0) {
+    } 
+    else if (this.fleeing > 0) {
       this.fleeing -= dt;
       this.angle   = this.fleeAngle + Math.sin(this.wanderT*6) * 0.3;
       this.speed  += (this.panicSpeed - this.speed) * (1 - Math.pow(1-0.35, step));
+      
       if (this.fleeing <= 0) {
         this.fleeing = 0; this.calming = CALM_SECONDS;
         this.speed = this.cruiseSpeed + (this.speed-this.cruiseSpeed) * 0.5;
         this.calmFromSpeed = this.speed;
         this.baseAngle = this.angle;
       }
-    } else if (this.calming > 0) {
+    } 
+    else if (this.calming > 0) {
       this.calming -= dt;
       this.steerWander(step);
       const t = Math.min(1, 1 - Math.max(0, this.calming) / CALM_SECONDS);
       this.speed = this.calmFromSpeed + (this.cruiseSpeed-this.calmFromSpeed) * t*t*(3-2*t);
-    } else {
+    } 
+    else {
       this.steerWander(step);
       this.speed += (this.cruiseSpeed-this.speed) * (1 - Math.pow(1-0.02, step));
     }
@@ -326,6 +179,7 @@ class Fish {
     if (!this.isCursorFish) {
       this.x += Math.cos(this.angle) * this.speed * step;
       this.y += Math.sin(this.angle) * this.speed * step;
+      
       if (this.x < -60) this.x = W+60; if (this.x > W+60) this.x = -60;
       if (this.y < -60) this.y = H+60; if (this.y > H+60) this.y = -60;
     }
@@ -333,6 +187,7 @@ class Fish {
 
   draw(ctx) {
     if (this.isCursorFish) { this.drawCursorFish(ctx); return; }
+    this.ensureTintedFrames();
 
     const { i0, i1, blend } = this.getFramePos();
     const { ux, uy, t } = lightShadowParams(this.x, this.y);
@@ -357,43 +212,67 @@ class Fish {
       ctx.restore();
     }
 
-    const body = assets.fish[this.fishType]?.[fi];
+      const body = this.tintedFrames ? this.tintedFrames[fi] : assets.fish[this.fishType]?.[fi];
     if (body) {
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(this.angle + Math.PI/2);
       ctx.globalAlpha = alpha;
-      ctx.filter = this.colorFilter;
       ctx.drawImage(body, -fa.x*this.spriteScale, -fa.y*this.spriteScale, this.drawW, this.drawH);
-      ctx.filter = 'none';
       ctx.globalAlpha = 1;
       ctx.restore();
     }
   }
 
-  drawFinImage(ctx, fin, norm, idx) {
-    if (!fin) return;
-    const { rightC, leftC } = bodyGeometry(this.shape);
-    const bendY = bendAt(fin.xc, rightC, leftC, norm, this.len*0.15);
+    drawCursorFish(ctx) {
+    const L = this.len;
+    const wag = Math.sin(this.swimPhase) * 0.55;
+ 
     ctx.save();
-    ctx.translate(this.x, this.y); ctx.rotate(this.angle);
-    ctx.translate(fin.attachX, bendY);
-    ctx.drawImage(fin.sprites[idx], -fin.originX, -fin.originY, fin.size, fin.size);
-    if (fin.mirror) {
-      ctx.scale(1, -1);
-      ctx.drawImage(fin.sprites[idx], -fin.originX, -fin.originY, fin.size, fin.size);
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.shadowColor = 'rgba(255,255,255,0.9)';
+    ctx.shadowBlur  = 14;
+    ctx.fillStyle   = 'rgba(255,255,255,0.9)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+    ctx.lineWidth   = 1.2;
+ 
+    // tail
+    const tx = -L*0.42, tw = wag*L*0.55;
+    ctx.beginPath();
+    ctx.moveTo(tx, 0);
+    ctx.quadraticCurveTo(-L*0.75, L*0.16, -L*1.05 + tw, L*0.38 + tw*0.4);
+    ctx.quadraticCurveTo(-L*0.85, L*0.05, -L*0.95 + tw, -L*0.02);
+    ctx.quadraticCurveTo(-L*0.85, -L*0.05, -L*1.05 + tw, -L*0.38 + tw*0.4);
+    ctx.quadraticCurveTo(-L*0.75, -L*0.16, tx, 0);
+    ctx.fill();
+ 
+    // fins
+    for (const side of [1, -1]) {
+      ctx.beginPath();
+      ctx.moveTo(L*0.08, side*L*0.1);
+      ctx.quadraticCurveTo(-L*0.1, side*L*0.32, -L*0.3, side*L*0.22);
+      ctx.quadraticCurveTo(-L*0.12, side*L*0.14, L*0.08, side*L*0.1);
+      ctx.fill();
     }
-    ctx.restore();
-  }
-
-  drawCursorFish(ctx) {
-    const norm = ((this.swimPhase % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
-    const idx  = Math.floor((norm/(Math.PI*2)) * N_PHASES) % N_PHASES;
-    this.drawFinImage(ctx, this.pectoralFin, norm, idx);
-    this.drawFinImage(ctx, this.tailFin,     norm, idx);
-    ctx.save();
-    ctx.translate(this.x, this.y); ctx.rotate(this.angle);
-    ctx.drawImage(this.cursorSprites[idx], -this.cursorOX, -this.cursorOY, this.cursorW, this.cursorH);
+ 
+    // body
+    ctx.beginPath();
+    ctx.moveTo(L*0.5, 0);
+    ctx.quadraticCurveTo(L*0.35, L*0.16, 0, L*0.15);
+    ctx.quadraticCurveTo(-L*0.3, L*0.13, tx, 0);
+    ctx.quadraticCurveTo(-L*0.3, -L*0.13, 0, -L*0.15);
+    ctx.quadraticCurveTo(L*0.35, -L*0.16, L*0.5, 0);
+    ctx.fill();
+    ctx.stroke();
+ 
+    // eye
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(30,30,30,0.9)';
+    ctx.beginPath();
+    ctx.arc(L*0.33, 0, L*0.045, 0, Math.PI*2);
+    ctx.fill();
+ 
     ctx.restore();
   }
 }

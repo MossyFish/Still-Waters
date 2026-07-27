@@ -27,7 +27,6 @@ function hexToRgba(hex, alpha) {
   return `rgba(${(v>>16)&255},${(v>>8)&255},${v&255},${alpha})`;
 }
 
-// blob helpers — used by the cursor fish AND render-foliage.js
 function makeBlobTemplate(lobes, irregularity) {
   return Array.from({length: lobes}, () => 1 - irregularity*0.5 + Math.random()*irregularity);
 }
@@ -54,29 +53,43 @@ const CAUSTIC_PP = [0,1,2,3,4,5,6,5,4,3,2,1];
 
 let waterPhase = 0;
 let causticPhase = 0;
+let driftT = 0;
 
 function drawWaterFrames() {
-  // solid fallback while frames are loading
   ctx.fillStyle = '#1a5a70';
   ctx.fillRect(0, 0, W, H);
 
   if (!assets?.water?.length) return;
 
-  // water — crossfade between adjacent frames
+  driftT += dt;
+
+  const wZoom = 1.035 + Math.sin(driftT * 0.11) * 0.02;
+  const wDx   = Math.sin(driftT * 0.09) * 22;
+  const wDy   = Math.cos(driftT * 0.07) * 16;
+
   waterPhase += dt * 0.8;
   const wt = waterPhase % WATER_PP.length;
   const wiA = WATER_PP[Math.floor(wt) % WATER_PP.length];
   const wiB = WATER_PP[(Math.floor(wt)+1) % WATER_PP.length];
   const wb = wt - Math.floor(wt);
 
+  ctx.save();
+  ctx.translate(W/2 + wDx, H/2 + wDy);
+  ctx.scale(wZoom, wZoom);
+  ctx.translate(-W/2, -H/2);
   ctx.drawImage(assets.water[wiA], 0, 0, W, H);
   if (wb > 0.001) {
     ctx.globalAlpha = wb;
     ctx.drawImage(assets.water[wiB], 0, 0, W, H);
     ctx.globalAlpha = 1;
   }
+  ctx.restore();
 
-  // caustics overlay — light patches, so screen (brighten) not multiply (darken)
+  // caustics
+  const cZoom = 1.06 + Math.sin(driftT * 0.16 + 1.7) * 0.03;
+  const cDx   = Math.sin(driftT * 0.14 + 2.1) * 34;
+  const cDy   = Math.cos(driftT * 0.12 + 0.6) * 26;
+
   causticPhase += dt * 0.35;
   const ct = causticPhase % CAUSTIC_PP.length;
   const ciA = CAUSTIC_PP[Math.floor(ct) % CAUSTIC_PP.length];
@@ -84,6 +97,9 @@ function drawWaterFrames() {
   const cb = ct - Math.floor(ct);
 
   ctx.save();
+  ctx.translate(W/2 + cDx, H/2 + cDy);
+  ctx.scale(cZoom, cZoom);
+  ctx.translate(-W/2, -H/2);
   ctx.globalCompositeOperation = 'screen';
   ctx.globalAlpha = 0.9 * (1 - cb);
   ctx.drawImage(assets.caustics[ciA], 0, 0, W, H);
@@ -92,7 +108,7 @@ function drawWaterFrames() {
   ctx.restore();
 }
 
-// subtle light shimmer on top
+// light shimmer
 const dapples = Array.from({length: 10}, () => ({
   x: Math.random()*2000, y: Math.random()*1200,
   r: 40 + Math.random()*80,
