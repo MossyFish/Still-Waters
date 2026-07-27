@@ -360,11 +360,11 @@ function lightShadowParams(x, y) {
 }
 
 function minFish() {
-  const onscreen = f => f.tier === 'large' || 'medium' && f.x >= 0 && f.x <= W && f.y >= 0 && f.y <= H;
+  const onscreen = f => (f.tier === 'large' || f.tier === 'medium') && f.x >= 0 && f.x <= W && f.y >= 0 && f.y <= H;
   const visible = fishArr.filter(onscreen).length;
-  if (visibleCount >= 6) return;
+  if (visible >= 6) return;
 
-  const offscreen = fishArr.filter(f => f.tier === 'large' || 'medium' && !onscreen(f));
+  const offscreen = fishArr.filter(f => (f.tier === 'large' || f.tier === 'medium') && !onscreen(f));
   const needed = 6 - visible;
 
   offscreen.slice(0, needed).forEach(f => {

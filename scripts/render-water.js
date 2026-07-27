@@ -202,8 +202,9 @@ canvas.addEventListener('click', e => {
   spawnRipple(e.clientX, e.clientY, 1.3, {
     wobble: true,
     rings: 2 + Math.floor(Math.random()*3),
-    decay: 0.95, alphaBoot: 1.35, widthBoost: 1.45,
-    ringGap: 0.28
+    maxAge: 1.0,
+    decay: 0.95, alphaBoot: 1.35, widthBoost: 1.45, 
+    ringGap: 0.35
   });
 
   nudgeFoliage(e.clientX, e.clientY, 110, 3.2);
