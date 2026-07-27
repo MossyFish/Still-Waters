@@ -187,7 +187,7 @@ function drawVignette() {
 
 function drawWater() {
   drawWaterFrames();
-  drawAmbientLight();
+  //drawAmbientLight();
   drawVignette();
   drawRipples();
 }
