@@ -50,6 +50,10 @@ function randRange(min, max) { return min + Math.random()*(max-min); }
 
 function pickTier() {
   let r = Math.random(), acc = 0;
+  for (const tier of KOI_TIERS) {
+    acc += tier.weight;
+    if (r < acc) return tier;
+  }
   return KOI_TIERS.at(-1);
 }
 
@@ -361,9 +365,9 @@ function minFish() {
   if (visibleCount >= 6) return;
 
   const offscreen = fishArr.filter(f => f.tier === 'large' || 'medium' && !onscreen(f));
-  const needed = 6 - visibleCount;
+  const needed = 6 - visible;
 
-  offscreenLarge.slice(0, needed).forEach(f => {
+  offscreen.slice(0, needed).forEach(f => {
     const targetAngle = Math.atan2(H/2 - f.y, W/2 - f.x);
     f.baseAngle = targetAngle;
     f.angle = targetAngle;
