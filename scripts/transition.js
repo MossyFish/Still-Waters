@@ -32,12 +32,12 @@ function warpTransition(outEl, inEl, onSwap) {
 
         if(!swapped  && progress >= 0.5) {
             swapped = true;
-            if (outEl !== content) outEl.style.display = 'none';
+            outEl.style.display = 'none';
             outEl.classList.remove('warping');
             if (inEl === intro) inEl.style.display = 'flex';
-            else if (inEl !== content) inEl.style.display = 'block';
+            else inEl.style.display = 'block';
             inEl.classList.add('warping');
-            if(onSwap) onSwap();    
+            if(onSwap) onSwap();   
         }
         if(swapped) {
             inEl.style.opacity = 1 - s / WARP_PEAK;
@@ -62,7 +62,7 @@ function enterContent(){
     content.classList.add('visible');
     backBtn.classList.add('visible');
     window.dispatchEvent(new Event('resize'));
-  });
+  }, 5);
 }
 
 function exitToIntro(){

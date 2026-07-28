@@ -122,8 +122,16 @@ class Fish {
     const pos = t * 4;
     const i0 = Math.min(4, Math.floor(pos));
     const i1 = Math.min(4, i0 + 1);
-    let blend = pos - i0;
-    blend = blend*blend*(3-2*blend); 
+    const raw = pos - i0;
+
+    const WINDOW = 0.18;
+    let blend;
+    if (raw < 0.5 - WINDOW) blend = 0;
+    else if (raw > 0.5 + WINDOW) blend = 1;
+    else {
+      const local = (raw - (0.5 - WINDOW)) / (WINDOW * 2);
+      blend = local*local*(3-2*local);
+    }
     return { i0, i1, blend };
   }
 
@@ -282,13 +290,10 @@ class Fish {
         fishScratchCtx.globalAlpha = 1;
       }
       
-      const blurAmt = Math.sin(blend * Math.PI) * 1.4; 
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(this.angle + Math.PI/2);
-      if (blurAmt > 0.05) ctx.filter = `blur(${blurAmt.toFixed(2)}px)`;
       ctx.drawImage(fishScratch, -cx, -cy, sw, sh);
-      ctx.filter = 'none';
       ctx.restore();
     }
     
