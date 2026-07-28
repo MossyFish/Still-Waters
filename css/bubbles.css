@@ -1,8 +1,7 @@
 .bubble-pond {
     position: relative;
-    width: 100%;
-    max-width: 620px;
-    aspect-ratio: 16/8;
+    width: 80%;
+    aspect-ratio: 16/6;
     overflow: hidden;
     container-type: size;
     opacity: 0;
@@ -14,9 +13,9 @@
     position: absolute;
     top: 50%;
     left: -30cqh;
-    width: 56cqh;
-    height: 56cqh;
-    margin: -28cqh 0 0 -28cqh;
+    width: 45cqh;
+    height: 45cqh;
+    margin: -30cqh 0 0 -30cqh;
     animation: travel 9s linear infinite;
     cursor: pointer;
 }
@@ -38,8 +37,8 @@
     box-shadow:
         inset -12px -12px 24px rgba(20,30,45,0.4),
         inset 10px 12px 20px rgba(255,255,255,0.35),
-        0 0 4px 1px rgba(255,255,255,0.9),
-        0 0 10px 3px rgba(255,255,255,0.32);
+        0 0 2px 1px rgba(255,255,255,0.9),
+        0 0 5dvb 3px rgba(255,255,255,0.32);
 }
 .bubble-slot:hover .bubble { filter: brightness(1.15); }
 
@@ -54,6 +53,7 @@
     height: 100%;
     object-fit: cover;
     border-radius: inherit;
+    opacity: 0.65;
 }
 
 .glass {
@@ -77,26 +77,23 @@
         rgba(255,120,190,0.5), rgba(130,200,255,0.45), rgba(160,255,210,0.45),
         rgba(255,225,130,0.45), rgba(210,140,255,0.5), rgba(255,120,190,0.5));
     mix-blend-mode: color-dodge;
-    opacity: 0.5;
+    opacity: 0.7;
     animation: spin 6s linear infinite;
     pointer-events: none;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.ring {
+.ring, .flash {
     position: absolute; inset: 0; border-radius: 50%;
-    border: 1.5px solid rgba(255,255,255,0.85);
     opacity: 0; pointer-events: none;
     animation: ring-pop 9s linear infinite;
     animation-delay: inherit;
+    transform-origin: 78% 78%;
 }
-.flash {
-    position: absolute; inset: 0; border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,255,255,0.6), rgba(255,255,255,0));
-    opacity: 0; pointer-events: none;
-    animation: flash-pop 9s linear infinite;
-    animation-delay: inherit;
-}
+
+.ring { border: 1.5px solid rgba(255,255,255,0.85); }
+.flash { background: radial-gradient(circle, rgba(255,255,255,0.6), rgba(255,255,255,0)); }
+
 .droplet {
     position: absolute; top: 50%; left: 50%;
     width: 5px; height: 5px; margin: -2.5px;
@@ -108,26 +105,31 @@
 }
 
 @keyframes travel {
-    0%   { left: -30cqh; transform: scale(0.2); opacity: 0; animation-timing-function: cubic-bezier(.34,1.56,.64,1); }
-    14%  { left: 10%;    transform: scale(1);   opacity: 1; }
-    88%  { left: 90%;    transform: scale(1);   opacity: 1; }
-    92%  { transform: scale(1.1); opacity: 0; }
-    100% { left: 96%;    transform: scale(1.1); opacity: 0; }
+    0% { left: -30cqh; transform: scale(0.2); opacity: 0; animation-timing-function: cubic-bezier(.34,1.56,.64,1); }
+    14% { left: 10%; transform: scale(1); opacity: 1; }
+    88% { left: 90%; transform: scale(1); opacity: 1; }
+    92% { transform: scale(1.12); opacity: 0.4; }
+    97% { transform: scale(1.15); opacity: 0; }
+    100% { left: 93%; transform: scale(1.15); opacity: 0; }
 }
+
 @keyframes ring-pop {
-    0%, 88%   { opacity: 0; transform: scale(0.3); }
-    90%       { opacity: 0.85; transform: scale(0.5); }
-    98%, 100% { opacity: 0; transform: scale(2.1); }
+    0%, 88% { opacity: 0; transform: scale(0.3); }
+    92% { opacity: 0.85; transform: scale(0.5); }
+    99%, 100% { opacity: 0; transform: scale(2.1); }
 }
+
 @keyframes flash-pop {
-    0%, 88%   { opacity: 0; }
-    90%       { opacity: 0.35; }
-    94%, 100% { opacity: 0; }
+    0%, 88% { opacity: 0; }
+    92% { opacity: 0.35; }
+    97%, 100% { opacity: 0; }
 }
+
 @keyframes drop-pop {
-    0%, 88%   { opacity: 0; transform: translate(0,0) scale(1); }
-    90%       { opacity: 0.9; transform: translate(0,0) scale(1); }
-    100%      { opacity: 0; transform: translate(var(--dx, 20px), var(--dy, 20px)) scale(0.3); }
+    0%, 88% { opacity: 0; transform: translate(0,0) scale(1); }
+    92% { opacity: 0.9; transform: translate(0,0) scale(1); }
+    99% { opacity: 0; transform: translate(var(--dx, 20px), var(--dy, 20px)) scale(0.3); }
+    100% { opacity: 0; transform: translate(var(--dx, 20px), var(--dy, 20px)) scale(0.3); }
 }
 
 @media (prefers-reduced-motion: reduce) {

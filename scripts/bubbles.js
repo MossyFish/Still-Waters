@@ -102,7 +102,7 @@ function buildBubblePond(list) {
     nextPhoto = SLOT_COUNT;
 
     const firstLoads = [];
-    for (let i = 0; i < SLOT_COUNT + 2; i++) {
+    for (let i = 0; i < SLOT_COUNT; i++) {
         firstLoads.push(loadImage(photos[i % photos.length].src));
     }
 
