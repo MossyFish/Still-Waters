@@ -1,18 +1,40 @@
 const bubblePond = document.getElementById('bubblePond');
-const POND_DURATION = 8;
+const LAP_SECONDS = 9;
 const SLOT_COUNT = 3;
+const WOBBLES = ['wobble-a', 'wobble-b', 'wobble-c'];
 
 let photos = [];
-let nextPhotoIndex = SLOT_COUNT;
-
+let nextPhoto = SLOT_COUNT;
 const imageCache = new Map();
 
-function preloadPhoto(index) {
-    const photo = photos[((index % photos.length) + photos.length) % photos.length];
+function loadImage(src) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(img);
+        img.src = src;
+    });
+}
+
+function preload(index) {
+    const photo = photos[index % photos.length];
     if (!photo || imageCache.has(photo.src)) return;
-    const im = new Image();
-    im.src = photo.src;
-    imageCache.set(photo.src, im);
+    loadImage(photo.src).then((img) => imageCache.set(photo.src, img));
+}
+
+function pickWobble(bubble) {
+    WOBBLES.forEach((w) => bubble.classList.remove(w));
+    bubble.classList.add(WOBBLES[Math.floor(Math.random() * WOBBLES.length)]);
+    bubble.style.animationDelay = `-${(Math.random() * 6).toFixed(2)}s`;
+}
+
+function randomDroplets(slot) {
+    slot.querySelectorAll('.droplet').forEach((d) => {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 18 + Math.random() * 22;
+        d.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+        d.style.setProperty('--dy', `${Math.sin(angle) * dist + 6}px`);
+    });
 }
 
 function buildSlot(startIndex, delay) {
@@ -20,9 +42,12 @@ function buildSlot(startIndex, delay) {
     slot.className = 'bubble-slot';
     slot.style.animationDelay = delay;
 
+    const lift = document.createElement('div');
+    lift.className = 'bubble-lift';
+
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
-    bubble.style.animationDelay = `0s, ${delay}`;
+    pickWobble(bubble);
 
     const img = document.createElement('img');
     img.src = photos[startIndex % photos.length].src;
@@ -33,60 +58,67 @@ function buildSlot(startIndex, delay) {
     glass.className = 'glass';
     bubble.appendChild(glass);
 
-    slot.appendChild(bubble);
+    lift.appendChild(bubble);
+    slot.appendChild(lift);
 
     const ring = document.createElement('div');
     ring.className = 'ring';
-    ring.style.animationDelay = delay;
     slot.appendChild(ring);
 
     const flash = document.createElement('span');
     flash.className = 'flash';
-    flash.style.animationDelay = delay;
     slot.appendChild(flash);
 
-    ['dp1', 'dp2', 'dp3', 'dp4', 'dp5', 'dp6'].forEach(cls => {
+    for (let i = 0; i < 5; i++) {
         const d = document.createElement('span');
-        d.className = `droplet ${cls}`;
-        d.style.animationDelay = delay;
+        d.className = 'droplet';
         slot.appendChild(d);
-    });
+    }
+    randomDroplets(slot);
 
     slot.addEventListener('animationiteration', (e) => {
-        if (e.animationName !== 'bubbleTravel') return;
-        const photo = photos[nextPhotoIndex % photos.length];
-        const im = img;
-        im.src = photo.src;
-        im.alt = photo.alt || '';
-        preloadPhoto(nextPhotoIndex + 2);
-        nextPhotoIndex++;
+        if (e.animationName !== 'travel') return;
+        const photo = photos[nextPhoto % photos.length];
+        img.src = photo.src;
+        img.alt = photo.alt || '';
+        preload(nextPhoto + 2);
+        nextPhoto++;
+        pickWobble(bubble);
+        randomDroplets(slot);
+    });
+
+    slot.addEventListener('click', () => {
+        slot.style.animationDelay = `-${(LAP_SECONDS * 0.9).toFixed(2)}s`;
     });
 
     return slot;
 }
 
-function makeBubbles(list) {
+function buildBubblePond(list) {
     photos = list;
     if (!photos.length) return;
 
     bubblePond.innerHTML = '';
-    nextPhotoIndex = SLOT_COUNT;
+    nextPhoto = SLOT_COUNT;
 
+    const firstLoads = [];
     for (let i = 0; i < SLOT_COUNT + 2; i++) {
-        preloadPhoto(i);
+        firstLoads.push(loadImage(photos[i % photos.length].src));
     }
 
-    for (let i = 0; i < SLOT_COUNT; i++) {
-        const delay = `-${(i * (POND_DURATION / SLOT_COUNT)).toFixed(2)}s`;
-        const slot = buildSlot(i, delay);
-        bubblePond.appendChild(slot);
-    }
+    Promise.all(firstLoads).then(() => {
+        for (let i = 0; i < SLOT_COUNT; i++) {
+            const delay = `-${(i * (LAP_SECONDS / SLOT_COUNT)).toFixed(2)}s`;
+            bubblePond.appendChild(buildSlot(i, delay));
+        }
+        bubblePond.classList.add('ready');
+    });
 }
 
 fetch('/api/photos')
-  .then(res => {
-    if (!res.ok) throw new Error(`/api/photos failed (${res.status})`);
-    return res.json();
-  })
-  .then(makeBubbles)
-  .catch(err => console.error('Failed to load photo list:', err));
+    .then((res) => {
+        if (!res.ok) throw new Error(`/api/photos failed (${res.status})`);
+        return res.json();
+    })
+    .then(buildBubblePond)
+    .catch((err) => console.error('Failed to load photo list:', err));
