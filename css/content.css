@@ -161,3 +161,110 @@
     font-size: 0.78rem;
     color: var(--water-light);
 }
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.project-box {
+  border: 1px solid rgba(243, 239, 228, 0.16);
+  border-radius: 12px;
+  padding: 20px;
+  background: rgba(243, 239, 228, 0.04);
+  color: var(--cream);
+  display: block;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.project-box:hover {
+  border-color: var(--gold);
+  background: rgba(227, 179, 92, 0.08);
+  transform: translateY(-2px);
+}
+
+#project-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+#project-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.project-box.expanded {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 41;
+  width: min(var(--expand-width, 640px), 90vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  cursor: default;
+  background:
+    linear-gradient(rgba(227, 179, 92, 0.08), rgba(227, 179, 92, 0.08)),
+    linear-gradient(rgba(243, 239, 228, 0.04), rgba(243, 239, 228, 0.04)),
+    var(--panel);
+  border-color: var(--gold);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(227, 179, 92, 0.3);
+}
+
+.project-box.expanded:hover {
+  transform: translate(-50%, -50%);
+}
+
+.project-box h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.03em;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.project-box p {
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: rgba(243, 239, 228, 0.75);
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+
+.project-box .project-image {
+  max-height: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  margin: 0;
+  transition: max-height 0.35s ease, margin 0.35s ease;
+}
+
+.project-box.expanded .project-image {
+  max-height: 320px;
+  margin: 0 0 12px;
+}
+
+.project-box .project-image img {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+}
+
+.project-box .link {
+  font-size: 0.78rem;
+  color: var(--water-light);
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.project-box .link:hover {
+  text-decoration: underline;
+}

@@ -65,7 +65,7 @@ function buildSlot(startIndex, delay) {
     return slot;
 }
 
-function buildBubblePond(list) {
+function makeBubbles(list) {
     photos = list;
     if (!photos.length) return;
 
@@ -90,5 +90,3 @@ fetch('/api/photos')
   })
   .then(makeBubbles)
   .catch(err => console.error('Failed to load photo list:', err));
-    
-window.addEventListener('resize', layoutCarousel);
