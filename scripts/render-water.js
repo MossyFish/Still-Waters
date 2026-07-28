@@ -202,8 +202,8 @@ canvas.addEventListener('click', e => {
     wobble: true,
     rings: 2 + Math.floor(Math.random()*3),
     maxAge: 1.5,
-    decay: 0.97, alphaBoot: 1.35, widthBoost: 1.4, 
-    ringGap: 0.10
+    decay: 0.98, alphaBoot: 1.35, widthBoost: 1.35, 
+    ringGap: 0.3
   });
 
   nudgeFoliage(e.clientX, e.clientY, 110, 3.2);

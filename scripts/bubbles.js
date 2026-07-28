@@ -28,8 +28,8 @@ function pickWobble(bubble) {
     bubble.style.animationDelay = `-${(Math.random() * 6).toFixed(2)}s`;
 }
 
-function randomDroplets(slot) {
-    slot.querySelectorAll('.droplet').forEach((d) => {
+function randomDroplets(container) {
+    container.querySelectorAll('.droplet').forEach((d) => {
         const angle = Math.random() * Math.PI * 2;
         const dist = 18 + Math.random() * 22;
         d.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
@@ -42,8 +42,8 @@ function buildSlot(startIndex, delay) {
     slot.className = 'bubble-slot';
     slot.style.animationDelay = delay;
 
-    const lift = document.createElement('div');
-    lift.className = 'bubble-lift';
+    const inner = document.createElement('div');
+    inner.className = 'bubble-inner';
 
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
@@ -58,37 +58,46 @@ function buildSlot(startIndex, delay) {
     glass.className = 'glass';
     bubble.appendChild(glass);
 
-    lift.appendChild(bubble);
-    slot.appendChild(lift);
+    inner.appendChild(bubble);
 
     const ring = document.createElement('div');
     ring.className = 'ring';
-    slot.appendChild(ring);
+    inner.appendChild(ring);
 
     const flash = document.createElement('span');
     flash.className = 'flash';
-    slot.appendChild(flash);
+    inner.appendChild(flash);
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
         const d = document.createElement('span');
         d.className = 'droplet';
-        slot.appendChild(d);
+        inner.appendChild(d);
     }
-    randomDroplets(slot);
+    randomDroplets(inner);
+
+    slot.appendChild(inner);
 
     slot.addEventListener('animationiteration', (e) => {
         if (e.animationName !== 'travel') return;
         const photo = photos[nextPhoto % photos.length];
         img.src = photo.src;
         img.alt = photo.alt || '';
+        preload(nextPhoto + 1);
         preload(nextPhoto + 2);
         nextPhoto++;
         pickWobble(bubble);
-        randomDroplets(slot);
+        randomDroplets(inner);
     });
 
     slot.addEventListener('click', () => {
-        slot.style.animationDelay = `-${(LAP_SECONDS * 0.9).toFixed(2)}s`;
+        const anim = slot.getAnimations().find((a) => a.animationName === 'travel');
+        if (!anim) return;
+        const durationMs = LAP_SECONDS * 1000;
+        const popStart = durationMs * 0.88;
+        const current = anim.currentTime % durationMs;
+        if (current < popStart) {
+            anim.currentTime = popStart + Math.random() * 40;
+        }
     });
 
     return slot;
@@ -112,6 +121,8 @@ function buildBubblePond(list) {
             bubblePond.appendChild(buildSlot(i, delay));
         }
         bubblePond.classList.add('ready');
+        preload(SLOT_COUNT + 1);
+        preload(SLOT_COUNT + 2);
     });
 }
 
