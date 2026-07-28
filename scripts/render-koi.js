@@ -78,13 +78,16 @@ class Fish {
     this.isCursorFish = isCursorFish;
     this.x = Math.random() * W;
     this.y = Math.random() * H;
-    this.angle     = Math.random() * Math.PI * 2;
+    this.angle = Math.random() * Math.PI * 2;
     this.baseAngle = this.angle;
     this.swimPhase = Math.random() * Math.PI * 2;
-    this.wanderT   = Math.random() * 1000;
-    this.fleeing   = 0;
-    this.calming   = 0;
+    this.wanderT = Math.random() * 1000;
+    this.fleeing = 0;
+    this.calming = 0;
     this.fleeAngle = this.angle;
+    
+    this.offscreenTime = 0;
+    this.returnThreshold = 2 + Math.random(); 
 
     if (isCursorFish) {
       this.speed = 0;
@@ -387,16 +390,22 @@ function lightShadowParams(x, y) {
 }
 
 function minFish() {
+  for (const f of fishArr) {
+    const onscreen = f.x >= 0 && f.x <= W && f.y >= 0 && f.y <= H;
+    f.offscreenTime = onscreen ? 0 : f.offscreenTime + dt;
+  }
+
   const onscreen = f => (f.tier === 'large' || f.tier === 'medium') && f.x >= 0 && f.x <= W && f.y >= 0 && f.y <= H;
   const visible = fishArr.filter(onscreen).length;
   if (visible >= 6) return;
 
-  const offscreen = fishArr.filter(f => (f.tier === 'large' || f.tier === 'medium') && !onscreen(f));
-  const needed = 6 - visible;
-
-  offscreen.slice(0, needed).forEach(f => {
-    const targetAngle = Math.atan2(H/2 - f.y, W/2 - f.x);
-    f.baseAngle = targetAngle;
-    f.angle = targetAngle;
-  });
+  const candidate = fishArr.find(f =>
+    (f.tier === 'large' || f.tier === 'medium') &&
+    f.offscreenTime >= f.returnThreshold &&
+    !onscreen(f)
+  );
+  if (candidate) {
+    const targetAngle = Math.atan2(H/2 - candidate.y, W/2 - candidate.x);
+    candidate.baseAngle = targetAngle;
+  }
 }

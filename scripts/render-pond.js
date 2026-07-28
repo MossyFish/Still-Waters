@@ -13,7 +13,6 @@ function loadImage(src) {
         img.src = src;
     });
 }
-
  
 async function loadAssets() {
   const waterP = Promise.all(Array.from({length:5}, (_,i) => loadImage(`assets/Water/Water-${i+1}.webp`)));
