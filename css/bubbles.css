@@ -14,10 +14,10 @@
 .bubble-slot {
     position: absolute;
     top: 50%;
-    left: -30cqw;
-    width: 80cqw;
-    height: 80cqw;
-    margin: -40cqw 0 0 -40cqw;
+    left: -30cqh;
+    width: 45cqh;
+    height: 45cqh;
+    margin: -30cqh 0 0 -30cqh;
     animation: travel 9s linear infinite;
     cursor: pointer;
 }

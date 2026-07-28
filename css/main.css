@@ -117,7 +117,8 @@ h1.name {
     color: var(--water-light);
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    font-size: 0.78rem;
+    font-size: 1.0rem;
+    font-weight: 600;
     margin-bottom: 36px;
 }
 
@@ -127,8 +128,8 @@ section {
 
 h2.section-title {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 1.3rem;
-    font-weight: 600;
+    font-size: 1.5rem;
+    font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--gold);
