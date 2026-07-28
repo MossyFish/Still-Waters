@@ -281,11 +281,14 @@ class Fish {
         fishScratchCtx.drawImage(body1, cx - fa1.x*this.spriteScale, cy - fa1.y*this.spriteScale, this.drawW, this.drawH);
         fishScratchCtx.globalAlpha = 1;
       }
-  
+      
+      const blurAmt = Math.sin(blend * Math.PI) * 1.4; 
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(this.angle + Math.PI/2);
+      if (blurAmt > 0.05) ctx.filter = `blur(${blurAmt.toFixed(2)}px)`;
       ctx.drawImage(fishScratch, -cx, -cy, sw, sh);
+      ctx.filter = 'none';
       ctx.restore();
     }
     
