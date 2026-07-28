@@ -5,7 +5,17 @@ const SLOT_COUNT = 3;
 let photos = [];
 let nextPhotoIndex = SLOT_COUNT;
 
-function buildSlot(photo, delay) {
+const imageCache = new Map();
+
+function preloadPhoto(index) {
+    const photo = photos[((index % photos.length) + photos.length) % photos.length];
+    if (!photo || imageCache.has(photo.src)) return;
+    const im = new Image();
+    im.src = photo.src;
+    imageCache.set(photo.src, im);
+}
+
+function buildSlot(startIndex, delay) {
     const slot = document.createElement('div');
     slot.className = 'bubble-slot';
     slot.style.animationDelay = delay;
@@ -15,9 +25,14 @@ function buildSlot(photo, delay) {
     bubble.style.animationDelay = `0s, ${delay}`;
 
     const img = document.createElement('img');
-    img.src = photo.src;
-    img.alt = photo.alt || '';
+    img.src = photos[startIndex % photos.length].src;
+    img.alt = photos[startIndex % photos.length].alt || '';
     bubble.appendChild(img);
+
+    const glass = document.createElement('div');
+    glass.className = 'glass';
+    bubble.appendChild(glass);
+
     slot.appendChild(bubble);
 
     const ring = document.createElement('div');
@@ -40,25 +55,30 @@ function buildSlot(photo, delay) {
     slot.addEventListener('animationiteration', (e) => {
         if (e.animationName !== 'bubbleTravel') return;
         const photo = photos[nextPhotoIndex % photos.length];
+        const im = img;
+        im.src = photo.src;
+        im.alt = photo.alt || '';
+        preloadPhoto(nextPhotoIndex + 2);
         nextPhotoIndex++;
-        const img = slot.querySelector('img');
-        img.src = photo.src;
-        img.alt = photo.alt || '';
     });
 
     return slot;
 }
 
-function makeBubbles(list) {
+function buildBubblePond(list) {
     photos = list;
     if (!photos.length) return;
 
     bubblePond.innerHTML = '';
     nextPhotoIndex = SLOT_COUNT;
 
+    for (let i = 0; i < SLOT_COUNT + 2; i++) {
+        preloadPhoto(i);
+    }
+
     for (let i = 0; i < SLOT_COUNT; i++) {
         const delay = `-${(i * (POND_DURATION / SLOT_COUNT)).toFixed(2)}s`;
-        const slot = buildSlot(photos[i % photos.length], delay);
+        const slot = buildSlot(i, delay);
         bubblePond.appendChild(slot);
     }
 }
