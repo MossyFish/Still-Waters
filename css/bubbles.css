@@ -1,0 +1,147 @@
+.bubble-pond {
+    position: relative;
+    width: 100%;
+    max-width: 620px;
+    aspect-ratio: 16/8;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(243, 239, 228, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    background: var(--panel);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    container-type: size;
+    container-name: pond;
+}
+
+.bubble-slot {
+    position: absolute;
+    top: 50%;
+    left: -22cqh;
+    width: 40cqh;
+    height: 40cqh;
+    margin-top: -20cqh;
+    margin-left: -20cqh;
+    animation: bubbleTravel 8s linear infinite;
+}
+
+.bubble {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    animation: bubbleWobble 5s ease-in-out infinite, bubbleRupture 8s linear infinite;
+    background:
+        radial-gradient(circle at 32% 26%, rgba(255,255,255,0.95), rgba(255,255,255,0.1) 18%, transparent 40%),
+        radial-gradient(circle at 62% 70%, rgba(227,179,92,0.18), rgba(90,150,200,0.15) 45%, transparent 70%),
+        radial-gradient(circle at 45% 45%, rgba(210,235,255,0.4), rgba(140,190,225,0.22) 60%, rgba(90,140,180,0.2) 100%);
+    box-shadow:
+        inset 0 0 0 1.5px rgba(255,255,255,0.55),
+        inset -10px -10px 22px rgba(20,30,45,0.4),
+        inset 8px 10px 18px rgba(255,255,255,0.35),
+        0 10px 14px rgba(0,0,0,0.35);
+}
+
+.bubble::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg,
+        rgba(255,150,200,0.35), rgba(150,210,255,0.3), rgba(180,255,210,0.3),
+        rgba(255,235,150,0.3), rgba(220,160,255,0.35), rgba(255,150,200,0.35));
+    mix-blend-mode: color-dodge;
+    opacity: 0.35;
+    animation: bubbleSpin 5s linear infinite;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.bubble img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+}
+
+.ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.85);
+    opacity: 0;
+    pointer-events: none;
+    animation: bubbleShockwave 8s linear infinite;
+}
+
+.flash {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,255,255,0));
+    opacity: 0;
+    pointer-events: none;
+    animation: bubbleFlash 8s linear infinite;
+}
+
+.droplet {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    margin: -2.5px;
+    border-radius: 50%;
+    background: rgba(210,235,255,0.9);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.dp1 { animation: dropA 8s linear infinite; }
+.dp2 { animation: dropB 8s linear infinite; }
+.dp3 { animation: dropC 8s linear infinite; }
+.dp4 { animation: dropD 8s linear infinite; }
+.dp5 { animation: dropE 8s linear infinite; }
+.dp6 { animation: dropF 8s linear infinite; }
+
+@keyframes bubbleTravel {
+    0%   { left: -14%; transform: scale(0.2); animation-timing-function: cubic-bezier(.34,  1.56,.64,  1); }
+    12%  { left: 8%; transform: scale(1); }
+    89%  { left: 88%; transform: scale(1); }
+    100% { left: 93%; transform: scale(1); }
+}
+@keyframes bubbleWobble {
+    0%, 100% { border-radius: 42% 58% 65% 35% / 45% 45% 55% 55%; }
+    50%      { border-radius: 58% 42% 38% 62% / 55% 62% 38% 45%; }
+}
+@keyframes bubbleRupture {
+    0%, 89%  { opacity: 1; transform: scale(1); }
+    90.5%    { opacity: 0; transform: scale(1.08); }
+    100%     { opacity: 0; transform: scale(1.08); }
+}
+@keyframes bubbleSpin { to { transform: rotate(360deg); } }
+@keyframes bubbleShockwave {
+    0%, 88% { opacity: 0; transform: scale(0.3); }
+    89%     { opacity: 0.9; transform: scale(0.5); }
+    97%, 100% { opacity: 0; transform: scale(2.1); }
+}
+@keyframes bubbleFlash {
+    0%, 88%   { opacity: 0; }
+    89.5%     { opacity: 0.85; }
+    92%, 100% { opacity: 0; }
+}
+@keyframes dropA { 0%,88% { opacity: 0; transform:translate(0, 0) scale(1); } 89% { opacity: 1; } 100% { opacity: 0; transform:translate(-26px, -16px) scale(0.4); } }
+@keyframes dropB { 0%,88% { opacity: 0; transform:translate(0, 0) scale(1); } 89% { opacity: 1; } 100% { opacity: 0; transform:translate(24px, -20px) scale(0.4); } }
+@keyframes dropC { 0%,88% { opacity: 0; transform:translate(0, 0) scale(1); } 89% { opacity: 1; } 100% { opacity: 0; transform:translate(-32px, 10px) scale(0.4); } }
+@keyframes dropD { 0%,88% { opacity: 0; transform:translate(0, 0) scale(1); } 89% { opacity: 1; } 100% { opacity: 0; transform:translate(30px, 14px) scale(0.4); } }
+@keyframes dropE { 0%,88% { opacity: 0; transform:translate(0, 0) scale(1); } 89% { opacity: 1; } 100% { opacity: 0; transform:translate(-8px, 32px) scale(0.4); } }
+@keyframes dropF { 0%,88% { opacity: 0; transform:translate(0, 0) scale(1); } 89% { opacity: 1; } 100% { opacity: 0; transform:translate(12px, 30px) scale(0.4); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .bubble-slot, .bubble, .bubble::after, .ring, .flash, .droplet {
+        animation: none;
+    }
+}

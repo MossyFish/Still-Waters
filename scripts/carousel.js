@@ -1,49 +1,66 @@
-const carouselViewport = document.getElementById('carousel');
-const carouselTrack = document.getElementById('carouselTrack');
-let slides = [];
-let slideIdx = 0;
-let carouselTimer = null;
+const bubblePond = document.getElementById('bubblePond');
+const POND_DURATION = 8;
+const SLOT_COUNT = 3;
 
-// sets full carousel size
-function layoutCarousel() {
-    const slideWidth = carouselViewport.clientWidth * 0.5;
-    slides.forEach(slide => { slide.style.width = `${slideWidth}px`;});
-    positionCarousel(false);
-}
+let photos = [];
+let nextPhotoIndex = SLOT_COUNT;
 
-function positionCarousel(animate) {
-    const viewportWidth = carouselViewport.clientWidth;
-    const slideWidth = viewportWidth * 0.5;
-    const offset = (viewportWidth - slideWidth) / 2 - slideIdx * slideWidth;
-    carouselTrack.style.transition = animate ? '' : 'none';
-    carouselTrack.style.transform = `translateX(${offset}px)`;
-    slides.forEach((slide, i) => slide.classList.toggle('is-active', i === slideIdx));
-}
+function buildSlot(photo, delay) {
+    const slot = document.createElement('div');
+    slot.className = 'bubble-slot';
+    slot.style.animationDelay = delay;
 
-function advanceCarousel() {
-    if (slides.length < 2) return;
-    slideIdx = (slideIdx + 1) % slides.length;
-    positionCarousel(true);
-}
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.style.animationDelay = `0s, ${delay}`;
 
-// photo order
-function buildSlides(photos) {
-    carouselTrack.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = photo.src;
+    img.alt = photo.alt || '';
+    bubble.appendChild(img);
+    slot.appendChild(bubble);
 
-    slides = photos.map(photo => {
-        const slide = document.createElement('div');
-        slide.className = 'slide';
-        const img = document.createElement('img');
-        img.src = photo.src;
-        slide.appendChild(img);
-        carouselTrack.appendChild(slide);
-        return slide;
+    const ring = document.createElement('div');
+    ring.className = 'ring';
+    ring.style.animationDelay = delay;
+    slot.appendChild(ring);
+
+    const flash = document.createElement('span');
+    flash.className = 'flash';
+    flash.style.animationDelay = delay;
+    slot.appendChild(flash);
+
+    ['dp1', 'dp2', 'dp3', 'dp4', 'dp5', 'dp6'].forEach(cls => {
+        const d = document.createElement('span');
+        d.className = `droplet ${cls}`;
+        d.style.animationDelay = delay;
+        slot.appendChild(d);
     });
 
-    slideIdx = 0;
-    layoutCarousel();
-    clearInterval(carouselTimer);
-    carouselTimer = setInterval(advanceCarousel, 5000);
+    slot.addEventListener('animationiteration', (e) => {
+        if (e.animationName !== 'bubbleTravel') return;
+        const photo = photos[nextPhotoIndex % photos.length];
+        nextPhotoIndex++;
+        const img = slot.querySelector('img');
+        img.src = photo.src;
+        img.alt = photo.alt || '';
+    });
+
+    return slot;
+}
+
+function makeBubbles(list) {
+    photos = list;
+    if (!photos.length) return;
+
+    bubblePond.innerHTML = '';
+    nextPhotoIndex = SLOT_COUNT;
+
+    for (let i = 0; i < SLOT_COUNT; i++) {
+        const delay = `-${(i * (POND_DURATION / SLOT_COUNT)).toFixed(2)}s`;
+        const slot = buildSlot(photos[i % photos.length], delay);
+        bubblePond.appendChild(slot);
+    }
 }
 
 fetch('/api/photos')
@@ -51,7 +68,7 @@ fetch('/api/photos')
     if (!res.ok) throw new Error(`/api/photos failed (${res.status})`);
     return res.json();
   })
-  .then(buildSlides)
+  .then(makeBubbles)
   .catch(err => console.error('Failed to load photo list:', err));
     
 window.addEventListener('resize', layoutCarousel);
