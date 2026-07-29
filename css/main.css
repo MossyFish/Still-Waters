@@ -152,3 +152,15 @@ p.body-text {
     font-size: 1.5rem;
     color: var(--water-light);
 }
+
+::selection {
+    background-color: rgba(64, 140, 220, 0.35);
+    color: inherit;
+    text-shadow: 0 0 2px rgba(120, 190, 255, 0.9);
+}
+
+::-moz-selection {
+    background-color: rgba(64, 140, 220, 0.35);
+    color: inherit;
+    text-shadow: 0 0 2px rgba(120, 190, 255, 0.9);
+}
