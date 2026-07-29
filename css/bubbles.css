@@ -2,22 +2,21 @@
     position: relative;
     width: 100%;
     max-width: none;
-    aspect-ratio: 16/6;
+    aspect-ratio: 16/7.5;
     overflow: hidden;
     container-type: size;
     opacity: 0;
     transition: opacity 0.4s ease;
 }
-
 .bubble-pond.ready { opacity: 1; }
 
 .bubble-slot {
     position: absolute;
     top: 50%;
     left: -30cqw;
-    width: min(80cqw, 150px);
-    height: min(80cqw, 150px);
-    margin: calc(min(80cqw, 150px) / -2) 0 0 calc(min(80cqw, 150px) / -2);
+    width: min(95cqw, 210px);
+    height: min(95cqw, 210px);
+    margin: calc(min(95cqw, 210px) / -2) 0 0 calc(min(95cqw, 210px) / -2);
     animation: travel 9s linear forwards;
     cursor: pointer;
 }
@@ -27,7 +26,6 @@
     inset: 0;
     transition: transform 0.25s ease;
 }
-
 .bubble-slot:hover .bubble-inner {
     transform: translateY(-10%);
 }
@@ -44,7 +42,6 @@
         inset 6px 8px 20px rgba(220,240,255,0.35),
         0 0 4px rgba(180,220,255,0.35);
 }
-
 .bubble-slot:hover .bubble {
     filter: brightness(1.15);
 }
@@ -53,9 +50,21 @@
 @keyframes wobble-b { 0%,100% { border-radius: 51% 49% 48% 52% / 48% 51% 49% 52%; } 50% { border-radius: 49% 51% 52% 48% / 52% 49% 51% 48%; } }
 @keyframes wobble-c { 0%,100% { border-radius: 49% 51% 52% 48% / 51% 49% 48% 52%; } 50% { border-radius: 51% 49% 48% 52% / 49% 51% 52% 48%; } }
 
+/* Popping: bubble squashes/stretches unevenly instead of just fading —
+   takes over from the idle wobble the moment .popping is added */
+@keyframes pop-warp {
+    0%   { transform: scale(1, 1) skew(0deg, 0deg); }
+    35%  { transform: scale(1.18, 0.82) skew(-5deg, 3deg); }
+    65%  { transform: scale(0.82, 1.22) skew(4deg, -4deg); }
+    100% { transform: scale(0.55, 0.6) skew(2deg, -2deg); }
+}
+.bubble-slot.popping .bubble {
+    animation: pop-warp 300ms ease-out forwards;
+}
+
 .photo {
     position: absolute;
-    top: 16%; left: 16%; right: 16%; bottom: 16%;
+    top: 10%; left: 10%; right: 10%; bottom: 10%;
     border-radius: 50%;
     overflow: hidden;
     z-index: 0;
@@ -105,16 +114,15 @@
     pointer-events: none;
     z-index: 2;
 }
-
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .particle {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 6px;
-    height: 3px;
-    margin: -1.5px 0 0 -3px;
+    width: 4px;
+    height: 2px;
+    margin: -1px 0 0 -2px;
     border-radius: 40%;
     background: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(180,220,255,0.6));
     opacity: 0;
@@ -122,8 +130,8 @@
 }
 
 .bubble-slot.popping .particle {
-    animation: pop-particle 0.35s ease-out forwards;
-    animation-delay: 0.08s;
+    animation: pop-particle 0.22s ease-out forwards;
+    animation-delay: 0.05s;
 }
 
 @keyframes pop-particle {
@@ -132,15 +140,15 @@
 }
 
 .particle-fall {
-    width: 5px;
-    height: 5px;
-    margin: -2.5px 0 0 -2.5px;
+    width: 3px;
+    height: 3px;
+    margin: -1.5px 0 0 -1.5px;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), rgba(170,210,255,0.55));
 }
 
 .bubble-slot.popping .particle-fall {
-    animation: pop-particle-fall 0.5s ease-in forwards;
+    animation: pop-particle-fall 0.32s ease-in forwards;
 }
 
 @keyframes pop-particle-fall {
