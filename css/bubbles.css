@@ -13,7 +13,7 @@
 .bubble-slot {
     position: absolute;
     top: 50%;
-    left: -30cqw;
+    left: -15cqw;
     width: min(95cqw, 210px);
     height: min(95cqw, 210px);
     margin: calc(min(95cqw, 210px) / -2) 0 0 calc(min(95cqw, 210px) / -2);
@@ -157,8 +157,8 @@
 }
 
 @keyframes travel {
-    0%   { left: -30cqw; transform: scale(0.2); opacity: 0; animation-timing-function: cubic-bezier(.34,1.56,.64,1); }
-    14%  { left: 10%; transform: scale(1); opacity: 1; }
+    0%   { left: -18cqw; transform: scale(0.2); opacity: 0; animation-timing-function: cubic-bezier(.34,1.18,.64,1); }
+    14%  { left: 6%; transform: scale(1); opacity: 1; }
     100% { left: 96%; transform: scale(1); opacity: 1; }
 }
 

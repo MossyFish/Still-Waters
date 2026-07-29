@@ -2,8 +2,9 @@ const bubblePond = document.getElementById('bubblePond');
 
 const LAP_SECONDS = 9;
 const BUBBLE_COUNT = 3;
-const RELEASE_EVERY_MS = (LAP_SECONDS / BUBBLE_COUNT) * 1000;
 const POP_AT_PROGRESS = 0.92;
+const POP_LIFE_MS = POP_AT_PROGRESS * LAP_SECONDS * 1000; // real time from release to pop
+const RELEASE_EVERY_MS = POP_LIFE_MS / (BUBBLE_COUNT - 1); // 3rd releases right as the 1st is about to pop
 const POP_DURATION_MS = 300;
 const EDGE_PARTICLE_TRIGGER = 0.65;
 const EDGE_PARTICLE_COUNT = 10;
@@ -69,7 +70,7 @@ function popHole(bubbleEl, bubbleSlot, durationMs) {
     const tears = Array.from({ length: 4 }, () => ({
         x: 35 + Math.random() * 30,
         y: 35 + Math.random() * 30,
-        delay: Math.random() * 7,
+        delay: Math.random() * 10,
         warpX: 0.75 + Math.random() * 0.5,
         warpY: 0.75 + Math.random() * 0.5,
     }));
@@ -82,13 +83,13 @@ function popHole(bubbleEl, bubbleSlot, durationMs) {
         const grow = eased * 165;
 
         bubbleEl.style.maskImage = tears
-                    .map(({ x, y, delay, warpX, warpY }) => {
-                        const r = Math.max(0, grow - delay);
-                        const rx = (r * warpX).toFixed(1);
-                        const ry = (r * warpY).toFixed(1);
-                        return `radial-gradient(ellipse ${rx}% ${ry}% at ${x}% ${y}%, transparent 60%, black 70%)`;
-                    })
-                    .join(', ');
+            .map(({ x, y, delay, warpX, warpY }) => {
+                const r = Math.max(0, grow - delay);
+                const rx = (r * warpX).toFixed(1);
+                const ry = (r * warpY).toFixed(1);
+                return `radial-gradient(ellipse ${rx}% ${ry}% at ${x}% ${y}%, transparent 60%, black 70%)`;
+            })
+            .join(', ');
 
         if (!edgeParticlesSpawned && t > EDGE_PARTICLE_TRIGGER) {
             edgeParticlesSpawned = true;
@@ -135,8 +136,8 @@ function buildBubble(photoIndex, delaySeconds = 0) {
 function pop(bubble) {
     if (bubble.popped) return;
     bubble.popped = true;
-    bubble.anim?.pause();
-    clearTimeout(bubble.safetyTimer);
+
+    bubble.slot.getAnimations()[0]?.pause();
 
     scatterParticles(bubble.slot);
     bubble.slot.classList.add('popping');
@@ -156,26 +157,22 @@ function release(delaySeconds = 0) {
     const slot = buildBubble(photoIndex, delaySeconds);
     bubblePond.appendChild(slot);
 
-    const bubble = { slot, anim: null, popped: false, safetyTimer: null };
-
-    slot.addEventListener('animationstart', () => {
-        bubble.anim = slot.getAnimations()[0];
-    }, { once: true });
-
-    const remainingMs = (LAP_SECONDS - delaySeconds) * 1000 + 300;
-    bubble.safetyTimer = setTimeout(() => pop(bubble), remainingMs);
+    const bubble = {
+        slot,
+        popped: false,
+        releasedAt: performance.now() - delaySeconds * 1000,
+    };
 
     slot.addEventListener('click', () => pop(bubble));
     bubbles.push(bubble);
 }
 
-function watchForEdge() {
+// for the bubble stacking issue
+function checkPops() {
+    const now = performance.now();
     bubbles.forEach((bubble) => {
-        if (bubble.popped) return;
-        const progress = bubble.anim?.effect?.getComputedTiming().progress;
-        if (progress >= POP_AT_PROGRESS) pop(bubble);
+        if (!bubble.popped && now - bubble.releasedAt >= POP_LIFE_MS) pop(bubble);
     });
-    requestAnimationFrame(watchForEdge);
 }
 
 async function start(photoList) {
@@ -187,11 +184,15 @@ async function start(photoList) {
     );
 
     for (let i = 0; i < BUBBLE_COUNT; i++) {
-        release(i * (LAP_SECONDS / BUBBLE_COUNT));
+        release(i * (RELEASE_EVERY_MS / 1000));
     }
     bubblePond.classList.add('ready');
 
-    watchForEdge();
+    setInterval(checkPops, 200);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') checkPops();
+    });
+
     setInterval(() => release(), RELEASE_EVERY_MS);
 }
 
