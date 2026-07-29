@@ -10,6 +10,14 @@ const TRANSITION_MS = 1200;
 const WARP_PEAK = 20;
 
 turb.setAttribute('baseFrequency', '0.019');
+requestAnimationFrame(() => {
+    swirl.classList.add('active');
+    applyWarp(0.01);
+    requestAnimationFrame(() => {
+        applyWarp(0);
+        swirl.classList.remove('active');
+    });
+});
 
 function applyWarp(s){
     displacement.setAttribute('scale', s);
