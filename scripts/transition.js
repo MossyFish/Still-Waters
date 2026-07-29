@@ -75,6 +75,15 @@ function exitToIntro(){
   });
 }
 
+window.addEventListener('load', () => {
+    content.classList.add('warping');
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            content.classList.remove('warping');
+        });
+    });
+});
+
 window.addEventListener('keydown', e => {
   if(e.key === 'Enter') enterContent();
   if(e.key === 'Escape'){

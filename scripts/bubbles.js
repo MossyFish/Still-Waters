@@ -1,176 +1,159 @@
 const bubblePond = document.getElementById('bubblePond');
+
 const LAP_SECONDS = 9;
-const SLOT_COUNT = 3;
-const WOBBLES = ['wobble-a', 'wobble-b', 'wobble-c'];
-const POP_PROGRESS = 0.92;
+const BUBBLE_COUNT = 3;
+const RELEASE_EVERY_MS = (LAP_SECONDS / BUBBLE_COUNT) * 1000;
+const POP_AT_PROGRESS = 0.92;
 const POP_DURATION_MS = 400;
+const WOBBLE_SHAPES = ['wobble-a', 'wobble-b', 'wobble-c'];
 
 let photos = [];
-let nextPhoto = 0;
-let activeLanes = [];
+let nextPhotoIndex = 0;
+let bubbles = [];
 const imageCache = new Map();
+
+function preload(index) {
+    const src = photos[index % photos.length]?.src;
+    if (!src || imageCache.has(src)) return;
+    const img = new Image();
+    img.src = src;
+    imageCache.set(src, img); // keep the reference alive so the browser can't cancel the load mid-fetch
+}
 
 function loadImage(src) {
     return new Promise((resolve) => {
         const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = () => resolve(img);
+        img.onload = img.onerror = () => resolve();
         img.src = src;
     });
 }
 
-function preload(index) {
-    const photo = photos[index % photos.length];
-    if (!photo || imageCache.has(photo.src)) return;
-    loadImage(photo.src).then((img) => imageCache.set(photo.src, img));
+function randomWobble(bubbleEl) {
+    WOBBLE_SHAPES.forEach((name) => bubbleEl.classList.remove(name));
+    bubbleEl.classList.add(WOBBLE_SHAPES[Math.floor(Math.random() * WOBBLE_SHAPES.length)]);
+    bubbleEl.style.animationDelay = `-${(Math.random() * 6).toFixed(2)}s`;
 }
 
-function pickWobble(bubble) {
-    WOBBLES.forEach((w) => bubble.classList.remove(w));
-    bubble.classList.add(WOBBLES[Math.floor(Math.random() * WOBBLES.length)]);
-    bubble.style.animationDelay = `-${(Math.random() * 6).toFixed(2)}s`;
-}
-
-function randomizeParticles(slot) {
-    slot.querySelectorAll('.particle').forEach((p) => {
+function scatterParticles(bubbleSlot) {
+    bubbleSlot.querySelectorAll('.particle').forEach((particle) => {
         const angle = Math.random() * Math.PI * 2;
-        const dist = 22 + Math.random() * 28;
-        p.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
-        p.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+        const distance = 22 + Math.random() * 28;
+        particle.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+        particle.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
     });
 }
 
-function popBubbleHole(bubbleEl, durationMs) {
-    const centers = Array.from({ length: 4 }, () => ({
+// Tears a rough hole through the bubble by growing a few overlapping
+// transparent circles in its mask. Done in JS, not an animated CSS
+// custom property, so it actually works in Firefox.
+function popHole(bubbleEl, durationMs) {
+    const tears = Array.from({ length: 4 }, () => ({
         x: 35 + Math.random() * 30,
         y: 35 + Math.random() * 30,
-        offset: Math.random() * 18,
+        delay: Math.random() * 18,
     }));
     const start = performance.now();
 
-    function frame(now) {
+    function step(now) {
         const t = Math.min(1, (now - start) / durationMs);
-        const eased = t^3;
-        const basePct = eased * 160;
+        const grow = (t ** 3) * 160;
 
-        const layers = centers.map((c) => {
-            const pct = Math.max(0, basePct - c.offset);
-            return `radial-gradient(circle at ${c.x}% ${c.y}%, transparent ${pct}%, black ${pct + 6}%)`;
-        }).join(', ');
+        bubbleEl.style.maskImage = tears
+            .map(({ x, y, delay }) => {
+                const r = Math.max(0, grow - delay);
+                return `radial-gradient(circle at ${x}% ${y}%, transparent ${r}%, black ${r + 6}%)`;
+            })
+            .join(', ');
 
-        bubbleEl.style.maskImage = layers;
-        bubbleEl.style.webkitMaskImage = layers;
-
-        if (t < 1) {
-            requestAnimationFrame(frame);
-        } else {
-            bubbleEl.style.opacity = '0';
-        }
+        if (t < 1) requestAnimationFrame(step);
+        else bubbleEl.style.opacity = '0';
     }
-    requestAnimationFrame(frame);
+    requestAnimationFrame(step);
 }
 
-function buildSlot(photoIndex, delaySeconds) {
+function buildBubble(photoIndex, delaySeconds = 0) {
     const slot = document.createElement('div');
     slot.className = 'bubble-slot';
+    slot.style.animation = 'travel 9s linear forwards';
     slot.style.animationDelay = `-${delaySeconds.toFixed(2)}s`;
 
     const inner = document.createElement('div');
     inner.className = 'bubble-inner';
 
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    pickWobble(bubble);
+    const bubbleEl = document.createElement('div');
+    bubbleEl.className = 'bubble';
+    randomWobble(bubbleEl);
 
-    const photo = document.createElement('div');
-    photo.className = 'photo';
-    const img = document.createElement('img');
-    img.src = photos[photoIndex % photos.length].src;
-    img.alt = photos[photoIndex % photos.length].alt || '';
-    photo.appendChild(img);
-    bubble.appendChild(photo);
-
-    const glass = document.createElement('div');
-    glass.className = 'glass';
-    bubble.appendChild(glass);
-
-    inner.appendChild(bubble);
+    const photo = photos[photoIndex % photos.length];
+    bubbleEl.innerHTML = `
+        <div class="photo"><img src="${photo.src}" alt="${photo.alt || ''}"></div>
+        <div class="glass"></div>
+    `;
+    inner.appendChild(bubbleEl);
 
     for (let i = 0; i < 7; i++) {
-        const p = document.createElement('span');
-        p.className = 'particle';
-        inner.appendChild(p);
+        const particle = document.createElement('span');
+        particle.className = 'particle';
+        inner.appendChild(particle);
     }
-    randomizeParticles(inner);
+    scatterParticles(inner);
 
     slot.appendChild(inner);
     return slot;
 }
 
-function spawnLane(laneIndex, delaySeconds) {
-    const photoIndex = nextPhoto;
-    nextPhoto++;
-    preload(nextPhoto);
-    preload(nextPhoto + 1);
+function pop(bubble) {
+    if (bubble.popped) return;
+    bubble.popped = true;
+    bubble.anim?.pause();
 
-    const slot = buildSlot(photoIndex, delaySeconds);
-    bubblePond.appendChild(slot);
-
-    const anim = slot.getAnimations().find((a) => a.animationName === 'travel');
-    const lane = { slot, anim, popped: false };
-
-    slot.addEventListener('click', () => popLane(lane));
-    activeLanes[laneIndex] = lane;
-}
-
-function popLane(lane) {
-    if (lane.popped) return;
-    lane.popped = true;
-    if (lane.anim) lane.anim.pause();
-
-    const bubble = lane.slot.querySelector('.bubble');
-    randomizeParticles(lane.slot);
-    lane.slot.classList.add('popping');
-    popBubbleHole(bubble, POP_DURATION_MS);
+    scatterParticles(bubble.slot);
+    bubble.slot.classList.add('popping');
+    popHole(bubble.slot.querySelector('.bubble'), POP_DURATION_MS);
 
     setTimeout(() => {
-        const laneIndex = activeLanes.indexOf(lane);
-        lane.slot.remove();
-        spawnLane(laneIndex, 0);
+        bubble.slot.remove();
+        bubbles = bubbles.filter((b) => b !== bubble);
     }, POP_DURATION_MS + 60);
 }
 
-function monitorLanes() {
-    activeLanes.forEach((lane) => {
-        if (!lane || lane.popped || !lane.anim || !lane.anim.effect) return;
-        const timing = lane.anim.effect.getComputedTiming();
-        if (typeof timing.progress === 'number' && timing.progress >= POP_PROGRESS) {
-            popLane(lane);
-        }
-    });
-    requestAnimationFrame(monitorLanes);
+function release(delaySeconds = 0) {
+    const photoIndex = nextPhotoIndex++;
+    preload(nextPhotoIndex);
+    preload(nextPhotoIndex + 1);
+
+    const slot = buildBubble(photoIndex, delaySeconds);
+    bubblePond.appendChild(slot);
+
+    const bubble = { slot, anim: slot.getAnimations()[0], popped: false };
+    slot.addEventListener('click', () => pop(bubble));
+    bubbles.push(bubble);
 }
 
-function buildBubblePond(list) {
-    photos = list;
+function watchForEdge() {
+    bubbles.forEach((bubble) => {
+        if (bubble.popped) return;
+        const progress = bubble.anim?.effect?.getComputedTiming().progress;
+        if (progress >= POP_AT_PROGRESS) pop(bubble);
+    });
+    requestAnimationFrame(watchForEdge);
+}
+
+async function start(photoList) {
+    photos = photoList;
     if (!photos.length) return;
 
-    bubblePond.innerHTML = '';
-    activeLanes = [];
-    nextPhoto = 0;
+    await Promise.all(
+        Array.from({ length: BUBBLE_COUNT }, (_, i) => loadImage(photos[i % photos.length].src))
+    );
 
-    const firstLoads = [];
-    for (let i = 0; i < SLOT_COUNT; i++) {
-        firstLoads.push(loadImage(photos[i % photos.length].src));
+    for (let i = 0; i < BUBBLE_COUNT; i++) {
+        release(i * (LAP_SECONDS / BUBBLE_COUNT));
     }
+    bubblePond.classList.add('ready');
 
-    Promise.all(firstLoads).then(() => {
-        for (let i = 0; i < SLOT_COUNT; i++) {
-            spawnLane(i, i * (LAP_SECONDS / SLOT_COUNT));
-        }
-        bubblePond.classList.add('ready');
-        requestAnimationFrame(monitorLanes);
-    });
+    watchForEdge();
+    setInterval(() => release(), RELEASE_EVERY_MS);
 }
 
 fetch('/api/photos')
@@ -178,5 +161,5 @@ fetch('/api/photos')
         if (!res.ok) throw new Error(`/api/photos failed (${res.status})`);
         return res.json();
     })
-    .then(buildBubblePond)
+    .then(start)
     .catch((err) => console.error('Failed to load photo list:', err));
