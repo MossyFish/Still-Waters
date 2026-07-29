@@ -5,7 +5,7 @@ const BUBBLE_COUNT = 3;
 const RELEASE_EVERY_MS = (LAP_SECONDS / BUBBLE_COUNT) * 1000;
 const POP_AT_PROGRESS = 0.92;
 const POP_DURATION_MS = 300;
-const EDGE_PARTICLE_TRIGGER = 0.65; // fraction of pop duration at which the hole has reached the rim
+const EDGE_PARTICLE_TRIGGER = 0.65;
 const EDGE_PARTICLE_COUNT = 10;
 const WOBBLE_SHAPES = ['wobble-a', 'wobble-b', 'wobble-c'];
 
@@ -19,7 +19,7 @@ function preload(index) {
     if (!src || imageCache.has(src)) return;
     const img = new Image();
     img.src = src;
-    imageCache.set(src, img); // keep the reference alive so the browser can't cancel the load mid-fetch
+    imageCache.set(src, img);
 }
 
 function loadImage(src) {
@@ -39,19 +39,16 @@ function randomWobble(bubbleEl) {
 function scatterParticles(container) {
     container.querySelectorAll('.particle').forEach((particle) => {
         const angle = Math.random() * Math.PI * 2;
-        const distance = 22 + Math.random() * 28;
+        const distance = 34 + Math.random() * 46;
         particle.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
         particle.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
     });
 }
 
-// Spawns a fresh ring of particles right at the bubble's rim and lets them
-// fall, as if droplets shake loose once the film has fully torn open —
-// separate from the initial click-burst, which fires immediately at pop.
 function spawnEdgeParticles(container) {
     for (let i = 0; i < EDGE_PARTICLE_COUNT; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const edgeRadius = 46; // % from center, roughly the bubble's rim
+        const edgeRadius = 46;
         const x = 50 + Math.cos(angle) * edgeRadius;
         const y = 50 + Math.sin(angle) * edgeRadius;
 
@@ -68,30 +65,30 @@ function spawnEdgeParticles(container) {
     }
 }
 
-// Tears a rough hole through the bubble by growing a few overlapping
-// transparent circles in its mask. Done in JS, not an animated CSS
-// custom property, so it actually works in Firefox.
 function popHole(bubbleEl, bubbleSlot, durationMs) {
     const tears = Array.from({ length: 4 }, () => ({
         x: 35 + Math.random() * 30,
         y: 35 + Math.random() * 30,
-        delay: Math.random() * 10,
+        delay: Math.random() * 7,
+        warpX: 0.75 + Math.random() * 0.5,
+        warpY: 0.75 + Math.random() * 0.5,
     }));
     const start = performance.now();
     let edgeParticlesSpawned = false;
 
     function step(now) {
         const t = Math.min(1, (now - start) / durationMs);
-        // Ease-out: the hole rips open fast and only eases off right at the end.
         const eased = 1 - (1 - t) ** 2;
         const grow = eased * 165;
 
         bubbleEl.style.maskImage = tears
-            .map(({ x, y, delay }) => {
-                const r = Math.max(0, grow - delay);
-                return `radial-gradient(circle at ${x}% ${y}%, transparent ${r}%, black ${r + 6}%)`;
-            })
-            .join(', ');
+                    .map(({ x, y, delay, warpX, warpY }) => {
+                        const r = Math.max(0, grow - delay);
+                        const rx = (r * warpX).toFixed(1);
+                        const ry = (r * warpY).toFixed(1);
+                        return `radial-gradient(ellipse ${rx}% ${ry}% at ${x}% ${y}%, transparent 60%, black 70%)`;
+                    })
+                    .join(', ');
 
         if (!edgeParticlesSpawned && t > EDGE_PARTICLE_TRIGGER) {
             edgeParticlesSpawned = true;
@@ -161,18 +158,10 @@ function release(delaySeconds = 0) {
 
     const bubble = { slot, anim: null, popped: false, safetyTimer: null };
 
-    // Grabbing the Animation object synchronously right after appendChild is
-    // unreliable — the browser hasn't always created it yet, especially while
-    // another bubble's pop is mid-repaint. Waiting for 'animationstart'
-    // guarantees it exists, so pause()/progress checks never silently no-op
-    // and leave a bubble frozen on screen.
     slot.addEventListener('animationstart', () => {
         bubble.anim = slot.getAnimations()[0];
     }, { once: true });
 
-    // Belt-and-suspenders: whatever happens above, this guarantees every
-    // bubble actually gets popped and cleaned up — no bubble can ever get
-    // stuck on screen piling up with others.
     const remainingMs = (LAP_SECONDS - delaySeconds) * 1000 + 300;
     bubble.safetyTimer = setTimeout(() => pop(bubble), remainingMs);
 
