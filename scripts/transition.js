@@ -83,11 +83,29 @@ function exitToIntro(){
   });
 }
 
+// pre loads the svg filter so the transition hopefully doesnt flicker
 window.addEventListener('load', () => {
+    swirl.classList.add('active');
+    applyWarp(0.01);
+
     content.classList.add('warping');
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             content.classList.remove('warping');
+        });
+    });
+
+    intro.classList.add('warping');
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            intro.classList.remove('warping');
+        });
+    });
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            applyWarp(0);
+            swirl.classList.remove('active');
         });
     });
 });
