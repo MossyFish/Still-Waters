@@ -36,6 +36,7 @@ function warpTransition(outEl, inEl, onSwap) {
             outEl.classList.remove('warping');
             if (inEl === intro) inEl.style.display = 'flex';
             else if (inEl !== content) inEl.style.display = 'block';
+            void inEl.offsetWidth; 
             inEl.classList.add('warping');
             if(onSwap) onSwap();    
         }
