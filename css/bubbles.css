@@ -14,9 +14,9 @@
     position: absolute;
     top: 50%;
     left: -30cqw;
-    width: min(80cqw, 130px);
-    height: min(80cqw, 130px);
-    margin: calc(min(80cqw, 130px) / -2) 0 0 calc(min(80cqw, 130px) / -2);
+    width: min(80cqw, 150px);
+    height: min(80cqw, 150px);
+    margin: calc(min(80cqw, 150px) / -2) 0 0 calc(min(80cqw, 150px) / -2);
     animation: travel 9s linear forwards;
     cursor: pointer;
 }
@@ -38,9 +38,9 @@
     filter: brightness(1);
     transition: filter 0.25s ease;
     box-shadow:
-        inset -12px -12px 24px rgba(20,30,45,0.4),
-        inset 10px 12px 20px rgba(255,255,255,0.35),
-        0 0 2px rgba(255,255,255,0.3);
+        inset -12px -12px 24px rgba(15,35,55,0.45),
+        inset 8px 10px 18px rgba(210,235,255,0.4),
+        0 0 3px rgba(180,220,255,0.4);
 }
 .bubble-slot:hover .bubble {
     filter: brightness(1.15);
@@ -50,14 +50,18 @@
 @keyframes wobble-b { 0%,100% { border-radius: 60% 40% 45% 55% / 40% 55% 45% 60%; } 50% { border-radius: 38% 62% 58% 42% / 60% 40% 60% 40%; } }
 @keyframes wobble-c { 0%,100% { border-radius: 48% 52% 38% 62% / 55% 48% 52% 45%; } 50% { border-radius: 55% 45% 62% 38% / 42% 58% 45% 55%; } }
 
-.bubble img {
+.photo {
     position: absolute;
-    inset: 0;
+    top: 16%; left: 16%; right: 16%; bottom: 16%;
+    border-radius: 50%;
+    overflow: hidden;
+    z-index: 0;
+}
+.photo img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: inherit;
-    opacity: 0.55;
+    opacity: 0.85;
 }
 
 .glass {
@@ -65,37 +69,32 @@
     inset: 0;
     border-radius: inherit;
     pointer-events: none;
+    z-index: 1;
     background:
-        radial-gradient(circle at 30% 24%, rgba(255,255,255,0.75), rgba(255,255,255,0.1) 22%, transparent 45%),
-        radial-gradient(circle at 68% 74%, rgba(90,150,200,0.3), transparent 65%);
+        radial-gradient(circle at 30% 24%, rgba(255,255,255,0.65), rgba(255,255,255,0.08) 20%, transparent 42%),
+        radial-gradient(circle at 65% 72%, rgba(70,140,210,0.45), transparent 65%),
+        radial-gradient(circle at 50% 50%, rgba(90,160,220,0.18), transparent 70%);
 }
 
 .bubble::after {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
+    top: 8%;
+    left: 10%;
+    width: 46%;
+    height: 46%;
+    border-radius: 50%;
     background: conic-gradient(from 0deg,
-        rgba(255,120,190,0.5), rgba(130,200,255,0.45), rgba(160,255,210,0.45),
-        rgba(255,225,130,0.45), rgba(210,140,255,0.5), rgba(255,120,190,0.5));
+        rgba(255,90,150,0.9), rgba(120,190,255,0.9), rgba(140,255,190,0.9),
+        rgba(255,235,120,0.9), rgba(200,120,255,0.9), rgba(255,90,150,0.9));
     mix-blend-mode: color-dodge;
-    opacity: 0.7;
-    animation: spin 6s linear infinite;
+    opacity: 0.55;
+    filter: blur(2px);
+    animation: spin 5s linear infinite;
     pointer-events: none;
+    z-index: 2;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-.hole {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,255,255,0.85), rgba(255,255,255,0));
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0.15);
-}
 
 .particle {
     position: absolute;
@@ -105,34 +104,19 @@
     height: 3px;
     margin: -1.5px 0 0 -3px;
     border-radius: 40%;
-    background: linear-gradient(90deg, rgba(255,255,255,0.9), rgba(180,220,255,0.5));
+    background: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(180,220,255,0.6));
     opacity: 0;
     pointer-events: none;
 }
 
-.bubble-slot.popping .bubble {
-    animation: pop-bubble 0.4s ease-out forwards;
-}
-.bubble-slot.popping .hole {
-    animation: pop-hole 0.4s ease-out forwards;
-}
 .bubble-slot.popping .particle {
-    animation: pop-particle 0.5s ease-out forwards;
+    animation: pop-particle 0.35s ease-out forwards;
+    animation-delay: 0.08s;
 }
 
-@keyframes pop-bubble {
-    0%   { opacity: 1; transform: scale(1,1); }
-    35%  { transform: scale(1.12, 0.85); }
-    60%  { transform: scale(0.85, 1.1); opacity: 0.6; }
-    100% { opacity: 0; transform: scale(1.3, 0.6); }
-}
-@keyframes pop-hole {
-    0%   { opacity: 0.9; transform: scale(0.15); }
-    100% { opacity: 0; transform: scale(2.4); }
-}
 @keyframes pop-particle {
     0%   { opacity: 1; transform: translate(0,0) rotate(0deg) scale(1); }
-    100% { opacity: 0; transform: translate(var(--dx, 20px), var(--dy, 20px)) rotate(120deg) scale(0.4); }
+    100% { opacity: 0; transform: translate(var(--dx, 20px), var(--dy, 20px)) rotate(120deg) scale(0.3); }
 }
 
 @keyframes travel {

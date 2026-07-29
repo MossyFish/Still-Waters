@@ -3,6 +3,7 @@ const LAP_SECONDS = 9;
 const SLOT_COUNT = 3;
 const WOBBLES = ['wobble-a', 'wobble-b', 'wobble-c'];
 const POP_PROGRESS = 0.92;
+const POP_DURATION_MS = 400;
 
 let photos = [];
 let nextPhoto = 0;
@@ -33,10 +34,40 @@ function pickWobble(bubble) {
 function randomizeParticles(slot) {
     slot.querySelectorAll('.particle').forEach((p) => {
         const angle = Math.random() * Math.PI * 2;
-        const dist = 20 + Math.random() * 26;
+        const dist = 22 + Math.random() * 28;
         p.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
         p.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
     });
+}
+
+function popBubbleHole(bubbleEl, durationMs) {
+    const centers = Array.from({ length: 4 }, () => ({
+        x: 35 + Math.random() * 30,
+        y: 35 + Math.random() * 30,
+        offset: Math.random() * 18,
+    }));
+    const start = performance.now();
+
+    function frame(now) {
+        const t = Math.min(1, (now - start) / durationMs);
+        const eased = t^3;
+        const basePct = eased * 160;
+
+        const layers = centers.map((c) => {
+            const pct = Math.max(0, basePct - c.offset);
+            return `radial-gradient(circle at ${c.x}% ${c.y}%, transparent ${pct}%, black ${pct + 6}%)`;
+        }).join(', ');
+
+        bubbleEl.style.maskImage = layers;
+        bubbleEl.style.webkitMaskImage = layers;
+
+        if (t < 1) {
+            requestAnimationFrame(frame);
+        } else {
+            bubbleEl.style.opacity = '0';
+        }
+    }
+    requestAnimationFrame(frame);
 }
 
 function buildSlot(photoIndex, delaySeconds) {
@@ -51,20 +82,19 @@ function buildSlot(photoIndex, delaySeconds) {
     bubble.className = 'bubble';
     pickWobble(bubble);
 
+    const photo = document.createElement('div');
+    photo.className = 'photo';
     const img = document.createElement('img');
     img.src = photos[photoIndex % photos.length].src;
     img.alt = photos[photoIndex % photos.length].alt || '';
-    bubble.appendChild(img);
+    photo.appendChild(img);
+    bubble.appendChild(photo);
 
     const glass = document.createElement('div');
     glass.className = 'glass';
     bubble.appendChild(glass);
 
     inner.appendChild(bubble);
-
-    const hole = document.createElement('div');
-    hole.className = 'hole';
-    inner.appendChild(hole);
 
     for (let i = 0; i < 7; i++) {
         const p = document.createElement('span');
@@ -97,14 +127,17 @@ function popLane(lane) {
     if (lane.popped) return;
     lane.popped = true;
     if (lane.anim) lane.anim.pause();
+
+    const bubble = lane.slot.querySelector('.bubble');
     randomizeParticles(lane.slot);
     lane.slot.classList.add('popping');
+    popBubbleHole(bubble, POP_DURATION_MS);
 
     setTimeout(() => {
         const laneIndex = activeLanes.indexOf(lane);
         lane.slot.remove();
         spawnLane(laneIndex, 0);
-    }, 480);
+    }, POP_DURATION_MS + 60);
 }
 
 function monitorLanes() {
