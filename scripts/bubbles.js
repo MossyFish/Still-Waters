@@ -10,6 +10,9 @@ const EDGE_PARTICLE_TRIGGER = 0.65;
 const EDGE_PARTICLE_COUNT = 10;
 const WOBBLE_SHAPES = ['wobble-a', 'wobble-b', 'wobble-c'];
 
+const AMBIENT_SPAWN_MS = 900;
+const AMBIENT_MAX = 12;
+
 let photos = [];
 let nextPhotoIndex = 0;
 let bubbles = [];
@@ -70,7 +73,7 @@ function popHole(bubbleEl, bubbleSlot, durationMs) {
     const tears = Array.from({ length: 4 }, () => ({
         x: 35 + Math.random() * 30,
         y: 35 + Math.random() * 30,
-        delay: Math.random() * 10,
+        delay: Math.random() * 6,
         warpX: 0.75 + Math.random() * 0.5,
         warpY: 0.75 + Math.random() * 0.5,
     }));
@@ -173,6 +176,40 @@ function checkPops() {
     bubbles.forEach((bubble) => {
         if (!bubble.popped && now - bubble.releasedAt >= POP_LIFE_MS) pop(bubble);
     });
+}
+
+function spawnAmbient() {
+    if (ambientCount >= AMBIENT_MAX) return;
+    ambientCount++;
+    const el = document.createElement('div');
+    el.className = 'ambient-bubble';
+
+    const size = 8 + Math.random() * 22;
+    const startX = Math.random() * 100;
+    const drift = (Math.random() - 0.5) * 60;
+    const duration = 3 + Math.random() * 4;
+
+    el.style.width = `${size}px`;
+    el.style.height = `${size}px`;
+    el.style.left = `${startX}%`;
+    el.style.setProperty('--drift', `${drift}px`);
+    el.style.animation = `ambient-rise ${duration}s linear forwards`;
+
+    function remove() {
+        el.remove();
+        ambientCount--;
+    }
+
+    el.addEventListener('animationend', remove);
+    el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (el.classList.contains('popping')) return;
+        el.style.animation = 'none';
+        el.classList.add('popping');
+        setTimeout(remove, 260);
+    });
+
+    bubblePond.appendChild(el);
 }
 
 async function start(photoList) {
