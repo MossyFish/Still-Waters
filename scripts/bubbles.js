@@ -2,9 +2,11 @@ const bubblePond = document.getElementById('bubblePond');
 const LAP_SECONDS = 9;
 const SLOT_COUNT = 3;
 const WOBBLES = ['wobble-a', 'wobble-b', 'wobble-c'];
+const POP_PROGRESS = 0.92;
 
 let photos = [];
-let nextPhoto = SLOT_COUNT;
+let nextPhoto = 0;
+let activeLanes = [];
 const imageCache = new Map();
 
 function loadImage(src) {
@@ -28,19 +30,19 @@ function pickWobble(bubble) {
     bubble.style.animationDelay = `-${(Math.random() * 6).toFixed(2)}s`;
 }
 
-function randomDroplets(container) {
-    container.querySelectorAll('.droplet').forEach((d) => {
+function randomizeParticles(slot) {
+    slot.querySelectorAll('.particle').forEach((p) => {
         const angle = Math.random() * Math.PI * 2;
-        const dist = 18 + Math.random() * 22;
-        d.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
-        d.style.setProperty('--dy', `${Math.sin(angle) * dist + 6}px`);
+        const dist = 20 + Math.random() * 26;
+        p.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+        p.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
     });
 }
 
-function buildSlot(startIndex, delay) {
+function buildSlot(photoIndex, delaySeconds) {
     const slot = document.createElement('div');
     slot.className = 'bubble-slot';
-    slot.style.animationDelay = delay;
+    slot.style.animationDelay = `-${delaySeconds.toFixed(2)}s`;
 
     const inner = document.createElement('div');
     inner.className = 'bubble-inner';
@@ -50,8 +52,8 @@ function buildSlot(startIndex, delay) {
     pickWobble(bubble);
 
     const img = document.createElement('img');
-    img.src = photos[startIndex % photos.length].src;
-    img.alt = photos[startIndex % photos.length].alt || '';
+    img.src = photos[photoIndex % photos.length].src;
+    img.alt = photos[photoIndex % photos.length].alt || '';
     bubble.appendChild(img);
 
     const glass = document.createElement('div');
@@ -60,47 +62,60 @@ function buildSlot(startIndex, delay) {
 
     inner.appendChild(bubble);
 
-    const ring = document.createElement('div');
-    ring.className = 'ring';
-    inner.appendChild(ring);
+    const hole = document.createElement('div');
+    hole.className = 'hole';
+    inner.appendChild(hole);
 
-    const flash = document.createElement('span');
-    flash.className = 'flash';
-    inner.appendChild(flash);
-
-    for (let i = 0; i < 6; i++) {
-        const d = document.createElement('span');
-        d.className = 'droplet';
-        inner.appendChild(d);
+    for (let i = 0; i < 7; i++) {
+        const p = document.createElement('span');
+        p.className = 'particle';
+        inner.appendChild(p);
     }
-    randomDroplets(inner);
+    randomizeParticles(inner);
 
     slot.appendChild(inner);
+    return slot;
+}
 
-    slot.addEventListener('animationiteration', (e) => {
-        if (e.animationName !== 'travel') return;
-        const photo = photos[nextPhoto % photos.length];
-        img.src = photo.src;
-        img.alt = photo.alt || '';
-        preload(nextPhoto + 1);
-        preload(nextPhoto + 2);
-        nextPhoto++;
-        pickWobble(bubble);
-        randomDroplets(inner);
-    });
+function spawnLane(laneIndex, delaySeconds) {
+    const photoIndex = nextPhoto;
+    nextPhoto++;
+    preload(nextPhoto);
+    preload(nextPhoto + 1);
 
-    slot.addEventListener('click', () => {
-        const anim = slot.getAnimations().find((a) => a.animationName === 'travel');
-        if (!anim) return;
-        const durationMs = LAP_SECONDS * 1000;
-        const popStart = durationMs * 0.88;
-        const current = anim.currentTime % durationMs;
-        if (current < popStart) {
-            anim.currentTime = popStart + Math.random() * 40;
+    const slot = buildSlot(photoIndex, delaySeconds);
+    bubblePond.appendChild(slot);
+
+    const anim = slot.getAnimations().find((a) => a.animationName === 'travel');
+    const lane = { slot, anim, popped: false };
+
+    slot.addEventListener('click', () => popLane(lane));
+    activeLanes[laneIndex] = lane;
+}
+
+function popLane(lane) {
+    if (lane.popped) return;
+    lane.popped = true;
+    if (lane.anim) lane.anim.pause();
+    randomizeParticles(lane.slot);
+    lane.slot.classList.add('popping');
+
+    setTimeout(() => {
+        const laneIndex = activeLanes.indexOf(lane);
+        lane.slot.remove();
+        spawnLane(laneIndex, 0);
+    }, 480);
+}
+
+function monitorLanes() {
+    activeLanes.forEach((lane) => {
+        if (!lane || lane.popped || !lane.anim || !lane.anim.effect) return;
+        const timing = lane.anim.effect.getComputedTiming();
+        if (typeof timing.progress === 'number' && timing.progress >= POP_PROGRESS) {
+            popLane(lane);
         }
     });
-
-    return slot;
+    requestAnimationFrame(monitorLanes);
 }
 
 function buildBubblePond(list) {
@@ -108,7 +123,8 @@ function buildBubblePond(list) {
     if (!photos.length) return;
 
     bubblePond.innerHTML = '';
-    nextPhoto = SLOT_COUNT;
+    activeLanes = [];
+    nextPhoto = 0;
 
     const firstLoads = [];
     for (let i = 0; i < SLOT_COUNT; i++) {
@@ -117,12 +133,10 @@ function buildBubblePond(list) {
 
     Promise.all(firstLoads).then(() => {
         for (let i = 0; i < SLOT_COUNT; i++) {
-            const delay = `-${(i * (LAP_SECONDS / SLOT_COUNT)).toFixed(2)}s`;
-            bubblePond.appendChild(buildSlot(i, delay));
+            spawnLane(i, i * (LAP_SECONDS / SLOT_COUNT));
         }
         bubblePond.classList.add('ready');
-        preload(SLOT_COUNT + 1);
-        preload(SLOT_COUNT + 2);
+        requestAnimationFrame(monitorLanes);
     });
 }
 
