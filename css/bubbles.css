@@ -2,18 +2,18 @@
     position: relative;
     width: 100%;
     max-width: none;
-    aspect-ratio: 16/6;
+    aspect-ratio: 16/5;
     overflow: hidden;
     container-type: size;
     opacity: 0;
     transition: opacity 0.4s ease;
-    margin-bottom: -30 px; /* this breaks if something goes under it */
+    margin-bottom: -30px; /* this breaks if something goes under it */
 }
 .bubble-pond.ready { opacity: 1; }
 
 .bubble-slot {
     position: absolute;
-    top: 60%;
+    top: 55%;
     left: -15cqw;
     width: min(105cqw, 250px);
     height: min(105cqw, 250px);
@@ -144,37 +144,6 @@
     animation: pop-particle-fall 0.32s ease-in forwards;
 }
 
-.bg-bubble {
-    position: absolute;
-    bottom: -5%;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.55), rgba(180,220,255,0.15) 60%, transparent 75%);
-    border: 1px solid rgba(255,255,255,0.25);
-    box-shadow:
-        inset -2px -2px 4px rgba(15,35,55,0.25),
-        inset 2px 2px 3px rgba(255,255,255,0.4);
-    cursor: pointer;
-    z-index: 0;
-    opacity: 0;
-}
-
-@keyframes bg-rise {
-    0%   { opacity: 0; transform: translate(0, 0) scale(0.7); }
-    8%   { opacity: 0.85; }
-    92%  { opacity: 0.85; }
-    100% { opacity: 0; transform: translate(var(--drift), -120cqh) scale(1); }
-}
-
-.bg-bubble.popping {
-    animation: bg-pop 0.26s ease-out forwards !important;
-}
-
-@keyframes bg-pop {
-    0%   { opacity: 0.85; transform: scale(1); }
-    100% { opacity: 0; transform: scale(1.6); }
-}
-
-
 @keyframes pop-particle-fall {
     0%   { opacity: 1; transform: translate(0,0) scale(1); }
     100% { opacity: 0; transform: translate(var(--dx, 0px), var(--dy, 50px)) scale(0.4); }
@@ -189,7 +158,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .bubble-slot, .bubble, .bubble::after .bg-bubble {
+    .bubble-slot, .bubble, .bubble::after {
         animation: none;
     }
 }
