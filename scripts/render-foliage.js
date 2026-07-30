@@ -11,7 +11,7 @@ const PAD_PALETTES = [
 
 const LEAF_GREENS = ['#4f9a5c','#6bb36f','#3f7a52','#7fb35a','#356b48','#5aa76a','#8cc26a','#2f6b46'];
 
-const PAD_MAJORITY_PALETTES = PAD_PALETTES.filter(p => {
+const PAD_COLORS = PAD_PALETTES.filter(p => {
     const mid = p[1], dark = p[2];
     return (parseInt(mid.slice(1),16) + parseInt(dark.slice(1),16)) / 2 > 0x414141;
 });
@@ -160,7 +160,7 @@ class LilyPad {
         this.driftT = Math.random()*1000;
 
         this.offX = 0; this.offY = 0; this.velX = 0; this.velY = 0;
-        this.palette = PAD_MAJORITY_PALETTES[Math.floor(Math.random()*PAD_MAJORITY_PALETTES.length)];
+        this.palette = PAD_COLORS[Math.floor(Math.random()*PAD_COLORS.length)];
         
         // shape 
         this.notchWidth = 0.35 + Math.random()*0.55;
