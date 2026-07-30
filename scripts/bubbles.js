@@ -1,10 +1,11 @@
 const bubblePond = document.getElementById('bubblePond');
+const popSoundEl = document.getElementById('sfxPop');
 
 const LAP_SECONDS = 9;
 const BUBBLE_COUNT = 3;
 const POP_AT_PROGRESS = 0.92;
-const POP_LIFE_MS = POP_AT_PROGRESS * LAP_SECONDS * 1000; // real time from release to pop
-const RELEASE_EVERY_MS = POP_LIFE_MS / (BUBBLE_COUNT - 1); // 3rd releases right as the 1st is about to pop
+const POP_LIFE_MS = POP_AT_PROGRESS * LAP_SECONDS * 1000; 
+const RELEASE_EVERY_MS = POP_LIFE_MS / (BUBBLE_COUNT - 1); 
 const POP_DURATION_MS = 300;
 const EDGE_PARTICLE_TRIGGER = 0.65;
 const EDGE_PARTICLE_COUNT = 10;
@@ -32,12 +33,6 @@ function loadImage(src) {
         img.onload = img.onerror = () => resolve();
         img.src = src;
     });
-}
-
-function randomWobble(bubbleEl) {
-    WOBBLE_SHAPES.forEach((name) => bubbleEl.classList.remove(name));
-    bubbleEl.classList.add(WOBBLE_SHAPES[Math.floor(Math.random() * WOBBLE_SHAPES.length)]);
-    bubbleEl.style.animationDelay = `-${(Math.random() * 6).toFixed(2)}s`;
 }
 
 function scatterParticles(container) {
@@ -116,7 +111,9 @@ function buildBubble(photoIndex, delaySeconds = 0) {
 
     const bubbleEl = document.createElement('div');
     bubbleEl.className = 'bubble';
-    randomWobble(bubbleEl);
+    WOBBLE_SHAPES.forEach((name) => bubbleEl.classList.remove(name));
+    bubbleEl.classList.add(WOBBLE_SHAPES[Math.floor(Math.random() * WOBBLE_SHAPES.length)]);
+    bubbleEl.style.animationDelay = `-${(Math.random() * 6).toFixed(2)}s`;
 
     const photo = photos[photoIndex % photos.length];
     bubbleEl.innerHTML = `
@@ -139,6 +136,11 @@ function buildBubble(photoIndex, delaySeconds = 0) {
 function pop(bubble) {
     if (bubble.popped) return;
     bubble.popped = true;
+    if (!popSoundEl) return;
+
+    const node = popSoundEl.cloneNode(true);
+    node.playbackRate = 0.85 + Math.random()*0.3;
+    node.play().catch(() => {});
 
     bubble.slot.getAnimations()[0]?.pause();
 
