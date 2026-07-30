@@ -11,10 +11,13 @@ const N_PHASES = 16;
 
 let W, H;
 function resize() {
-  W = canvas.width = buffer.width = window.innerWidth;
-  H = canvas.height = buffer.height = window.innerHeight;
-  if (overlayCanvas) { overlayCanvas.width = W; overlayCanvas.height = H; }
+  const w = window.innerWidth, h = window.innerHeight;
+  if (canvas.width === w && canvas.height === h) return;
+  W = canvas.width = buffer.width = w;
+  H = canvas.height = buffer.height = h;
+  if (overlayCanvas) { overlayCanvas.width = w; overlayCanvas.height = h; }
 }
+
 resize();
 window.addEventListener('resize', resize);
 
@@ -200,10 +203,10 @@ function spawnRipple(x, y, strength = 0.6, opts = {}) {
 canvas.addEventListener('click', e => {
   spawnRipple(e.clientX, e.clientY, 1.3, {
     wobble: true,
-    rings: 2 + Math.floor(Math.random()*3),
-    maxAge: 1.5,
+    rings: 2 + Math.floor(Math.random()*2),
+    maxAge: 2.4,
     decay: 0.98, alphaBoot: 1.35, widthBoost: 1.35, 
-    ringGap: 0.3
+    ringGap: 0.35
   });
 
   nudgeFoliage(e.clientX, e.clientY, 110, 3.2);

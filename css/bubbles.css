@@ -107,8 +107,8 @@
         rgba(255,235,150,0.45) 268deg,
         rgba(255,255,255,0) 285deg,
         rgba(255,255,255,0) 360deg);
-    mask-image: radial-gradient(circle, transparent 66%, black 72%, black 84%, transparent 90%);
     -webkit-mask-image: radial-gradient(circle, transparent 66%, black 72%, black 84%, transparent 90%);
+    mask-image: radial-gradient(circle, transparent 66%, black 72%, black 84%, transparent 90%);
     mix-blend-mode: screen;
     opacity: 0.8;
     filter: blur(1.5px);

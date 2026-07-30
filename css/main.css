@@ -60,8 +60,8 @@ html, body {
     height: 100%; 
 }
 
-#intro.warping, 
-#content.warping { 
+#intro, 
+#content { 
     filter: url(#swirlFilter);
 }
 
@@ -105,7 +105,7 @@ html, body {
 
 h1.name {
     font-family: 'Rajdhani', sans-serif;
-    font-size: clamp(1.9rem, 3.6vw, 2.6rem);
+    font-size: clamp(2.0rem, 3.6vw, 2.7rem);
     font-weight: 600;
     letter-spacing: 0.03em;
     margin: 0 0 6px;
@@ -142,7 +142,7 @@ p.body-text {
     line-height: 1.7;
     font-weight: 300;
     color: rgba(243, 239, 228, 0.88);
-    font-size: 0.98rem;
+    font-size: 1.15rem;
     max-width: 60ch;
 }
 
@@ -156,11 +156,11 @@ p.body-text {
 ::selection {
     background-color: rgba(64, 140, 220, 0.35);
     color: inherit;
-    text-shadow: 0 0 2px rgba(120, 190, 255, 0.9);
+    text-shadow: 0 2 2px rgba(120, 190, 255, 0.9);
 }
 
 ::-moz-selection {
     background-color: rgba(64, 140, 220, 0.35);
     color: inherit;
-    text-shadow: 0 0 2px rgba(120, 190, 255, 0.9);
+    text-shadow: 0 2 2px rgba(120, 190, 255, 0.9);
 }
