@@ -1,5 +1,5 @@
 ## Description 
-A pond that's doubling as my personal website (for now). The purpose is to be aesthetic
+A pond that's doubling as my personal website. The fish flicker a little because I drew all the frames and got tired of it. Pond is interactive!
 
 <img width="1917" height="873" alt="image" src="https://github.com/user-attachments/assets/8c43c462-0984-4b4d-b695-a856df884516" />
 
