@@ -7,17 +7,17 @@
     container-type: size;
     opacity: 0;
     transition: opacity 0.4s ease;
+    margin-bottom: -30 px; /* this breaks if something goes under it */
 }
 .bubble-pond.ready { opacity: 1; }
 
 .bubble-slot {
     position: absolute;
-    top: 50%;
+    top: 60%;
     left: -15cqw;
-    width: min(110cqw, 250px);
-    height: min(110cqw, 250px);
-    margin: calc(min(110cqw, 250px) / -2) 0 0 calc(min(110cqw, 250px) / -2);
-    animation: travel 9s linear forwards;
+    width: min(105cqw, 250px);
+    height: min(105cqw, 250px);
+    margin: calc(min(105cqw, 250px) / -2) 0 0 calc(min(105cqw, 250px) / -2);
     z-index: 2;
     cursor: pointer;
 }
@@ -29,11 +29,11 @@
 }
 
 .bubble-slot:hover .bubble-inner {
-    transform: translateY(-10%);
+    transform: translateY(8%);
 }
 
 .bubble-slot:hover .bubble {
-    filter: brightness(1.15);
+    filter: brightness(1.2);
 }
 
 .bubble {
@@ -111,7 +111,7 @@
 
 .particle {
     position: absolute;
-    top: 50%;
+    top: 55%;
     left: 50%;
     width: 4px;
     height: 2px;
@@ -181,9 +181,10 @@
 }
 
 @keyframes travel {
-    0% { left: -18cqw; transform: scale(0.2); opacity: 0; animation-timing-function: ease-out; }
-    6% { left: 9%; transform: scale(1.06); opacity: 1; }
-    9% { left: 6%; transform: scale(1); opacity: 1; }
+    0% { left: -18cqw; transform: scale(0.15); opacity: 0; animation-timing-function: ease-out; }
+    5% { left: -6cqw;  transform: scale(0.45); opacity: 1; }
+    8% { left: 8%; transform: scale(1.05); }
+    9.5% { left: 6%; transform: scale(1); }
     100% { left: 96%; transform: scale(1); opacity: 1; }
 }
 

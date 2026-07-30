@@ -1,11 +1,11 @@
 const bubblePond = document.getElementById('bubblePond');
 const popSoundEl = document.getElementById('sfxPop');
 
-const LAP_SECONDS = 9;
+const LAP_SECONDS = 7;
 const BUBBLE_COUNT = 3;
 const POP_AT_PROGRESS = 0.92;
 const POP_LIFE_MS = POP_AT_PROGRESS * LAP_SECONDS * 1000; 
-const RELEASE_EVERY_MS = POP_LIFE_MS / (BUBBLE_COUNT - 1); 
+const RELEASE_EVERY_MS = POP_LIFE_MS / (BUBBLE_COUNT - 1) * 0.7; 
 const POP_DURATION_MS = 300;
 const EDGE_PARTICLE_TRIGGER = 0.65;
 const EDGE_PARTICLE_COUNT = 10;
@@ -68,7 +68,7 @@ function popHole(bubbleEl, bubbleSlot, durationMs) {
     const tears = Array.from({ length: 4 }, () => ({
         x: 35 + Math.random() * 30,
         y: 35 + Math.random() * 30,
-        delay: Math.random() * 6,
+        delay: Math.random() * 5,
         warpX: 0.75 + Math.random() * 0.5,
         warpY: 0.75 + Math.random() * 0.5,
     }));
@@ -103,7 +103,7 @@ function popHole(bubbleEl, bubbleSlot, durationMs) {
 function buildBubble(photoIndex, delaySeconds = 0) {
     const slot = document.createElement('div');
     slot.className = 'bubble-slot';
-    slot.style.animation = 'travel 9s linear forwards';
+    slot.style.animation = `travel ${LAP_SECONDS}s linear forwards`;
     slot.style.animationDelay = `-${delaySeconds.toFixed(2)}s`;
 
     const inner = document.createElement('div');
@@ -151,6 +151,7 @@ function pop(bubble) {
     setTimeout(() => {
         bubble.slot.remove();
         bubbles = bubbles.filter((b) => b !== bubble);
+        if (bubbles.length === 0) release();
     }, POP_DURATION_MS + 550);
 }
 
@@ -190,11 +191,13 @@ function spawnAmbient() {
     const startX = Math.random() * 100;
     const drift = (Math.random() - 0.5) * 60;
     const duration = 3 + Math.random() * 4;
+    const riseDistance = bubblePond.clientHeight * 1.2; 
 
     el.style.width = `${size}px`;
     el.style.height = `${size}px`;
     el.style.left = `${startX}%`;
     el.style.setProperty('--drift', `${drift}px`);
+    el.style.setProperty('--rise', `-${riseDistance}px`);
     el.style.animation = `ambient-rise ${duration}s linear forwards`;
 
     function remove() {
