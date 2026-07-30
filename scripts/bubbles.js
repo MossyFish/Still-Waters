@@ -1,22 +1,28 @@
 const bubblePond = document.getElementById('bubblePond');
 const popSoundEl = document.getElementById('sfxPop');
 
-const LAP_SECONDS = 8;
+const LAP_SECONDS = 9;
 const BUBBLE_COUNT = 3;
 const POP_AT_PROGRESS = 0.85;
-const POP_LIFE_MS = POP_AT_PROGRESS * LAP_SECONDS * 1000; 
-const RELEASE_EVERY_MS = 3800; 
-const POP_DURATION_MS = 260;
+const POP_LIFE_MS = POP_AT_PROGRESS * LAP_SECONDS * 1000;
+const RELEASE_EVERY_MS = 3800;
+const POP_DURATION_MS = 300;
 const EDGE_PARTICLE_TRIGGER = 0.65;
 const EDGE_PARTICLE_COUNT = 10;
 const WOBBLE_SHAPES = ['wobble-a', 'wobble-b', 'wobble-c'];
 
-const AMBIENT_SPAWN_MS = 900;
-const AMBIENT_MAX = 12;
+const FALLBACK_SRC = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+        <rect width="200" height="200" fill="#345973"/>
+        <circle cx="100" cy="100" r="60" fill="none" stroke="#9fc8e8" stroke-width="4" opacity="0.6"/>
+        <circle cx="100" cy="80" r="10" fill="#9fc8e8" opacity="0.6"/>
+    </svg>
+`);
 
 let photos = [];
 let nextPhotoIndex = 0;
 let bubbles = [];
+let releaseTimer = null;
 const imageCache = new Map();
 
 function preload(index) {
@@ -136,11 +142,11 @@ function buildBubble(photoIndex, delaySeconds = 0) {
 function pop(bubble) {
     if (bubble.popped) return;
     bubble.popped = true;
-    if (!popSoundEl) return;
-
-    const node = popSoundEl.cloneNode(true);
-    node.playbackRate = 0.85 + Math.random()*0.3;
-    node.play().catch(() => {});
+    if (popSoundEl) {
+        const node = popSoundEl.cloneNode(true);
+        node.playbackRate = 0.85 + Math.random()*0.3;
+        node.play().catch(() => {});
+    }
 
     bubble.slot.getAnimations()[0]?.pause();
 
@@ -151,7 +157,7 @@ function pop(bubble) {
     setTimeout(() => {
         bubble.slot.remove();
         bubbles = bubbles.filter((b) => b !== bubble);
-        if (bubbles.length === 0) release();
+        if (bubbles.length === 0) scheduleRelease(50);
     }, POP_DURATION_MS + 550);
 }
 
@@ -173,48 +179,20 @@ function release(delaySeconds = 0) {
     bubbles.push(bubble);
 }
 
-// for the bubble stacking issue
+function scheduleRelease(delay = RELEASE_EVERY_MS) {
+    clearTimeout(releaseTimer);
+    releaseTimer = setTimeout(() => {
+        release();
+        scheduleRelease();
+    }, delay);
+}
+
+// for the bubble stacking 
 function checkPops() {
     const now = performance.now();
     bubbles.forEach((bubble) => {
         if (!bubble.popped && now - bubble.releasedAt >= POP_LIFE_MS) pop(bubble);
     });
-}
-
-function spawnAmbient() {
-    if (ambientCount >= AMBIENT_MAX) return;
-    ambientCount++;
-    const el = document.createElement('div');
-    el.className = 'ambient-bubble';
-
-    const size = 8 + Math.random() * 22;
-    const startX = Math.random() * 100;
-    const drift = (Math.random() - 0.5) * 60;
-    const duration = 3 + Math.random() * 4;
-    const riseDistance = bubblePond.clientHeight * 1.2; 
-
-    el.style.width = `${size}px`;
-    el.style.height = `${size}px`;
-    el.style.left = `${startX}%`;
-    el.style.setProperty('--drift', `${drift}px`);
-    el.style.setProperty('--rise', `-${riseDistance}px`);
-    el.style.animation = `ambient-rise ${duration}s linear forwards`;
-
-    function remove() {
-        el.remove();
-        ambientCount--;
-    }
-
-    el.addEventListener('animationend', remove);
-    el.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (el.classList.contains('popping')) return;
-        el.style.animation = 'none';
-        el.classList.add('popping');
-        setTimeout(remove, 260);
-    });
-
-    bubblePond.appendChild(el);
 }
 
 async function start(photoList) {
@@ -235,7 +213,7 @@ async function start(photoList) {
         if (document.visibilityState === 'visible') checkPops();
     });
 
-    setInterval(() => release(), RELEASE_EVERY_MS);
+    scheduleRelease();
 }
 
 fetch('/api/photos')
@@ -244,4 +222,7 @@ fetch('/api/photos')
         return res.json();
     })
     .then(start)
-    .catch((err) => console.error('Failed to load photo list:', err));
+    .catch((err) => {
+        console.error('Failed to load photo list:', err);
+        start([{ src: FALLBACK_SRC, alt: 'placeholder' }]);
+    });
