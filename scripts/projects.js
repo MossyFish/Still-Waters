@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setPreview(desc, sentences) {
         const w = window.innerWidth;
+        let count;
         if (w < 480) count = 1;
         if (w < 768) count = 2;
         else count = 3; 
@@ -60,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (desc) {
             const fullText = desc.textContent.trim();
-            const sentences = fullText.match(/[^.!?]+[.!?]+(\s+|$)/g) || [fullText];
             const sentences = fullText.match(/[^.!?]+[.!?]+(\s+|$)/g) || [fullText];
             desc.dataset.full = fullText;
             descSentenceMap.set(desc, sentences);
