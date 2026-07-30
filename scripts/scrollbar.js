@@ -1,208 +1,206 @@
-const bubblePond = document.getElementById('bubblePond');
-const popSoundEl = document.getElementById('sfxPop');
+document.addEventListener('DOMContentLoaded', () => {
+    const tickSound = document.getElementById('sfxClick');
 
-const LAP_SECONDS = 7;
-const BUBBLE_COUNT = 3;
-const POP_AT_PROGRESS = 0.92;
-const POP_LIFE_MS = POP_AT_PROGRESS * LAP_SECONDS * 1000; 
-const RELEASE_EVERY_MS = POP_LIFE_MS / (BUBBLE_COUNT - 1) * 0.7; 
-const POP_DURATION_MS = 300;
-const EDGE_PARTICLE_TRIGGER = 0.65;
-const EDGE_PARTICLE_COUNT = 10;
-const WOBBLE_SHAPES = ['wobble-a', 'wobble-b', 'wobble-c'];
-
-let photos = [];
-let nextPhotoIndex = 0;
-let bubbles = [];
-const imageCache = new Map();
-
-function preload(index) {
-    const src = photos[index % photos.length]?.src;
-    if (!src || imageCache.has(src)) return;
-    const img = new Image();
-    img.src = src;
-    imageCache.set(src, img);
-}
-
-function loadImage(src) {
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = img.onerror = () => resolve();
-        img.src = src;
-    });
-}
-
-function scatterParticles(container) {
-    container.querySelectorAll('.particle').forEach((particle) => {
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 34 + Math.random() * 46;
-        particle.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
-        particle.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
-    });
-}
-
-function spawnEdgeParticles(container) {
-    for (let i = 0; i < EDGE_PARTICLE_COUNT; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const edgeRadius = 46;
-        const x = 50 + Math.cos(angle) * edgeRadius;
-        const y = 50 + Math.sin(angle) * edgeRadius;
-
-        const particle = document.createElement('span');
-        particle.className = 'particle particle-fall';
-        particle.style.left = `${x}%`;
-        particle.style.top = `${y}%`;
-        particle.style.setProperty('--dx', `${(Math.random() - 0.5) * 30}px`);
-        particle.style.setProperty('--dy', `${40 + Math.random() * 35}px`);
-        particle.style.animationDelay = `${(Math.random() * 0.08).toFixed(2)}s`;
-        container.appendChild(particle);
-
-        setTimeout(() => particle.remove(), 650);
+    function playTick() {
+        if (!tickSound) return;
+        const node = tickSound.cloneNode(true);
+        node.playbackRate = 0.96 + Math.random() * 0.08;
+        node.volume = 1.0;
+        node.currentTime = 0;
+        node.play().catch(() => {});
     }
-}
 
-function popHole(bubbleEl, bubbleSlot, durationMs) {
-    const tears = Array.from({ length: 4 }, () => ({
-        x: 35 + Math.random() * 30,
-        y: 35 + Math.random() * 30,
-        delay: Math.random() * 5,
-        warpX: 0.75 + Math.random() * 0.5,
-        warpY: 0.75 + Math.random() * 0.5,
-    }));
-    const start = performance.now();
-    let edgeParticlesSpawned = false;
+    function buildPad(size) {
+        const canvas = document.createElement('canvas');
+        const scale = window.devicePixelRatio || 1;
+        canvas.width = size * scale;
+        canvas.height = size * scale;
+        canvas.style.width = `${size}px`;
+        canvas.style.height = `${size}px`;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(scale, scale);
+        ctx.translate(size / 2, size / 2);
+        ctx.rotate(-Math.PI / 2);
 
-    function step(now) {
-        const t = Math.min(1, (now - start) / durationMs);
-        const eased = 1 - (1 - t) ** 2;
-        const grow = eased * 165;
+        const r = size * 0.42;
+        const palette = PAD_COLORS[Math.floor(Math.random() * PAD_COLORS.length)];
+        const [c0, c1, c2] = palette;
+        const bodyColor = lerpHex(c1, c2, 0.3);
+        const edgeColor = lerpHex(bodyColor, c2, 0.5);
+        const centerLight = lerpHex(c0, '#d1ffdb', 0.2);
+        const veinColor = lerpHex(c1, c0, 0.7);
 
-        bubbleEl.style.maskImage = tears
-            .map(({ x, y, delay, warpX, warpY }) => {
-                const r = Math.max(0, grow - delay);
-                const rx = (r * warpX).toFixed(1);
-                const ry = (r * warpY).toFixed(1);
-                return `radial-gradient(ellipse ${rx}% ${ry}% at ${x}% ${y}%, transparent 60%, black 70%)`;
-            })
-            .join(', ');
+        let altPalette;
+        do { altPalette = PAD_COLORS[Math.floor(Math.random() * PAD_COLORS.length)]; }
+        while (altPalette === palette);
+        const mixColor = lerpHex(altPalette[Math.floor(Math.random() * altPalette.length)], bodyColor, 0.1);
+        const mixAngle = Math.random() * Math.PI * 2;
 
-        if (!edgeParticlesSpawned && t > EDGE_PARTICLE_TRIGGER) {
-            edgeParticlesSpawned = true;
-            spawnEdgeParticles(bubbleSlot);
+        const outlinePts = makePadOutline(r, 0.5, 0.65, 0.07, Math.random() * 10, Math.random() * 10, 40);
+
+        ctx.save();
+        ctx.filter = 'blur(3px)';
+        ctx.translate(1.5, 2.5);
+        blobPath(ctx, outlinePts);
+        ctx.fillStyle = 'rgba(0,0,0,0.28)';
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        blobPath(ctx, outlinePts);
+        ctx.clip();
+
+        blobPath(ctx, outlinePts);
+        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+        grad.addColorStop(0, hexToRgba(bodyColor, 1));
+        grad.addColorStop(1, hexToRgba(edgeColor, 1));
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // secondary-color patch blended into ~30% of the pad
+        {
+            const centerDist = r * 0.45;
+            const bx = Math.cos(mixAngle) * centerDist;
+            const by = Math.sin(mixAngle) * centerDist;
+            const blobR = r * 0.85;
+            ctx.beginPath();
+            ctx.arc(bx, by, blobR, 0, Math.PI * 2);
+            const mixGrad = ctx.createRadialGradient(bx, by, 0, bx, by, blobR * 0.85);
+            mixGrad.addColorStop(0, hexToRgba(mixColor, 0.8));
+            mixGrad.addColorStop(0.55, hexToRgba(mixColor, 0.45));
+            mixGrad.addColorStop(1, hexToRgba(mixColor, 0));
+            ctx.fillStyle = mixGrad;
+            ctx.fill();
         }
 
-        if (t < 1) requestAnimationFrame(step);
-        else bubbleEl.style.opacity = '0';
+        // light streaks radiating from center
+        ctx.save();
+        ctx.filter = 'blur(0.6px)';
+        ctx.lineCap = 'round';
+        const veinCount = 5;
+        for (let i = 0; i < veinCount; i++) {
+            const angle = (i / veinCount) * Math.PI * 2 + Math.random() * 0.3;
+            const len = r * (0.45 + Math.random() * 0.35);
+            ctx.strokeStyle = hexToRgba(veinColor, 0.22 + Math.random() * 0.15);
+            ctx.lineWidth = r * 0.05;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(Math.cos(angle) * len, Math.sin(angle) * len);
+            ctx.stroke();
+        }
+        ctx.restore();
+
+        // rim darkening
+        const rimGrad = ctx.createRadialGradient(0, 0, r * 0.45, 0, 0, r);
+        rimGrad.addColorStop(0, 'rgba(0,0,0,0)');
+        rimGrad.addColorStop(0.7, 'rgba(0,0,0,0.18)');
+        rimGrad.addColorStop(1, 'rgba(0,0,0,0.4)');
+        ctx.fillStyle = rimGrad;
+        ctx.fill();
+
+        ctx.filter = 'blur(1px)';
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.16, 0, Math.PI * 2);
+        ctx.fillStyle = hexToRgba(centerLight, 0.9);
+        ctx.fill();
+        ctx.filter = 'none';
+
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.07, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(160,220,180,0.55)';
+        ctx.shadowBlur = 6;
+        blobPath(ctx, outlinePts);
+        ctx.strokeStyle = 'rgba(200,255,210,0.3)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.restore();
+
+        return canvas;
     }
-    requestAnimationFrame(step);
-}
 
-function buildBubble(photoIndex, delaySeconds = 0) {
-    const slot = document.createElement('div');
-    slot.className = 'bubble-slot';
-    slot.style.animation = `travel ${LAP_SECONDS}s linear forwards`;
-    slot.style.animationDelay = `-${delaySeconds.toFixed(2)}s`;
+    document.querySelectorAll('.exp-block').forEach((block) => {
+        const list = block.querySelector('.scroll-list');
+        const track = block.querySelector('.fake-scrollbar-track');
+        const thumb = block.querySelector('.fake-scrollbar-thumb');
+        if (!list || !track || !thumb) return;
+        thumb.appendChild(buildPad(48));
 
-    const inner = document.createElement('div');
-    inner.className = 'bubble-inner';
+        const items = Array.from(list.querySelectorAll('.exp-item'));
+        if (!items.length) return;
 
-    const bubbleEl = document.createElement('div');
-    bubbleEl.className = 'bubble';
-    WOBBLE_SHAPES.forEach((name) => bubbleEl.classList.remove(name));
-    bubbleEl.classList.add(WOBBLE_SHAPES[Math.floor(Math.random() * WOBBLE_SHAPES.length)]);
-    bubbleEl.style.animationDelay = `-${(Math.random() * 6).toFixed(2)}s`;
+        let currentIndex = -1;
+        let dragging = false;
 
-    const photo = photos[photoIndex % photos.length];
-    bubbleEl.innerHTML = `
-        <div class="photo"><img src="${photo.src}" alt="${photo.alt || ''}"></div>
-        <div class="glass"></div>
-    `;
-    inner.appendChild(bubbleEl);
+        function setActive(index, { silent = false } = {}) {
+            index = Math.max(0, Math.min(items.length - 1, index));
+            if (index === currentIndex) return;
+            if (currentIndex >= 0) items[currentIndex].classList.remove('scroll-active');
+            items[index].classList.add('scroll-active');
+            currentIndex = index;
+            if (!silent) playTick();
+            positionThumb(index);
+        }
 
-    for (let i = 0; i < 7; i++) {
-        const particle = document.createElement('span');
-        particle.className = 'particle';
-        inner.appendChild(particle);
-    }
-    scatterParticles(inner);
+        function positionThumb(index) {
+            const trackH = track.clientHeight;
+            const thumbH = thumb.offsetHeight;
+            const maxY = trackH - thumbH;
+            let y;
+            if (index === 0) y = 0;
+            else if (index === items.length - 1) y = maxY;
+            else {
+                const item = items[index];
+                const listRect = list.getBoundingClientRect();
+                const itemRect = item.getBoundingClientRect();
+                const itemMidY = itemRect.top + itemRect.height / 2 - listRect.top;
+                y = Math.max(0, Math.min(maxY, itemMidY - thumbH / 2));
+            }
+            thumb.style.setProperty('--pad-y', `${y}px`);
+        }
 
-    slot.appendChild(inner);
-    return slot;
-}
+        function indexFromClientY(clientY) {
+            let closest = 0;
+            let minDist = Infinity;
+            items.forEach((item, i) => {
+                const rect = item.getBoundingClientRect();
+                const mid = rect.top + rect.height / 2;
+                const dist = Math.abs(clientY - mid);
+                if (dist < minDist) { minDist = dist; closest = i; }
+            });
+            return closest;
+        }
 
-function pop(bubble) {
-    if (bubble.popped) return;
-    bubble.popped = true;
-    if (!popSoundEl) return;
+        thumb.addEventListener('pointerdown', (e) => {
+            dragging = true;
+            thumb.setPointerCapture(e.pointerId);
+            thumb.classList.add('dragging');
+        });
 
-    const node = popSoundEl.cloneNode(true);
-    node.playbackRate = 0.85 + Math.random()*0.3;
-    node.play().catch(() => {});
+        thumb.addEventListener('pointermove', (e) => {
+            if (!dragging) return;
+            setActive(indexFromClientY(e.clientY));
+        });
 
-    bubble.slot.getAnimations()[0]?.pause();
+        function endDrag(e) {
+            if (!dragging) return;
+            dragging = false;
+            thumb.classList.remove('dragging');
+        }
+        thumb.addEventListener('pointerup', endDrag);
+        thumb.addEventListener('pointercancel', endDrag);
 
-    scatterParticles(bubble.slot);
-    bubble.slot.classList.add('popping');
-    popHole(bubble.slot.querySelector('.bubble'), bubble.slot, POP_DURATION_MS);
+        track.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('.fake-scrollbar-thumb')) return;
+            setActive(indexFromClientY(e.clientY));
+       });
 
-    setTimeout(() => {
-        bubble.slot.remove();
-        bubbles = bubbles.filter((b) => b !== bubble);
-        if (bubbles.length === 0) release();
-    }, POP_DURATION_MS + 550);
-}
+        window.addEventListener('resize', () => positionThumb(currentIndex));
 
-function release(delaySeconds = 0) {
-    const photoIndex = nextPhotoIndex++;
-    preload(nextPhotoIndex);
-    preload(nextPhotoIndex + 1);
-
-    const slot = buildBubble(photoIndex, delaySeconds);
-    bubblePond.appendChild(slot);
-
-    const bubble = {
-        slot,
-        popped: false,
-        releasedAt: performance.now() - delaySeconds * 1000,
-    };
-
-    slot.addEventListener('click', () => pop(bubble));
-    bubbles.push(bubble);
-}
-
-// for the bubble stacking 
-function checkPops() {
-    const now = performance.now();
-    bubbles.forEach((bubble) => {
-        if (!bubble.popped && now - bubble.releasedAt >= POP_LIFE_MS) pop(bubble);
+        setActive(0, { silent: true });
     });
-}
-
-async function start(photoList) {
-    photos = photoList;
-    if (!photos.length) return;
-
-    await Promise.all(
-        Array.from({ length: BUBBLE_COUNT }, (_, i) => loadImage(photos[i % photos.length].src))
-    );
-
-    for (let i = 0; i < BUBBLE_COUNT; i++) {
-        release(i * (RELEASE_EVERY_MS / 1000));
-    }
-    bubblePond.classList.add('ready');
-
-    setInterval(checkPops, 200);
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') checkPops();
-    });
-
-    setInterval(() => release(), RELEASE_EVERY_MS);
-}
-
-fetch('/api/photos')
-    .then((res) => {
-        if (!res.ok) throw new Error(`/api/photos failed (${res.status})`);
-        return res.json();
-    })
-    .then(start)
-    .catch((err) => console.error('Failed to load photo list:', err));
+});
