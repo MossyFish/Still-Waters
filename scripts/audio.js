@@ -1,4 +1,5 @@
 const ambience = document.getElementById('ambience');
+const ambience2 = document.getElementById('ambience2');
 const sfxRipple = document.getElementById('sfxRipple');
 const sfxSplash = [
   document.getElementById('sfxSplash1'),
@@ -7,6 +8,7 @@ const sfxSplash = [
 ];
 
 ambience.volume = 1.0;
+ambience2.volume = 0.2;
 sfxRipple.volume = 0.2;
 sfxSplash.forEach(s => s.volume = 0.7);  
 
@@ -16,7 +18,8 @@ let ambienceStarted = false;
 function startAmbience(){
   if(ambienceStarted || muted) return;
   ambienceStarted = true;
-  ambience.play().catch(()=>{});
+  ambience.play().catch(() =>{ });
+  ambience2.play().catch(() => {})
 }
 
 window.addEventListener('click', startAmbience, { once: false });
