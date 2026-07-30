@@ -213,7 +213,7 @@ p.body-text {
 
 .fake-scrollbar-thumb:hover,
 .fake-scrollbar-thumb.dragging {
-    transform: translate(-50%, var(--pad-y, 0px)) scale(1.2);
+    transform: translate(-50%, var(--pad-y, 0px)) scale(1.1);
     cursor: grabbing;
 }
 .fake-scrollbar-thumb:hover canvas,

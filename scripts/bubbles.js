@@ -1,12 +1,12 @@
 const bubblePond = document.getElementById('bubblePond');
 const popSoundEl = document.getElementById('sfxPop');
 
-const LAP_SECONDS = 7;
+const LAP_SECONDS = 8;
 const BUBBLE_COUNT = 3;
-const POP_AT_PROGRESS = 0.92;
+const POP_AT_PROGRESS = 0.85;
 const POP_LIFE_MS = POP_AT_PROGRESS * LAP_SECONDS * 1000; 
-const RELEASE_EVERY_MS = POP_LIFE_MS / (BUBBLE_COUNT - 1) * 0.7; 
-const POP_DURATION_MS = 300;
+const RELEASE_EVERY_MS = 3800; 
+const POP_DURATION_MS = 260;
 const EDGE_PARTICLE_TRIGGER = 0.65;
 const EDGE_PARTICLE_COUNT = 10;
 const WOBBLE_SHAPES = ['wobble-a', 'wobble-b', 'wobble-c'];

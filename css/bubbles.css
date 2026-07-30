@@ -1,19 +1,20 @@
 .bubble-pond {
     position: relative;
-    width: 100%;
+    width: calc(100% + 2 * var(--panel-pad-x, 0px));
+    margin-left: calc(-1 * var(--panel-pad-x, 0px));
     max-width: none;
-    aspect-ratio: 16/5;
+    aspect-ratio: 16/6;
     overflow: hidden;
     container-type: size;
     opacity: 0;
     transition: opacity 0.4s ease;
-    margin-bottom: -30px; /* this breaks if something goes under it */
+    margin-bottom: -40px; /* this breaks if something goes under it */
 }
 .bubble-pond.ready { opacity: 1; }
 
 .bubble-slot {
     position: absolute;
-    top: 55%;
+    top: 65%;
     left: -15cqw;
     width: min(105cqw, 250px);
     height: min(105cqw, 250px);
@@ -29,7 +30,7 @@
 }
 
 .bubble-slot:hover .bubble-inner {
-    transform: translateY(8%);
+    transform: translateY(-8%);
 }
 
 .bubble-slot:hover .bubble {
