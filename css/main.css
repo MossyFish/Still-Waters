@@ -66,41 +66,40 @@ html, body {
 }
 
 .mute-btn {
-  position: fixed;
-  top: 22px;
-  right: 26px;
-  z-index: 12;
-  width: 36px;
-  height: 36px;
-  background: rgba(243,239,228,0.04);
-  border: 1px solid rgba(243,239,228,0.16);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--cream);
-  cursor: none;
-  transition: all 0.2s ease;
-  padding: 0;
-  cursor: none;
+    position: fixed;
+    top: 22px;
+    right: 26px;
+    z-index: 12;
+    width: 36px;
+    height: 36px;
+    background: rgba(243,239,228,0.04);
+    border: 1px solid rgba(243,239,228,0.16);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cream);
+    transition: all 0.2s ease;
+    padding: 0;
+    cursor: none;
 
-  box-shadow: 0 2px 0 rgba(0,0,0,0.4), 0 3px 6px rgba(0,0,0,0.25);
-  transform: translateY(0);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.4), 0 3px 6px rgba(0,0,0,0.25);
+    transform: translateY(0);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .mute-btn:hover {
-  border-color: var(--gold);
-  background: rgba(227,179,92,0.1);
-  color: var(--gold);
-  transform: translateY(-3px);
-  box-shadow: 0 5px 0 rgba(0,0,0,0.4), 0 8px 12px rgba(0,0,0,0.3), 0 0 10px rgba(227,179,92,0.25);
+    border-color: var(--gold);
+    background: rgba(227,179,92,0.1);
+    color: var(--gold);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 0 rgba(0,0,0,0.4), 0 8px 12px rgba(0,0,0,0.3), 0 0 10px rgba(227,179,92,0.25);
 }
 
 .mute-btn:active {
-  transform: translateY(0px);
-  box-shadow: 0 1px 0 rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.25);
-  transition: transform 0.06s ease, box-shadow 0.06s ease;
+    transform: translateY(0px);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.25);
+    transition: transform 0.06s ease, box-shadow 0.06s ease;
 }
 
 h1.name {

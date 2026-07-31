@@ -7,9 +7,8 @@ const overlayCanvas = document.getElementById('cursorOverlay');
 const overlayCtx = overlayCanvas ? overlayCanvas.getContext('2d') : null;
 
 const SPRITE_SCALE = 2;
-const N_PHASES = 16;
-
 let W, H;
+
 function resize() {
   const w = window.innerWidth, h = window.innerHeight;
   if (canvas.width === w && canvas.height === h) return;

@@ -22,8 +22,8 @@ function startAmbience(){
   ambience2.play().catch(() => {})
 }
 
-window.addEventListener('click', startAmbience, { once: false });
-window.addEventListener('keydown', startAmbience, { once: false });
+window.addEventListener('click', startAmbience);
+window.addEventListener('keydown', startAmbience);
 
 function playRippleSound(){
   if(muted) return;

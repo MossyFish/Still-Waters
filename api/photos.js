@@ -1,3 +1,4 @@
+// link is https://share.icloud.com/photos/05epiLMCAzsSALPEU6Tyz9csw
 const ALBUM_TOKEN = '05epiLMCAzsSALPEU6Tyz9csw';
 
 export default async function handler(req, res) {
