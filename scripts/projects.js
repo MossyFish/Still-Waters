@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const w = window.innerWidth;
         let count;
         if (w < 480) count = 1;
-        if (w < 768) count = 2;
-        else count = 3; 
+        else if (w < 768) count = 2;
+        else count = 3;
 
         if (sentences.length > count) {
             const preview = sentences.slice(0, count).join('').trim() + '...';
@@ -85,8 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (openBox) collapse(openBox);
             });
         }
-
-        window.hasOpenProject = () => !!openBox;
-        window.collapseOpenProject = () => { if (openBox) collapse(openBox); };
     });
+
+    window.hasOpenProject = () => !!openBox;
+    window.collapseOpenProject = () => { if (openBox) collapse(openBox); };
 })

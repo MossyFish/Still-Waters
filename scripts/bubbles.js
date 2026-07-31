@@ -5,11 +5,14 @@ const LAP_SECONDS = 13;
 const BUBBLE_COUNT = 3;
 const POP_AT_PROGRESS = 0.85;
 const POP_LIFE_MS = POP_AT_PROGRESS * LAP_SECONDS * 1000;
-const RELEASE_EVERY_MS = 2500;
+const RELEASE_EVERY_MS = Math.round(LAP_SECONDS * 1000 / BUBBLE_COUNT); 
 const POP_DURATION_MS = 300;
+
 const EDGE_PARTICLE_TRIGGER = 0.65;
 const EDGE_PARTICLE_COUNT = 10;
+
 const WOBBLE_SHAPES = ['wobble-a', 'wobble-b', 'wobble-c'];
+
 const PHOTO_REFRESH_MS = 5 * 60 * 1000;
 
 const FALLBACK_SRC = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
@@ -185,7 +188,7 @@ function release(delaySeconds = 0) {
 function scheduleRelease(delay = RELEASE_EVERY_MS) {
     clearTimeout(releaseTimer);
     releaseTimer = setTimeout(() => {
-        release();
+        if (bubbles.length < BUBBLE_COUNT) release();
         scheduleRelease();
     }, delay);
 }
@@ -205,22 +208,8 @@ async function loadPhotos() {
         const list = await res.json();
         if (list.length) photos = list;
     } catch (err) {
-        console.error('Failed to refresh photo list:', err);
+        console.error('Photo refresh failed:', err);
     }
-}
-
-async function retryFetches(attempts = 2, delayMs = 1000) {
-    for (let i = 0; i < attempts; i++) {
-        try {
-            const res = await fetch('/api/photos', { cache: 'no-store' });
-            if (!res.ok) throw new Error(`/api/photos failed (${res.status})`);
-            return await res.json();
-        } catch (err) {
-            console.error(`Photo fetch attempt ${i + 1} failed:`, err);
-            if (i < attempts - 1) await new Promise(r => setTimeout(r, delayMs));
-        }
-    }
-    return [];
 }
 
 async function start(photoList) {

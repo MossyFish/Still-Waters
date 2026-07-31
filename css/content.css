@@ -19,11 +19,11 @@
 }
 
 #content {
-  pointer-events: none;
+    pointer-events: none;
 }
 
 #content.visible .panel {
-  pointer-events: auto;
+    pointer-events: auto;
 }
 
 /* Base wrap */
@@ -107,12 +107,6 @@
     color: rgba(243, 239, 228, 0.78);
     margin: 0;
     line-height: 1.55;
-}
-
-.cert-panel { 
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
 }
 
 @media (max-width: 600px) { 
