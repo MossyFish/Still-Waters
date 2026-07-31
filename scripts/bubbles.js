@@ -1,7 +1,7 @@
 const bubblePond = document.getElementById('bubblePond');
 const popSoundEl = document.getElementById('sfxPop');
 
-const LAP_SECONDS = 9;
+const LAP_SECONDS = 13;
 const BUBBLE_COUNT = 3;
 const POP_AT_PROGRESS = 0.85;
 const POP_LIFE_MS = POP_AT_PROGRESS * LAP_SECONDS * 1000;
@@ -10,6 +10,7 @@ const POP_DURATION_MS = 300;
 const EDGE_PARTICLE_TRIGGER = 0.65;
 const EDGE_PARTICLE_COUNT = 10;
 const WOBBLE_SHAPES = ['wobble-a', 'wobble-b', 'wobble-c'];
+const PHOTO_REFRESH_MS = 5 * 60 * 1000;
 
 const FALLBACK_SRC = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
@@ -126,6 +127,8 @@ function buildBubble(photoIndex, delaySeconds = 0) {
         <div class="photo"><img src="${photo.src}" alt="${photo.alt || ''}"></div>
         <div class="glass"></div>
     `;
+    const imgEl = bubbleEl.querySelector('.photo img');
+    imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = FALLBACK_SRC; };
     inner.appendChild(bubbleEl);
 
     for (let i = 0; i < 7; i++) {
@@ -195,6 +198,17 @@ function checkPops() {
     });
 }
 
+async function loadPhotos() {
+    try {
+        const res = await fetch('/api/photos');
+        if (!res.ok) throw new Error(`/api/photos failed (${res.status})`);
+        const list = await res.json();
+        if (list.length) photos = list;
+    } catch (err) {
+        console.error('Failed to refresh photo list:', err);
+    }
+}
+
 async function start(photoList) {
     photos = photoList;
     if (!photos.length) return;
@@ -221,7 +235,10 @@ fetch('/api/photos')
         if (!res.ok) throw new Error(`/api/photos failed (${res.status})`);
         return res.json();
     })
-    .then(start)
+    .then((list) => {
+        start(list.length ? list : [{ src: FALLBACK_SRC, alt: 'placeholder' }]);
+        setInterval(loadPhotos, PHOTO_REFRESH_MS);
+    })
     .catch((err) => {
         console.error('Failed to load photo list:', err);
         start([{ src: FALLBACK_SRC, alt: 'placeholder' }]);
