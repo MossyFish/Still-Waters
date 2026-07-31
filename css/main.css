@@ -60,8 +60,8 @@ html, body {
     height: 100%; 
 }
 
-#intro, 
-#content { 
+#intro.warping, 
+#content.warping { 
     filter: url(#swirlFilter);
 }
 
