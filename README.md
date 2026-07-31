@@ -3,7 +3,11 @@ A pond that's doubling as my personal website. The fish flicker a little because
 
 <img width="1917" height="873" alt="image" src="https://github.com/user-attachments/assets/8c43c462-0984-4b4d-b695-a856df884516" />
 
+<img width="1918" height="876" alt="image" src="https://github.com/user-attachments/assets/3d160b5f-c720-4a3b-96d7-6b59a68e8ed0" />
+
 Photos are pulled live from my iCloud album using an unofficial API. 
+
+Site accessible at [https://still-waters-khaki.vercel.app/](still-waters-khaki.vercel.app)
 
 ## Credits
 Pond ambience water sound by [Soul Serenity Sounds on Pixabay](https://pixabay.com/sound-effects/nature-water-noises-241049/)
