@@ -86,7 +86,7 @@ function popHole(bubbleEl, bubbleSlot, durationMs) {
 
     function step(now) {
         const t = Math.min(1, (now - start) / durationMs);
-        const eased = 1 - (1 - t) ** 2;
+        const eased = 1 - (1 - t) ** 3;
         const grow = eased * 165;
 
         bubbleEl.style.maskImage = tears
