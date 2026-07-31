@@ -49,9 +49,13 @@ muteBtn.addEventListener('click', () => {
   muted = !muted;
   if(muted){
     ambience.pause();
+    ambience2.pause();
     drawMuteIcon();
   } else {
-    if(ambienceStarted) ambience.play().catch(()=>{});
+    if(ambienceStarted) {
+      ambience.play().catch(()=>{});
+      ambience2.play().catch(()=>{});
+    }
     drawMuteIcon();
   }
 });
