@@ -356,7 +356,7 @@ class Fish {
 }
 
 function fishPop() {
-  const target = Math.max(4, Math.round(W * H * 15 / (1920 * 1080)));
+  const target = Math.max(4, Math.round(W * H * 18 / (1920 * 1080)));
   while (fishArr.length < target) fishArr.push(new Fish());
   while (fishArr.length > target) fishArr.pop(); 
 }
