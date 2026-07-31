@@ -3,10 +3,7 @@ A pond that's doubling as my personal website. The fish flicker a little because
 
 <img width="1917" height="873" alt="image" src="https://github.com/user-attachments/assets/8c43c462-0984-4b4d-b695-a856df884516" />
 
-
-### Future page additions 
-- daily list of tasks
-- personal blog
+Photos are pulled live from my iCloud album using an unofficial API. 
 
 ## Credits
 Pond ambience water sound by [Soul Serenity Sounds on Pixabay](https://pixabay.com/sound-effects/nature-water-noises-241049/)
