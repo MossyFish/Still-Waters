@@ -42,14 +42,19 @@ async function loadAssets() {
 let lastFrameTime = performance.now();
 let dt = 1/60;
 let trailX = null, trailY = null;
+let waterFrameCounter = 0;
 
 function loop() {
     const now = performance.now();
     dt = Math.min(0.05, (now - lastFrameTime)/1000);
     lastFrameTime = now;
 
-    ctx.clearRect(0, 0, W, H);
-    drawWater();
+    const contentOpen = document.getElementById('content')?.classList.contains('visible');
+    waterFrameCounter++;
+    if (!contentOpen || waterFrameCounter % 3 === 0) {
+        ctx.clearRect(0, 0, W, H);
+        drawWater();
+    }
 
     screenCtx.clearRect(0, 0, W, H);
     screenCtx.drawImage(buffer, 0, 0);
