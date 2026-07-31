@@ -3,7 +3,7 @@
     width: calc(100% + 2 * var(--panel-pad-x, 0px));
     margin-left: calc(-1 * var(--panel-pad-x, 0px));
     max-width: none;
-    aspect-ratio: 16/6;
+    height: 260px; 
     overflow: hidden;
     container-type: size;
     opacity: 0;
@@ -33,11 +33,11 @@
     pointer-events: auto;
 }
 
-.bubble-slot:hover .bubble-inner {
+.bubble-inner:hover {
     transform: translateY(-8%);
 }
 
-.bubble-slot:hover .bubble {
+.bubble-inner:hover .bubble {
     filter: brightness(1.2);
 }
 

@@ -200,13 +200,27 @@ function checkPops() {
 
 async function loadPhotos() {
     try {
-        const res = await fetch('/api/photos');
+        const res = await fetch('/api/photos', { cache: 'no-store' });
         if (!res.ok) throw new Error(`/api/photos failed (${res.status})`);
         const list = await res.json();
         if (list.length) photos = list;
     } catch (err) {
         console.error('Failed to refresh photo list:', err);
     }
+}
+
+async function retryFetches(attempts = 2, delayMs = 1000) {
+    for (let i = 0; i < attempts; i++) {
+        try {
+            const res = await fetch('/api/photos', { cache: 'no-store' });
+            if (!res.ok) throw new Error(`/api/photos failed (${res.status})`);
+            return await res.json();
+        } catch (err) {
+            console.error(`Photo fetch attempt ${i + 1} failed:`, err);
+            if (i < attempts - 1) await new Promise(r => setTimeout(r, delayMs));
+        }
+    }
+    return [];
 }
 
 async function start(photoList) {
