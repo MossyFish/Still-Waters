@@ -215,8 +215,8 @@ class Fish {
       this.x += Math.cos(this.angle) * this.speed * step;
       this.y += Math.sin(this.angle) * this.speed * step;
       
-      if (this.x < -280) this.x = W+280; if (this.x > W+280) this.x = -280;
-      if (this.y < -280) this.y = H+280; if (this.y > H+280) this.y = -280;
+      if (this.x < -120) this.x = W + 120; if (this.x > W + 120) this.x = -120;
+      if (this.y < -120) this.y = H + 120; if (this.y > H + 120) this.y = -120;
     }
   }
 
@@ -397,7 +397,7 @@ function minFish() {
 
   const onscreen = f => (f.tier === 'large' || f.tier === 'medium') && f.x >= 0 && f.x <= W && f.y >= 0 && f.y <= H;
   const visible = fishArr.filter(onscreen).length;
-  if (visible >= 6) return;
+  if (visible >= 10) return;
 
   const candidate = fishArr.find(f =>
     (f.tier === 'large' || f.tier === 'medium') &&
