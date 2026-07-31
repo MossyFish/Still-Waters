@@ -1,5 +1,4 @@
-// https://www.icloud.com/sharedalbum/#B2a5oqs3q8cRZRw
-const ALBUM_TOKEN = 'B2a5oqs3q8cRZRw';
+const ALBUM_TOKEN = '05epiLMCAzsSALPEU6Tyz9csw';
 
 export default async function handler(req, res) {
   try {
