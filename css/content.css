@@ -14,8 +14,8 @@
 }
 
 #content.warping .panel {
-    backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    backdrop-filter: none;
 }
 
 #content {
@@ -30,6 +30,7 @@
 .panel {
     max-width: 880px;
     margin: 0 auto;
+    position: relative;
     background: var(--panel);
     -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
