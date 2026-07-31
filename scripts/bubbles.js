@@ -6,7 +6,7 @@ const BUBBLE_COUNT = 3;
 const POP_AT_PROGRESS = 0.85;
 const POP_LIFE_MS = POP_AT_PROGRESS * LAP_SECONDS * 1000;
 const RELEASE_EVERY_MS = Math.round(LAP_SECONDS * 1000 / BUBBLE_COUNT); 
-const POP_DURATION_MS = 300;
+const POP_DURATION_MS = 200;
 
 const EDGE_PARTICLE_TRIGGER = 0.65;
 const EDGE_PARTICLE_COUNT = 10;
@@ -78,9 +78,8 @@ function popHole(bubbleEl, bubbleSlot, durationMs) {
     const tears = Array.from({ length: 4 }, () => ({
         x: 35 + Math.random() * 30,
         y: 35 + Math.random() * 30,
-        delay: Math.random() * 5,
-        warpX: 0.75 + Math.random() * 0.5,
-        warpY: 0.75 + Math.random() * 0.5,
+        warpX: 1 + Math.random() * 0.25,
+        warpY: 1 + Math.random() * 0.25,
     }));
     const start = performance.now();
     let edgeParticlesSpawned = false;
@@ -91,8 +90,8 @@ function popHole(bubbleEl, bubbleSlot, durationMs) {
         const grow = eased * 165;
 
         bubbleEl.style.maskImage = tears
-            .map(({ x, y, delay, warpX, warpY }) => {
-                const r = Math.max(0, grow - delay);
+            .map(({ x, y, warpX, warpY }) => {
+                const r = Math.max(0, grow);
                 const rx = (r * warpX).toFixed(1);
                 const ry = (r * warpY).toFixed(1);
                 return `radial-gradient(ellipse ${rx}% ${ry}% at ${x}% ${y}%, transparent 60%, black 70%)`;
@@ -227,7 +226,18 @@ async function start(photoList) {
 
     setInterval(checkPops, 200);
     document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') checkPops();
+        if (document.visibilityState === 'hidden') {
+            hiddenAt = performance.now();
+            clearTimeout(releaseTimer);
+        } else {
+            if (hiddenAt !== null) {
+                const hiddenMs = performance.now() - hiddenAt;
+                bubbles.forEach((b) => { b.releasedAt += hiddenMs; });
+                hiddenAt = null;
+            }
+            checkPops();
+            scheduleRelease();
+        }
     });
 
     scheduleRelease();
