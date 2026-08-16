@@ -2,12 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tickSound = document.getElementById('sfxClick');
 
     function playTick() {
-        if (!tickSound) return;
-        const node = tickSound.cloneNode(true);
-        node.playbackRate = 0.96 + Math.random() * 0.08;
-        node.volume = 1.0;
-        node.currentTime = 0;
-        node.play().catch(() => {});
+        playOneShot(tickSound, { rate: 0.96 + Math.random() * 0.08 });
     }
 
     function buildPad(size) {

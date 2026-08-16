@@ -15,6 +15,27 @@ sfxSplash.forEach(s => s.volume = 0.7);
 let muted = false;
 let ambienceStarted = false;
 
+const oneShots = new Set();
+
+function playOneShot(el, { rate = 1, volume = 1 } = {}) {
+  if (muted || !el) return;
+  const node = el.cloneNode(true);
+  node.playbackRate = rate;
+  node.volume = volume;
+  node.currentTime = 0;
+  oneShots.add(node);
+  node.addEventListener('ended', () => oneShots.delete(node));
+  node.play().catch(() => oneShots.delete(node));
+}
+
+function stopOneShots() {
+  oneShots.forEach(node => node.pause());
+  oneShots.clear();
+}
+
+window.playOneShot = playOneShot;
+window.isMuted = () => muted;
+
 function startAmbience(){
   if(ambienceStarted || muted) return;
   ambienceStarted = true;
@@ -50,6 +71,9 @@ muteBtn.addEventListener('click', () => {
   if(muted){
     ambience.pause();
     ambience2.pause();
+    sfxRipple.pause();
+    sfxSplash.forEach(s => s.pause());
+    stopOneShots();
     drawMuteIcon();
   } else {
     if(ambienceStarted) {

@@ -147,11 +147,7 @@ function buildBubble(photoIndex, delaySeconds = 0) {
 function pop(bubble) {
     if (bubble.popped) return;
     bubble.popped = true;
-    if (popSoundEl) {
-        const node = popSoundEl.cloneNode(true);
-        node.playbackRate = 0.85 + Math.random()*0.3;
-        node.play().catch(() => {});
-    }
+    playOneShot(popSoundEl, { rate: 0.85 + Math.random()*0.3 });
 
     bubble.slot.getAnimations()[0]?.pause();
 
