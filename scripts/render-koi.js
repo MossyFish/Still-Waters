@@ -241,10 +241,16 @@ function drawBent2D(ctx, img, anchor, fish, x, y, phase, alpha) {
   const tailV = Math.min(1, (anchor.y + fish.def.bodyLen) / IMG_H);
   const startV = headV + (tailV - headV) * 0.08;
   const k = m.bend / ((tailV - startV) * itemH);
-  const rows = Math.min(60, Math.max(16, Math.ceil(itemH / 4)));
-  const rowH = IMG_H / rows;
+  // rows are whole screen pixels tall and the unbent ones sit on pixel boundaries; rows on
+  // fractional positions antialias their edges and the fish comes out striped
+  const ROW_PX = 3;
+  const rows = Math.ceil(itemH / ROW_PX);
+  const srcRow = ROW_PX / s;
+  const top = Math.round(c0 - headY);
   for (let i = 0; i < rows; i++) {
-    const v = (i + 0.5) / rows;
+    const srcH = Math.min(srcRow, IMG_H - i * srcRow);
+    if (srcH <= 0) break;
+    const v = (i + 0.5) * ROW_PX / itemH;
     const w = Math.max(0, Math.min(1, (v - headV) / (tailV - headV)));
     const waveK = 5.2 + m.flow * 0.9;
     const env = 0.1 + 0.9 * Math.pow(w, 1.6);
@@ -252,18 +258,19 @@ function drawBent2D(ctx, img, anchor, fish, x, y, phase, alpha) {
     const swing = Math.sin(phase - w * waveK) * env - Math.sin(phase) * 0.1
                 + tailFin * (0.2 + 0.4 * m.flow) * Math.sin(phase - w * waveK - 1.2)
                 + tailFin * m.flow * 0.12 * Math.sin(phase * 2 - w * 12);
+    const dx = c0 - pivotX + m.amp * swing;
     const sigma = (v - startV) * itemH;
-    let ox = pivotX, oy = v * itemH, th = 0;
-    if (sigma > 0 && Math.abs(k) > 1e-5) {
-      th = k * sigma;
-      ox = pivotX + (Math.cos(th) - 1) / k;
-      oy = startV * itemH + Math.sin(th) / k;
+    const th = sigma > 0 ? k * sigma : 0;
+    if (Math.abs(th) < 0.01) {
+      sctx.drawImage(img, 0, i * srcRow, IMG_W, srcH, dx, top + i * ROW_PX, fish.drawW, srcH * s);
+      continue;
     }
+    // on the arc: centre of the row rides the curve, the row turns with it
+    const ox = (Math.cos(th) - 1) / k, oy = startV * itemH + Math.sin(th) / k;
     sctx.save();
-    sctx.translate(c0 + ox - pivotX, c0 + oy - headY);
+    sctx.translate(c0 + ox, top + oy);
     sctx.rotate(th);
-    sctx.drawImage(img, 0, i * rowH, IMG_W, rowH + 0.6,
-                   -pivotX + m.amp * swing, -rowH * s / 2, fish.drawW, (rowH + 0.6) * s);
+    sctx.drawImage(img, 0, i * srcRow, IMG_W, srcH, dx - c0, -ROW_PX / 2 - 0.25, fish.drawW, srcH * s + 0.5);
     sctx.restore();
   }
   ctx.save();
