@@ -63,9 +63,9 @@ function loop() {
 
     for (const f of fishArr) {
         f.update();
-        f.draw(screenCtx);
         nudgeFoliage(f.x, f.y, Math.max(18, f.len * 0.55), 0.15);
     };
+    drawKoi(screenCtx, fishArr);
 
     lilyPads.forEach(p => { p.update(); p.draw(screenCtx); });
     leaves.forEach(l => { l.update(); l.draw(screenCtx); });
@@ -82,10 +82,10 @@ function loop() {
     
     if (overlayCtx) {
         overlayCtx.clearRect(0, 0, W, H);
-        cursorFish.draw(overlayCtx);
+        cursorFish.drawCursorFish(overlayCtx);
     } 
     else {
-        cursorFish.draw(screenCtx);
+        cursorFish.drawCursorFish(screenCtx);
     }
     
     requestAnimationFrame(loop);

@@ -36,10 +36,12 @@ const KOI_PALETTE = [
   { hue: 10, sat: 130 },
   { hue: 20, sat: 170 },
 ];
+// the third frame of every fish is the straight pose; it gets bent in code instead of
+// swapping between hand-drawn frames, which is what made the old swim look choppy
+const STRAIGHT_FRAME = 2;
 
 // fish behaviour
 const PANIC_SECONDS = 1.0;
-const CALM_SECONDS  = 2.0;
 const KOI_TIERS = [
   { name:'large', weight: 0.45, lenRange:[95,135] },
   { name:'medium', weight: 0.40, lenRange:[58,80] },
@@ -57,10 +59,167 @@ function pickTier() {
   return KOI_TIERS.at(-1);
 }
 
+// The swim is the same one as the Submerge KDE wallpaper: one straight sprite per fish, bent on
+// the GPU by a travelling wave down the body, a soft C-shaped arc when it turns, and fins that
+// sweep back, spread and flutter. Canvas 2D can only do the wave and the arc, so it's the fallback.
+const FISH_VERT = `#version 300 es
+in vec2 uv;
+out vec2 vUv;
+uniform vec2 screen;    // canvas size, px
+uniform vec2 pos;       // where the head (anchor) sits on screen
+uniform float rot;      // heading + yaw, radians
+uniform vec2 itemSize;  // whole sprite on screen, px
+uniform vec2 anchor;    // head inside the sprite, px (x is the body centreline)
+uniform float phase;    // swim cycle, radians
+uniform float amp;      // tail swing, px
+uniform float bend;     // how far the body curves when turning, radians
+uniform float headV;    // texture v of the head
+uniform float tailV;    // texture v of the tail tip
+uniform float bodyHalf; // half the body's width, px; anything wider is fin
+uniform float flow;     // 0 = neat, 1 = tail and fins streaming out and rippling
+uniform float fold;     // fins swept back (+) while driving, spread forward (-) while gliding
+uniform float finTurn;  // turning: one pectoral fin spreads to brake while the other tucks in
+void main() {
+    vUv = uv;
+    float itemH = itemSize.y, pivotX = anchor.x;
+    vec2 p = uv * itemSize;
+    float w = clamp((uv.y - headV) / (tailV - headV), 0.0, 1.0);
+    // about one S along the body: the head barely recoils, the middle sways a little, the tail most
+    float waveK = 5.2 + flow * 0.9;
+    float env = 0.1 + 0.9 * pow(w, 1.6);
+    float swing = sin(phase - w * waveK) * env - sin(phase) * 0.1;
+    // the tail fin lags behind the body and keeps whipping after each stroke
+    float tailFin = smoothstep(0.78, 1.0, w);
+    swing += tailFin * (0.2 + 0.4 * flow) * sin(phase - w * waveK - 1.2);
+    swing += tailFin * flow * 0.12 * sin(phase * 2.0 - w * 12.0);
+    float x0 = p.x;
+    p.x += amp * swing;
+    // whatever sticks out past the body sweeps back or spreads out, each side a little out of step
+    float dx = x0 - pivotX;
+    float side = dx < 0.0 ? -1.0 : 1.0;
+    float reach = max(abs(dx) - bodyHalf, 0.0);
+    float flutter = (0.08 + 0.22 * flow) * sin(phase * 0.5 - w * 3.0 + side * 1.3);
+    float sweep = (fold * 0.6 + side * finTurn * 0.35) * (1.0 - 0.5 * tailFin) + flutter;
+    p.y += reach * sweep;
+    p.x -= side * reach * abs(sweep) * 0.25;
+    // turning: every point rides a constant-curvature arc that starts just behind the head
+    float startV = headV + (tailV - headV) * 0.08;
+    float sigma = p.y - startV * itemH;
+    if (sigma > 0.0) {
+        float k = bend / ((tailV - startV) * itemH);
+        float th = k * sigma;
+        float ox = p.x - pivotX;
+        vec2 c = abs(k) > 1e-5 ? vec2(cos(th) - 1.0, sin(th)) / k : vec2(0.0, sigma);
+        p = vec2(pivotX, startV * itemH) + c + ox * vec2(cos(th), sin(th));
+    }
+    vec2 q = p - anchor;
+    float cr = cos(rot), sr = sin(rot);
+    vec2 world = pos + vec2(cr * q.x - sr * q.y, sr * q.x + cr * q.y);
+    gl_Position = vec4(world.x / screen.x * 2.0 - 1.0, 1.0 - world.y / screen.y * 2.0, 0.0, 1.0);
+}`;
+
+const FISH_FRAG = `#version 300 es
+precision mediump float;
+in vec2 vUv;
+out vec4 color;
+uniform sampler2D tex;
+uniform float alpha;
+void main() { color = texture(tex, vUv) * alpha; }`;
+
+const koiGL = (() => {
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl2', { premultipliedAlpha: true, antialias: true });
+  if (!gl) return null;
+
+  function compile(type, src) {
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) console.warn(gl.getShaderInfoLog(sh));
+    return sh;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, FISH_VERT));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FISH_FRAG));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { console.warn(gl.getProgramInfoLog(prog)); return null; }
+  gl.useProgram(prog);
+  const u = {};
+  for (const name of ['screen','pos','rot','itemSize','anchor','phase','amp','bend','headV','tailV',
+                      'bodyHalf','flow','fold','finTurn','alpha']) {
+    u[name] = gl.getUniformLocation(prog, name);
+  }
+
+  // same mesh density as the wallpaper: 12 x 32 cells
+  const GX = 12, GY = 32;
+  const verts = [], idx = [];
+  for (let j = 0; j <= GY; j++) for (let i = 0; i <= GX; i++) verts.push(i / GX, j / GY);
+  for (let j = 0; j < GY; j++) for (let i = 0; i < GX; i++) {
+    const a = j * (GX + 1) + i, b = a + 1, c = a + GX + 1, d = c + 1;
+    idx.push(a, b, c, b, d, c);
+  }
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, 'uv');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(idx), gl.STATIC_DRAW);
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+
+  const textures = new WeakMap();
+  function texture(img) {
+    let t = textures.get(img);
+    if (t) return t;
+    t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    textures.set(img, t);
+    return t;
+  }
+
+  function begin(w, h) {
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    gl.viewport(0, 0, w, h);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform2f(u.screen, w, h);
+  }
+
+  function draw(img, anchor, fish, x, y, phase, alpha) {
+    const s = fish.spriteScale, m = fish.motion;
+    gl.bindTexture(gl.TEXTURE_2D, texture(img));
+    gl.uniform2f(u.pos, x, y);
+    gl.uniform1f(u.rot, fish.angle + Math.PI / 2 + m.yaw);
+    gl.uniform2f(u.itemSize, fish.drawW, fish.drawH);
+    gl.uniform2f(u.anchor, anchor.x * s, anchor.y * s);
+    gl.uniform1f(u.phase, phase);
+    gl.uniform1f(u.amp, m.amp);
+    gl.uniform1f(u.bend, m.bend);
+    gl.uniform1f(u.headV, anchor.y / IMG_H);
+    gl.uniform1f(u.tailV, Math.min(1, (anchor.y + fish.def.bodyLen) / IMG_H));
+    gl.uniform1f(u.bodyHalf, fish.len * 0.1);
+    gl.uniform1f(u.flow, m.flow);
+    gl.uniform1f(u.fold, m.fold);
+    gl.uniform1f(u.finTurn, m.finTurn);
+    gl.uniform1f(u.alpha, alpha);
+    gl.drawElements(gl.TRIANGLES, idx.length, gl.UNSIGNED_SHORT, 0);
+  }
+
+  return { canvas, begin, draw };
+})();
+
+// fallback for browsers without WebGL2: the same wave and arc, drawn as thin rows of the sprite
 const fishScratch = document.createElement('canvas');
 const fishScratchCtx = fishScratch.getContext('2d');
-const shadowScratch = document.createElement('canvas');
-const shadowScratchCtx = shadowScratch.getContext('2d');
 
 let maxDrawDim = 0;
 for (const tier of KOI_TIERS) {
@@ -69,9 +228,54 @@ for (const tier of KOI_TIERS) {
     maxDrawDim = Math.max(maxDrawDim, IMG_W*scale, IMG_H*scale);
   }
 }
-const SCRATCH_MAX = Math.ceil(maxDrawDim * 1.6) + 8;
+const SCRATCH_MAX = Math.ceil(maxDrawDim * 2.2) + 8;
 fishScratch.width = fishScratch.height = SCRATCH_MAX;
-shadowScratch.width = shadowScratch.height = SCRATCH_MAX;
+
+function drawBent2D(ctx, img, anchor, fish, x, y, phase, alpha) {
+  const s = fish.spriteScale, m = fish.motion;
+  const size = SCRATCH_MAX, c0 = size / 2;
+  const sctx = fishScratchCtx;
+  sctx.clearRect(0, 0, size, size);
+  const itemH = fish.drawH, pivotX = anchor.x * s, headY = anchor.y * s;
+  const headV = anchor.y / IMG_H;
+  const tailV = Math.min(1, (anchor.y + fish.def.bodyLen) / IMG_H);
+  const startV = headV + (tailV - headV) * 0.08;
+  const k = m.bend / ((tailV - startV) * itemH);
+  const rows = Math.min(60, Math.max(16, Math.ceil(itemH / 4)));
+  const rowH = IMG_H / rows;
+  for (let i = 0; i < rows; i++) {
+    const v = (i + 0.5) / rows;
+    const w = Math.max(0, Math.min(1, (v - headV) / (tailV - headV)));
+    const waveK = 5.2 + m.flow * 0.9;
+    const env = 0.1 + 0.9 * Math.pow(w, 1.6);
+    const tf = Math.max(0, Math.min(1, (w - 0.78) / 0.22)), tailFin = tf * tf * (3 - 2 * tf);
+    const swing = Math.sin(phase - w * waveK) * env - Math.sin(phase) * 0.1
+                + tailFin * (0.2 + 0.4 * m.flow) * Math.sin(phase - w * waveK - 1.2)
+                + tailFin * m.flow * 0.12 * Math.sin(phase * 2 - w * 12);
+    const sigma = (v - startV) * itemH;
+    let ox = pivotX, oy = v * itemH, th = 0;
+    if (sigma > 0 && Math.abs(k) > 1e-5) {
+      th = k * sigma;
+      ox = pivotX + (Math.cos(th) - 1) / k;
+      oy = startV * itemH + Math.sin(th) / k;
+    }
+    sctx.save();
+    sctx.translate(c0 + ox - pivotX, c0 + oy - headY);
+    sctx.rotate(th);
+    sctx.drawImage(img, 0, i * rowH, IMG_W, rowH + 0.6,
+                   -pivotX + m.amp * swing, -rowH * s / 2, fish.drawW, (rowH + 0.6) * s);
+    sctx.restore();
+  }
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(fish.angle + Math.PI / 2 + m.yaw);
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(fishScratch, -c0, -c0);
+  ctx.restore();
+}
+
+// tinted copies are shared between fish of the same type and colour
+const tintCache = new Map();
 
 class Fish {
   constructor(isCursorFish = false) {
@@ -82,28 +286,42 @@ class Fish {
     this.baseAngle = this.angle;
     this.swimPhase = Math.random() * Math.PI * 2;
     this.wanderT = Math.random() * 1000;
+    this.seedA = Math.random() * 100;
+    this.seedB = Math.random() * 100;
+    this.flowSeed = Math.random() * 100;
+    this.turn = 0;          // smoothed turning speed, rad/s
+    // koi swim in bursts: a few strong tail beats, then a glide with the tail almost still
+    this.beat = 0.5;
+    this.beatTarget = 0.8;
+    this.beatTimer = Math.random() * 2;
     this.fleeing = 0;
-    this.calming = 0;
     this.fleeAngle = this.angle;
-    
+    this.motion = { amp: 0, bend: 0, yaw: 0, flow: 0, fold: 0, finTurn: 0 };
+
     this.offscreenTime = 0;
-    this.returnThreshold = 2 + Math.random(); 
+    this.returnThreshold = 2 + Math.random();
 
     if (isCursorFish) {
       this.speed = 0;
       this.cruiseSpeed = 0;
-      this.len = 22;
-    } 
-    
+      // a tiny version of the pond's own baby koi, so it matches the painted fish
+      this.fishType = 6;
+      this.def = FISH_DEFS[6];
+      this.len = 40;
+      this.spriteScale = this.len / this.def.bodyLen;
+      this.drawW = IMG_W * this.spriteScale;
+      this.drawH = IMG_H * this.spriteScale;
+      this.bubbles = [];
+      this.bubbleTimer = 0;
+    }
+
     else {
       const tier = pickTier();
       this.tier = tier.name;
       this.len = randRange(...tier.lenRange);
       this.cruiseSpeed = randRange(0.5, 1.4);
       this.speed = this.cruiseSpeed;
-      this.turnRate = randRange(0.035, 0.075);
       this.panicSpeed = 3.2;
-      this.calmFromSpeed = this.cruiseSpeed;
 
       const types = TIER_FISH_TYPES[this.tier];
       this.fishType = types[Math.floor(Math.random() * types.length)];
@@ -116,55 +334,33 @@ class Fish {
 
       const pick = KOI_PALETTE[Math.floor(Math.random() * KOI_PALETTE.length)];
       this.colorFilter = `saturate(${pick.sat}%) hue-rotate(${pick.hue}deg)`;
-      this.tintedFrames = null;
+      this.tinted = null;
     }
   }
 
-  getFramePos() {
-    const t = (1 - Math.cos(this.swimPhase)) / 2;
-    const pos = t * 4;
-    const i0 = Math.min(4, Math.floor(pos));
-    const i1 = Math.min(4, i0 + 1);
-    const raw = pos - i0;
-
-    const WINDOW = 0.18;
-    let blend;
-    if (raw < 0.5 - WINDOW) blend = 0;
-    else if (raw > 0.5 + WINDOW) blend = 1;
-    else {
-      const local = (raw - (0.5 - WINDOW)) / (WINDOW * 2);
-      blend = local*local*(3-2*local);
-    }
-    return { i0, i1, blend };
-  }
-
-  ensureTintedFrames() {
-    if (this.tintedFrames) return;
-    const frames = assets.fish[this.fishType];
-    if (!frames || frames.some(f => !f)) return;
-    this.tintedFrames = frames.map(img => {
-      const c = document.createElement('canvas');
-      c.width = img.width;
-      c.height = img.height;
-      const cctx = c.getContext('2d');
-      cctx.filter = this.colorFilter;
-      cctx.drawImage(img, 0, 0);
-      return c;
-    });
-  }
-
-  steerWander(step) {
-    this.baseAngle += (Math.random()-0.5) * 0.05 * step;
-    const target = this.baseAngle + Math.sin(this.wanderT) * 0.9;
-    const diff   = Math.atan2(Math.sin(target-this.angle), Math.cos(target-this.angle));
-    this.angle  += diff * Math.min(1, this.turnRate*3*step);
+  ensureTinted() {
+    if (this.tinted) return;
+    const key = this.fishType + '|' + this.colorFilter;
+    if (tintCache.has(key)) { this.tinted = tintCache.get(key); return; }
+    const img = assets.fish[this.fishType]?.[STRAIGHT_FRAME];
+    if (!img) return;
+    const c = document.createElement('canvas');
+    c.width = img.width;
+    c.height = img.height;
+    const cctx = c.getContext('2d');
+    cctx.filter = this.colorFilter;
+    cctx.drawImage(img, 0, 0);
+    tintCache.set(key, c);
+    this.tinted = c;
   }
 
   update() {
     const step = dt * 60;
+    const now = performance.now() / 1000;
     this.wanderT += 0.012 * step;
 
     if (this.isCursorFish) {
+      const angleBefore = this.angle;
       const dx = mouse.x - this.x, dy = mouse.y - this.y;
       const dist = Math.hypot(dx, dy);
       const ease = 1 - Math.pow(1-0.32, step);
@@ -180,179 +376,162 @@ class Fish {
       this.x = Math.max(20, Math.min(W-20, this.x));
       this.y = Math.max(20, Math.min(H-20, this.y));
 
-    } 
-    else if (this.fleeing > 0) {
+      // it turns as fast as the cursor does, so the curve comes from the measured turn rate
+      const dA = Math.atan2(Math.sin(this.angle-angleBefore), Math.cos(this.angle-angleBefore)) / Math.max(dt, 0.001);
+      this.turn += (Math.max(-3, Math.min(3, dA)) - this.turn) * (1 - Math.exp(-dt / 0.15));
+      const drive = Math.max(0.25, Math.min(1, this.speed / 4));
+      this.swimPhase += dt * (1.4 + 4.6 * drive);
+      this.setMotion(drive, now, 0.35);
+      this.updateBubbles();
+      return;
+    }
+
+    // where it wants to head drifts smoothly (no per-frame randomness), and the turning speed
+    // eases toward what's needed, so turns build up and settle like a real fish
+    let target, maxTurn, settle;
+    if (this.fleeing > 0) {
       this.fleeing -= dt;
-      this.angle   = this.fleeAngle + Math.sin(this.wanderT*6) * 0.3;
-      this.speed  += (this.panicSpeed - this.speed) * (1 - Math.pow(1-0.35, step));
-      
-      if (this.fleeing <= 0) {
-        this.fleeing = 0; this.calming = CALM_SECONDS;
-        this.speed = this.cruiseSpeed + (this.speed-this.cruiseSpeed) * 0.5;
-        this.calmFromSpeed = this.speed;
-        this.baseAngle = this.angle;
-      }
-    } 
-    else if (this.calming > 0) {
-      this.calming -= dt;
-      this.steerWander(step);
-      const t = Math.min(1, 1 - Math.max(0, this.calming) / CALM_SECONDS);
-      this.speed = this.calmFromSpeed + (this.cruiseSpeed-this.calmFromSpeed) * t*t*(3-2*t);
-    } 
-    else {
-      this.steerWander(step);
-      this.speed += (this.cruiseSpeed-this.speed) * (1 - Math.pow(1-0.02, step));
-    }
-
-    if (this.isCursorFish) {
-      this.swimPhase += 0.12 * step;
+      target = this.fleeAngle + Math.sin(this.wanderT*4) * 0.25;
+      maxTurn = 4.5; settle = 0.12;
+      if (this.fleeing <= 0) { this.fleeing = 0; this.baseAngle = this.angle; }
     } else {
-      const speedFactor = Math.min(1.2, this.speed/2.2);
-      this.swimPhase += 0.09 * (0.30 + speedFactor*1.6) * step;
+      this.baseAngle += (0.16 * Math.sin(now * 0.07 + this.seedA) + 0.09 * Math.sin(now * 0.19 + this.seedB)) * dt;
+      target = this.baseAngle + Math.sin(this.wanderT) * 0.8;
+      maxTurn = 1.1; settle = 0.55;
     }
+    const diff = Math.atan2(Math.sin(target - this.angle), Math.cos(target - this.angle));
+    const want = Math.max(-maxTurn, Math.min(maxTurn, diff * (this.fleeing > 0 ? 6 : 1.1)));
+    this.turn += (want - this.turn) * (1 - Math.exp(-dt / settle));
+    this.angle += this.turn * dt;
 
-    if (!this.isCursorFish) {
-      this.x += Math.cos(this.angle) * this.speed * step;
-      this.y += Math.sin(this.angle) * this.speed * step;
-      
-      if (this.x < -120) this.x = W + 120; if (this.x > W + 120) this.x = -120;
-      if (this.y < -120) this.y = H + 120; if (this.y > H + 120) this.y = -120;
+    // burst and glide; a scared fish just beats as hard as it can
+    this.beatTimer -= dt;
+    if (this.beatTimer <= 0) {
+      const gliding = this.beatTarget > 0.5;
+      this.beatTarget = gliding ? 0.08 + Math.random() * 0.1 : 0.65 + Math.random() * 0.35;
+      this.beatTimer = gliding ? 1.2 + Math.random() * 2.2 : 1.4 + Math.random() * 2.4;
     }
+    const beatGoal = this.fleeing > 0 ? 1 : this.beatTarget;
+    this.beat += (beatGoal - this.beat) * (1 - Math.exp(-dt / (this.fleeing > 0 ? 0.12 : 0.6)));
+    const drive = Math.max(this.beat, Math.min(1, Math.abs(this.turn) * 0.8));
+
+    const targetSpeed = this.fleeing > 0 ? this.panicSpeed : this.cruiseSpeed * (0.4 + 0.9 * drive);
+    const tau = this.fleeing > 0 ? 0.1 : targetSpeed > this.speed ? 0.8 : 1.6;
+    this.speed += (targetSpeed - this.speed) * (1 - Math.exp(-dt / tau));
+
+    // the tail beats while driving and almost stops while gliding; these fish cover more body
+    // lengths a second than the wallpaper's, so the beat speeds up with that too
+    const pace = Math.sqrt(Math.max(1, this.speed * 60 / this.len / 0.45));
+    this.swimPhase += dt * (1.4 + 4.6 * drive) * pace;
+    this.setMotion(drive, now, 1.5);
+
+    // each stroke of the tail gives a little surge forward
+    const surge = 1 + 0.15 * drive * Math.sin(2 * this.swimPhase);
+    this.x += Math.cos(this.angle) * this.speed * surge * step;
+    this.y += Math.sin(this.angle) * this.speed * surge * step;
+
+    if (this.x < -120) this.x = W + 120; if (this.x > W + 120) this.x = -120;
+    if (this.y < -120) this.y = H + 120; if (this.y > H + 120) this.y = -120;
   }
 
-  draw(ctx) {
-    if (this.isCursorFish) { this.drawCursorFish(ctx); return; }
-    this.ensureTintedFrames();
+  setMotion(drive, now, bendGain) {
+    const m = this.motion;
+    m.amp = this.len * (0.02 + 0.07 * drive);
+    // negative so the tail trails to the outside of the turn
+    m.bend = -Math.max(-1.3, Math.min(1.3, this.turn * bendGain));
+    m.yaw = Math.sin(this.swimPhase + 0.6) * 2.0 * drive * Math.PI / 180;
+    // the tail and fins drift between neat and streaming, and trail out more while gliding
+    m.flow = Math.max(0, Math.min(1, 0.45 + 0.45 * Math.sin(now * 0.045 + this.flowSeed)
+                                       + 0.25 * Math.sin(now * 0.11 + this.flowSeed * 2.3)
+                                       + 0.25 * (1 - drive)));
+    // fins tuck back during a burst and spread out while gliding
+    m.fold = Math.max(-0.35, Math.min(0.5, drive * 0.8 - 0.3));
+    // the fin on the inside of a turn spreads to brake, the outer one tucks in
+    m.finTurn = -Math.max(-1, Math.min(1, this.turn * 1.2));
+  }
 
-    const { i0, i1, blend } = this.getFramePos();
+  drawShadow(draw) {
+    const shadow = assets.shadows[this.shadowType]?.[STRAIGHT_FRAME];
+    if (!shadow) return;
     const { ux, uy, t } = lightShadowParams(this.x, this.y);
-    const shadowOff = this.len * (0.14 + t*0.5);
-
-    this.drawShadow(ctx, i0, i1, blend, ux, uy, t, shadowOff);
-    this.drawBody(ctx, i0, i1, blend);
+    const off = this.len * (0.14 + t*0.5);
+    draw(shadow, this.shadowDef.anchors[STRAIGHT_FRAME], this, this.x + ux*off, this.y + uy*off,
+         this.swimPhase - 0.3, Math.max(0, 0.3 - t*0.12));
   }
 
-    drawShadow(ctx, i0, i1, blend, ux, uy, t, shadowOff) {
-      const shadow0 = assets.shadows[this.shadowType]?.[i0];
-      if (!shadow0) return;
-      const shadow1 = assets.shadows[this.shadowType]?.[i1];
-      const sa0 = this.shadowDef.anchors[i0];
-      const sa1 = this.shadowDef.anchors[i1];
+  drawBody(draw) {
+    this.ensureTinted();
+    if (!this.tinted) return;
+    draw(this.tinted, this.def.anchors[STRAIGHT_FRAME], this, this.x, this.y, this.swimPhase, 1);
+  }
 
-      const sw = SCRATCH_MAX;
-      const sh = SCRATCH_MAX;
-      const cx = sw / 2, cy = sh / 2;
-
-      if (shadowScratch.width !== sw || shadowScratch.height !== sh) {
-        shadowScratch.width = sw;
-        shadowScratch.height = sh;
+    // a little trail of bubbles that drift off the tail while the cursor fish is moving
+    updateBubbles() {
+      this.bubbleTimer -= dt;
+      if (this.speed > 1.5 && this.bubbleTimer <= 0) {
+        const back = this.len * 0.55;
+        this.bubbles.push({
+          x: this.x - Math.cos(this.angle) * back + (Math.random() - 0.5) * 4,
+          y: this.y - Math.sin(this.angle) * back + (Math.random() - 0.5) * 4,
+          r: 1 + Math.random() * 1.8, age: 0, life: 0.7 + Math.random() * 0.5
+        });
+        this.bubbleTimer = 0.07;
       }
-      shadowScratchCtx.clearRect(0, 0, sw, sh);
-      shadowScratchCtx.globalAlpha = 1 - blend
-      shadowScratchCtx.drawImage(shadow0, cx - sa0.x*this.spriteScale, cy - sa0.y*this.spriteScale, this.drawW, this.drawH);
-
-      if (blend > 0.02 && shadow1) {
-        shadowScratchCtx.globalAlpha = blend;
-        shadowScratchCtx.drawImage(shadow1, cx - sa1.x*this.spriteScale, cy - sa1.y*this.spriteScale, this.drawW, this.drawH);
-        shadowScratchCtx.globalAlpha = 1;
-      }
-
-      ctx.save();
-      ctx.translate(this.x + ux*shadowOff, this.y + uy*shadowOff);
-      ctx.rotate(this.angle + Math.PI/2);
-      ctx.globalAlpha = Math.max(0, 0.3 - t*0.12);
-      ctx.drawImage(shadowScratch, -cx, -cy, sw, sh);
-      ctx.globalAlpha = 1;
-      ctx.restore();
+      for (const b of this.bubbles) { b.age += dt; b.y -= dt * 9; }
+      this.bubbles = this.bubbles.filter(b => b.age < b.life);
     }
-
-    drawBody(ctx, i0, i1, blend) {
-      const body0 = this.tintedFrames ? this.tintedFrames[i0] : assets.fish[this.fishType]?.[i0];
-      if (!body0) return;
-      const body1 = this.tintedFrames ? this.tintedFrames[i1] : assets.fish[this.fishType]?.[i1];
-  
-      const fa0 = this.def.anchors[i0];
-      const fa1 = this.def.anchors[i1];
-  
-      const sw = SCRATCH_MAX;
-      const sh = SCRATCH_MAX;
-      const cx = sw / 2, cy = sh / 2;
-  
-      if (fishScratch.width !== sw || fishScratch.height !== sh) {
-        fishScratch.width = sw;
-        fishScratch.height = sh;
-      }
-      fishScratchCtx.clearRect(0, 0, sw, sh);
-  
-      fishScratchCtx.globalAlpha = 1 - blend;
-      fishScratchCtx.drawImage(body0, cx - fa0.x*this.spriteScale, cy - fa0.y*this.spriteScale, this.drawW, this.drawH);
-      
-      if (blend > 0.02 && body1) {
-        fishScratchCtx.globalAlpha = blend;
-        fishScratchCtx.drawImage(body1, cx - fa1.x*this.spriteScale, cy - fa1.y*this.spriteScale, this.drawW, this.drawH);
-        fishScratchCtx.globalAlpha = 1;
-      }
-      
-      ctx.save();
-      ctx.translate(this.x, this.y);
-      ctx.rotate(this.angle + Math.PI/2);
-      ctx.drawImage(fishScratch, -cx, -cy, sw, sh);
-      ctx.restore();
-    }
-    
 
     drawCursorFish(ctx) {
-    const L = this.len;
-    const wag = Math.sin(this.swimPhase) * 0.55;
- 
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.angle);
-    ctx.shadowColor = 'rgba(255,255,255,0.9)';
-    ctx.shadowBlur  = 14;
-    ctx.fillStyle   = 'rgba(255,255,255,0.9)';
-    ctx.strokeStyle = 'rgba(255,255,255,0.95)';
-    ctx.lineWidth   = 1.2;
- 
-    // tail
-    const tx = -L*0.42;
-    const wagY = wag*L*0.45;
-    ctx.beginPath();
-    ctx.moveTo(tx, 0);
-    ctx.quadraticCurveTo(-L*0.62, L*0.24 + wagY*0.5, -L*0.78, L*0.5 + wagY);
-    ctx.quadraticCurveTo(-L*0.6, L*0.08 + wagY*0.3, -L*0.68, -L*0.02 + wagY*0.5);
-    ctx.quadraticCurveTo(-L*0.6, -L*0.08 + wagY*0.3, -L*0.78, -L*0.5 + wagY);
-    ctx.quadraticCurveTo(-L*0.62, -L*0.24 + wagY*0.5, tx, 0);
-    ctx.fill();
- 
-    // fins
-    for (const side of [1, -1]) {
-      ctx.beginPath();
-      ctx.moveTo(L * 0.08, side * L * 0.14);
-      ctx.quadraticCurveTo(-L * 0.1, side * L * 0.4, -L * 0.3, side * L * 0.28);
-      ctx.quadraticCurveTo(-L * 0.12, side * L * 0.18, L * 0.08, side * L * 0.14);
-      ctx.fill();
+      for (const b of this.bubbles) {
+        const k = 1 - b.age / b.life;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r * (0.6 + 0.4 * k), 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255,255,255,${(0.7 * k).toFixed(3)})`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
+
+      const img = assets.fish[this.fishType]?.[STRAIGHT_FRAME];
+      if (!img) return;
+      const anchor = this.def.anchors[STRAIGHT_FRAME];
+      // soft light around it so it reads as the one you're steering
+      ctx.save();
+      ctx.shadowColor = 'rgba(255,255,255,0.75)';
+      ctx.shadowBlur = 6;
+      if (useGL) {
+        koiGL.begin(W, H);
+        koiGL.draw(img, anchor, this, this.x, this.y, this.swimPhase, 1);
+        const r = Math.ceil(this.len * 1.5);
+        const sx = Math.max(0, Math.floor(this.x - r)), sy = Math.max(0, Math.floor(this.y - r));
+        const sw = Math.min(W, sx + 2*r) - sx, sh = Math.min(H, sy + 2*r) - sy;
+        if (sw > 0 && sh > 0) ctx.drawImage(koiGL.canvas, sx, sy, sw, sh, sx, sy, sw, sh);
+      } else {
+        drawBent2D(ctx, img, anchor, this, this.x, this.y, this.swimPhase, 1);
+      }
+      ctx.restore();
     }
- 
-    // body
-    ctx.beginPath();
-    ctx.moveTo(L * 0.5, 0);
-    ctx.quadraticCurveTo(L * 0.35, L * 0.24, 0, L * 0.22);
-    ctx.quadraticCurveTo(-L * 0.3, L * 0.19, tx, 0);
-    ctx.quadraticCurveTo(-L * 0.3, -L * 0.19, 0, -L * 0.22);
-    ctx.quadraticCurveTo(L * 0.35, -L * 0.24, L * 0.5, 0);
-    ctx.fill();
-    ctx.stroke();
- 
-    // eye
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgba(30,30,30,0.9)';
-    ctx.beginPath();
-    ctx.arc(L * 0.33, 0, L * 0.05, 0, Math.PI * 2);
-    ctx.fill();
- 
-    ctx.restore();
+}
+
+// if the GPU path ever fails (say a sprite it isn't allowed to read), drop to canvas 2D for good
+let useGL = !!koiGL;
+
+// all the shadows go down first, then every fish on top of them
+function drawKoi(ctx, fishes) {
+  if (useGL) {
+    try {
+      koiGL.begin(W, H);
+      for (const f of fishes) f.drawShadow(koiGL.draw);
+      for (const f of fishes) f.drawBody(koiGL.draw);
+      ctx.drawImage(koiGL.canvas, 0, 0);
+      return;
+    } catch (e) {
+      console.warn('fish fell back to canvas 2D:', e);
+      useGL = false;
+    }
   }
+  const draw = (...args) => drawBent2D(ctx, ...args);
+  for (const f of fishes) f.drawShadow(draw);
+  for (const f of fishes) f.drawBody(draw);
 }
 
 function fishPop() {
@@ -371,9 +550,7 @@ function fleeFrom(x, y, radius) {
   for (const f of fishArr) {
     if (Math.hypot(f.x-x, f.y-y) < radius) {
       f.fleeAngle  = Math.atan2(f.y-y, f.x-x);
-      f.angle      = f.fleeAngle;
       f.fleeing    = PANIC_SECONDS;
-      f.calming    = 0;
       f.panicSpeed = 4.5 + Math.random()*1.3;
       fled = true;
     }
