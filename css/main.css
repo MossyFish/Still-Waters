@@ -185,40 +185,109 @@ p.body-text {
 
 .fake-scrollbar-track {
     position: absolute;
-    top: 2px;
-    bottom: 2px;
-    left: calc(78%);
-    width: 8px;
+    left: 78%;
+    width: 3px;
     transform: translateX(-50%);
-    border-radius: 6px;
-    background: linear-gradient(180deg, rgba(243,206,140,0.8), rgba(255,255,255,0.85), rgba(243,206,140,0.8));
-    box-shadow: 0 0 6px rgba(255, 240, 210, 0.25);
+    z-index: 0;
     cursor: pointer;
+}
+
+/* a lily stem: lighter down the middle, fading out at both ends. It's drawn on its own layer
+   because the fade mask would clip the pad and dots too */
+.fake-scrollbar-track::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 3px;
+    background: linear-gradient(90deg, rgba(52, 104, 72, 0.7), rgba(150, 204, 150, 0.8) 50%, rgba(52, 104, 72, 0.7));
+    box-shadow: 0 0 8px rgba(120, 200, 160, 0.18);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 12px, #000 calc(100% - 12px), transparent);
+    mask-image: linear-gradient(180deg, transparent, #000 12px, #000 calc(100% - 12px), transparent);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* the stem is thin, so give it a wider area to click */
+.fake-scrollbar-track::before {
+    content: '';
+    position: absolute;
+    inset: 0 -12px;
+}
+
+.fake-scrollbar-tick {
+    position: absolute;
+    left: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(190, 230, 205, 0.45);
+    box-shadow: 0 0 4px rgba(150, 220, 190, 0.3);
+    transition: background 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+}
+
+.fake-scrollbar-tick.active {
+    background: var(--gold);
+    transform: translate(-50%, -50%) scale(1.3);
 }
 
 .fake-scrollbar-thumb {
     position: absolute;
-    left: calc(78%);
+    top: 0;
+    left: 50%;
     width: 50px;
     height: 50px;
-    transform: translate(-50%, var(--pad-y, 0px));
+    transform: translate(-50%, -50%) translateY(var(--pad-y, 0px));
     cursor: grab;
-    transition: filter 0.15s ease;
+    /* glides to the next entry and settles with a tiny overshoot, like it's floating */
+    transition: transform 0.5s cubic-bezier(0.34, 1.35, 0.5, 1), filter 0.15s ease;
 }
 
 .fake-scrollbar-thumb canvas {
+    position: relative;
     display: block;
     filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+    animation: pad-bob 7s ease-in-out infinite;
+}
+
+/* the ripple sits under the pad */
+.fake-scrollbar-thumb::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    margin: -22px 0 0 -22px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(200, 235, 255, 0.55);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.fake-scrollbar-thumb.landed::before {
+    animation: pad-ripple 0.9s ease-out;
 }
 
 .fake-scrollbar-thumb:hover,
 .fake-scrollbar-thumb.dragging {
-    transform: translate(-50%, var(--pad-y, 0px)) scale(1.1);
+    transform: translate(-50%, -50%) translateY(var(--pad-y, 0px)) scale(1.1);
     cursor: grabbing;
 }
 .fake-scrollbar-thumb:hover canvas,
 .fake-scrollbar-thumb.dragging canvas {
     filter: drop-shadow(0 0 6px rgba(227,179,92,0.6));
+}
+
+@keyframes pad-bob {
+    0%, 100% { transform: rotate(-4deg) translateY(0); }
+    50%      { transform: rotate(4deg) translateY(1px); }
+}
+
+@keyframes pad-ripple {
+    0%   { transform: scale(0.6); opacity: 0.7; }
+    100% { transform: scale(1.7); opacity: 0; }
 }
 
 .exp-item {

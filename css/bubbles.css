@@ -13,12 +13,13 @@
 .bubble-pond.ready { opacity: 1; }
 
 .bubble-slot {
+    --size: min(30cqw, 88cqh, 230px);
     position: absolute;
     top: 50%;
     left: 0;
-    width: min(100cqw, 250px);
-    height: min(100cqw, 250px);
-    margin: calc(min(100cqw, 250px) / -2) 0 0 calc(min(100cqw, 250px) / -2);
+    width: var(--size);
+    height: var(--size);
+    margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
     z-index: 2;
     cursor: pointer;
     pointer-events: none;
@@ -28,89 +29,71 @@
 .bubble-inner {
     position: absolute;
     inset: 0;
-    transition: transform 0.25s ease;
-    clip-path: circle(48% at 50% 50%);
+    border-radius: 50%;
     pointer-events: auto;
-}
-
-.bubble-inner:hover {
-    transform: translateY(-5%);
-}
-
-.bubble-inner:hover .bubble {
-    filter: brightness(1.2);
+    animation: bob 5.5s ease-in-out infinite;
 }
 
 .bubble {
     position: absolute;
     inset: 0;
-    overflow: hidden;
     border-radius: 50%;
     animation: wobble-a 6s ease-in-out infinite;
-    filter: brightness(1);
-    transition: filter 0.25s ease;
+    transition: translate 0.3s ease;
     will-change: transform;
-    box-shadow:
-        inset -10px -10px 26px rgba(15,35,55,0.32),
-        inset 6px 8px 20px rgba(220,240,255,0.35),
-        0 0 4px rgba(180,220,255,0.35);
+}
+
+.bubble-inner:hover .bubble {
+    translate: 0 -5%;
+}
+
+@keyframes bob {
+    0%, 100% { transform: translateY(-3.5%) rotate(-2deg); }
+    50%      { transform: translateY(3.5%) rotate(2deg); }
 }
 
 @keyframes wobble-a { 0%,100% { transform: scale(1, 1); } 50% { transform: scale(1.025, 0.975); } }
 @keyframes wobble-b { 0%,100% { transform: scale(0.98, 1.02); } 50% { transform: scale(1.02, 0.98); } }
 @keyframes wobble-c { 0%,100% { transform: scale(1.015, 0.985); } 50% { transform: scale(0.985, 1.015); } }
 
+/* the photo fills the bubble, a touch magnified like it's seen through curved water */
 .photo {
     position: absolute;
-    top: 10%; left: 10%; right: 10%; bottom: 10%;
+    inset: 2%;
     border-radius: 50%;
     overflow: hidden;
-    z-index: 0;
 }
 
 .photo img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.97;
+    transform: scale(1.08);
 }
 
+.film,
 .glass {
     position: absolute;
     inset: 0;
-    border-radius: inherit;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
-    z-index: 1;
-    background:
-        radial-gradient(ellipse 70% 10% at 22% 6%, rgba(255,255,255,0.55), transparent 70%),
-        radial-gradient(ellipse 55% 8% at 80% 16%, rgba(255,255,255,0.35), transparent 70%),
-        radial-gradient(ellipse 60% 10% at 86% 62%, rgba(255,255,255,0.28), transparent 70%),
-        radial-gradient(ellipse 50% 8% at 28% 92%, rgba(180,215,255,0.26), transparent 70%),
-        radial-gradient(circle at 50% 48%, rgba(255,255,255,0.18), transparent 60%),
-        radial-gradient(circle at 62% 68%, rgba(60,130,200,0.26), transparent 70%);
-    filter: blur(0.5px);
+    user-select: none;
 }
 
-.bubble::after {
-    content: '';
-    position: absolute;
-    inset: -2%;
-    border-radius: inherit;
-    background: conic-gradient(from 200deg,
-        rgba(255,255,255,0) 0deg,
-        rgba(255,255,255,0) 200deg,
-        rgba(255,140,170,0.35) 230deg,
-        rgba(140,200,255,0.35) 250deg,
-        rgba(255,235,150,0.32) 268deg,
-        rgba(255,255,255,0) 285deg,
-        rgba(255,255,255,0) 360deg);
-    -webkit-mask-image: radial-gradient(circle, transparent 66%, black 72%, black 84%, transparent 90%);
-    mask-image: radial-gradient(circle, transparent 66%, black 72%, black 84%, transparent 90%);
-    opacity: 0.8;
-    animation: spin 14s linear infinite;
-    pointer-events: none;
-    z-index: 2;
+.film {
+    opacity: 0.85;
+    animation: spin 22s linear infinite;
     will-change: transform;
+}
+
+.glass {
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+}
+
+.bubble-inner:hover .glass {
+    opacity: 1;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -156,18 +139,17 @@
 }
 
 @keyframes travel {
-    0% { transform: translateX(-20cqw) scale(0.1); opacity: 0; }
-    2% { transform: translateX(-8cqw) scale(0.15); opacity: 0.3; }
-    3% { transform: translateX(1cqw) scale(0.2); opacity: 0.5; }
-    4% { transform: translateX(7cqw) scale(0.3); opacity: 1; }
-    5% { transform: translateX(10cqw) scale(0.35); }
-    9% { transform: translateX(19cqw) scale(1.05); }
-    10% { transform: translateX(20cqw) scale(1); }
-    100% { transform: translateX(96cqw) scale(1); opacity: 1; }
+    from { transform: translateX(-14cqw); }
+    to   { transform: translateX(96cqw); }
+}
+
+@keyframes arrive {
+    from { scale: 0.15; opacity: 0; }
+    to   { scale: 1; opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .bubble-slot, .bubble, .bubble::after {
+    .bubble-inner, .bubble, .film {
         animation: none;
     }
 }

@@ -149,6 +149,86 @@ function makePadOutline(baseR, notchWidth, notchDepth, irregularity, seedA, seed
     return pts;
 }
 
+// painted texture shared by the pond pads and the scrollbar pads, so they read like the watercolour
+// water and fish: soft blotches, fine ribs like the fin rays, a little brush grain, and shading lit
+// from the side the shadows fall away from
+let padGrain = null;
+function padGrainPattern(ctx) {
+    if (!padGrain) {
+        const size = 96;
+        const raw = document.createElement('canvas');
+        raw.width = raw.height = size;
+        const rctx = raw.getContext('2d');
+        const img = rctx.createImageData(size, size);
+        for (let i = 0; i < img.data.length; i += 4) {
+            const v = 128 + (Math.random() - 0.5) * 120;
+            img.data[i] = img.data[i+1] = img.data[i+2] = v;
+            img.data[i+3] = 255;
+        }
+        rctx.putImageData(img, 0, 0);
+        // softened a touch so it reads as paper grain, not screen noise
+        padGrain = document.createElement('canvas');
+        padGrain.width = padGrain.height = size;
+        const gctx = padGrain.getContext('2d');
+        gctx.filter = 'blur(0.5px)';
+        gctx.drawImage(raw, 0, 0);
+    }
+    return ctx.createPattern(padGrain, 'repeat');
+}
+
+function paintPadTexture(ctx, r, palette, lightAngle, notchWidth) {
+    const [c0, c1, c2] = palette;
+    const box = r * 1.3;
+
+    ctx.save();
+    ctx.filter = `blur(${Math.max(1, r*0.14).toFixed(1)}px)`;
+    const blotches = 9 + Math.floor(Math.random()*6);
+    for (let i = 0; i < blotches; i++) {
+        const a = Math.random()*Math.PI*2, d = Math.sqrt(Math.random())*r*0.85;
+        const light = Math.random() < 0.5;
+        ctx.beginPath();
+        ctx.ellipse(Math.cos(a)*d, Math.sin(a)*d, r*(0.12 + Math.random()*0.25), r*(0.08 + Math.random()*0.18),
+                    Math.random()*Math.PI, 0, Math.PI*2);
+        ctx.fillStyle = light ? hexToRgba(lerpHex(c0, '#e8f5c8', 0.25), 0.07 + Math.random()*0.08)
+                              : hexToRgba(c2, 0.08 + Math.random()*0.1);
+        ctx.fill();
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.lineCap = 'round';
+    const ribColor = lerpHex(c1, c0, 0.8);
+    const ribs = 18 + Math.floor(Math.random()*8);
+    for (let i = 0; i < ribs; i++) {
+        const a = (i + Math.random()*0.6) / ribs * Math.PI*2;
+        if (angularDistance(a, 0) < notchWidth*0.9) continue;
+        const len = r*(0.75 + Math.random()*0.3);
+        const bendA = a + (Math.random() - 0.5)*0.25;
+        ctx.strokeStyle = hexToRgba(ribColor, 0.06 + Math.random()*0.07);
+        ctx.lineWidth = Math.max(0.5, r*0.025);
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a)*r*0.12, Math.sin(a)*r*0.12);
+        ctx.quadraticCurveTo(Math.cos(bendA)*len*0.55, Math.sin(bendA)*len*0.55, Math.cos(a)*len, Math.sin(a)*len);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    const lx = Math.cos(lightAngle)*r, ly = Math.sin(lightAngle)*r;
+    const shade = ctx.createLinearGradient(lx, ly, -lx, -ly);
+    shade.addColorStop(0, 'rgba(255,250,220,0.14)');
+    shade.addColorStop(0.45, 'rgba(255,250,220,0)');
+    shade.addColorStop(1, 'rgba(0,18,20,0.2)');
+    ctx.fillStyle = shade;
+    ctx.fillRect(-box, -box, box*2, box*2);
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.globalAlpha = 0.16;
+    ctx.fillStyle = padGrainPattern(ctx);
+    ctx.fillRect(-box, -box, box*2, box*2);
+    ctx.restore();
+}
+
 class LilyPad {
     constructor(){
         this.r = 16 + Math.random()*18;
@@ -269,6 +349,8 @@ class LilyPad {
             sctx.fillStyle = mixGrad;
             sctx.fill();
         }
+
+        paintPadTexture(sctx, this.r, this.palette, Math.atan2(-uy, -ux) - this.rot, this.notchWidth);
 
         // vein blurring on pad
         sctx.save(); 

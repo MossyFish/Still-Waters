@@ -68,6 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fill();
         }
 
+        // the pad is drawn turned -90deg, so the screen's top-left light is turned back by the same amount
+        paintPadTexture(ctx, r, palette, Math.atan2(-1, -1) + Math.PI / 2, 0.5);
+
         // light streaks radiating from center
         ctx.save();
         ctx.filter = 'blur(0.6px)';
@@ -128,34 +131,52 @@ document.addEventListener('DOMContentLoaded', () => {
         const items = Array.from(list.querySelectorAll('.exp-item'));
         if (!items.length) return;
 
+        // the stem runs from the first entry to the last, with a dot level with each one
+        const STEM_END = 14;
+        const ticks = items.map(() => {
+            const tick = document.createElement('div');
+            tick.className = 'fake-scrollbar-tick';
+            track.insertBefore(tick, thumb);
+            return tick;
+        });
+        let mids = [];
+
         let currentIndex = -1;
         let dragging = false;
+
+        function layout() {
+            const listTop = list.getBoundingClientRect().top;
+            mids = items.map((item) => {
+                const rect = item.getBoundingClientRect();
+                return rect.top + rect.height / 2 - listTop;
+            });
+            const first = mids[0];
+            track.style.top = `${first - STEM_END}px`;
+            track.style.height = `${mids[mids.length - 1] - first + STEM_END * 2}px`;
+            ticks.forEach((tick, i) => { tick.style.top = `${mids[i] - first + STEM_END}px`; });
+            positionThumb(currentIndex);
+        }
 
         function setActive(index, { silent = false } = {}) {
             index = Math.max(0, Math.min(items.length - 1, index));
             if (index === currentIndex) return;
             if (currentIndex >= 0) items[currentIndex].classList.remove('scroll-active');
             items[index].classList.add('scroll-active');
+            ticks.forEach((tick, i) => tick.classList.toggle('active', i === index));
             currentIndex = index;
-            if (!silent) playTick();
+            if (!silent) {
+                playTick();
+                // a ring spreads out under the pad where it lands
+                thumb.classList.remove('landed');
+                void thumb.offsetWidth;
+                thumb.classList.add('landed');
+            }
             positionThumb(index);
         }
 
         function positionThumb(index) {
-            const trackH = track.clientHeight;
-            const thumbH = thumb.offsetHeight;
-            const maxY = trackH - thumbH;
-            let y;
-            if (index === 0) y = 0;
-            else if (index === items.length - 1) y = maxY;
-            else {
-                const item = items[index];
-                const listRect = list.getBoundingClientRect();
-                const itemRect = item.getBoundingClientRect();
-                const itemMidY = itemRect.top + itemRect.height / 2 - listRect.top;
-                y = Math.max(0, Math.min(maxY, itemMidY - thumbH / 2));
-            }
-            thumb.style.setProperty('--pad-y', `${y}px`);
+            if (index < 0 || !mids.length) return;
+            thumb.style.setProperty('--pad-y', `${mids[index] - mids[0] + STEM_END}px`);
         }
 
         function indexFromClientY(clientY) {
@@ -194,8 +215,9 @@ document.addEventListener('DOMContentLoaded', () => {
             setActive(indexFromClientY(e.clientY));
        });
 
-        window.addEventListener('resize', () => positionThumb(currentIndex));
-
+        // heights change as fonts load and the window resizes
+        new ResizeObserver(layout).observe(list);
+        layout();
         setActive(0, { silent: true });
     });
 });

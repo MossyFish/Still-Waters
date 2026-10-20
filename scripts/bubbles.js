@@ -13,6 +13,66 @@ const EDGE_PARTICLE_COUNT = 10;
 
 const WOBBLE_SHAPES = ['wobble-a', 'wobble-b', 'wobble-c'];
 
+// The glass and the soap-film colours are painted once and shared by every bubble. Stacking blurred
+// gradients, inset shadows and a masked spinning ring on each bubble made Firefox repaint them every
+// frame, which halved the frame rate.
+const BUBBLE_ART = (() => {
+    const S = 256, c = S / 2, R = c - 2;
+    function paint(draw) {
+        const cv = document.createElement('canvas');
+        cv.width = cv.height = S;
+        draw(cv.getContext('2d'));
+        return cv.toDataURL();
+    }
+    const glass = paint((ctx) => {
+        // clear in the middle, picking up a faint blue toward the rim where the film is seen edge-on
+        const edge = ctx.createRadialGradient(c, c, R * 0.5, c, c, R);
+        edge.addColorStop(0, 'rgba(170,215,255,0)');
+        edge.addColorStop(0.78, 'rgba(170,215,255,0.08)');
+        edge.addColorStop(0.95, 'rgba(225,242,255,0.32)');
+        edge.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = edge;
+        ctx.beginPath(); ctx.arc(c, c, R, 0, Math.PI * 2); ctx.fill();
+
+        ctx.strokeStyle = 'rgba(235,248,255,0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(c, c, R - 1, 0, Math.PI * 2); ctx.stroke();
+
+        // a window reflection curving along the top left, and a small catchlight opposite
+        ctx.save();
+        ctx.translate(c, c);
+        ctx.rotate(-Math.PI * 0.75);
+        ctx.filter = 'blur(2px)';
+        ctx.beginPath();
+        ctx.arc(0, 0, R * 0.8, -0.45, 0.45);
+        ctx.arc(0, 0, R * 0.62, 0.38, -0.38, true);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.fill();
+        ctx.restore();
+        ctx.filter = 'blur(1.5px)';
+        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.beginPath(); ctx.ellipse(c + R * 0.5, c + R * 0.52, R * 0.08, R * 0.035, -Math.PI / 4, 0, Math.PI * 2); ctx.fill();
+    });
+    const film = paint((ctx) => {
+        // magenta, gold and cyan swirling round the rim, heavy on one side and faint on the other
+        ctx.filter = 'blur(3px)';
+        ctx.lineCap = 'round';
+        const steps = 90;
+        for (let i = 0; i < steps; i++) {
+            const a0 = (i / steps) * Math.PI * 2, a1 = ((i + 1.4) / steps) * Math.PI * 2;
+            const hue = 300 + 140 * Math.sin(a0 * 2.0 + 0.6);
+            const strength = Math.pow(Math.max(0, Math.cos(a0 - 0.9)), 1.6) * 0.42
+                           + Math.pow(Math.max(0, Math.cos(a0 - 4.0)), 3) * 0.18;
+            if (strength < 0.01) continue;
+            ctx.strokeStyle = `hsla(${hue.toFixed(0)}, 90%, 72%, ${strength.toFixed(3)})`;
+            ctx.lineWidth = R * (0.09 + 0.05 * Math.sin(a0 * 3));
+            ctx.beginPath(); ctx.arc(c, c, R * 0.87, a0, a1); ctx.stroke();
+        }
+    });
+    return { glass, film };
+})();
+
 const PHOTO_REFRESH_MS = 5 * 60 * 1000;
 
 const FALLBACK_SRC = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
@@ -112,22 +172,26 @@ function popHole(bubbleEl, bubbleSlot, durationMs) {
 function buildBubble(photoIndex, delaySeconds = 0) {
     const slot = document.createElement('div');
     slot.className = 'bubble-slot';
-    slot.style.animation = `travel ${LAP_SECONDS}s linear forwards`;
+    // drifts across at a steady pace, and grows in from small as it arrives
+    slot.style.animation = `travel ${LAP_SECONDS}s linear forwards, arrive 1.8s cubic-bezier(0.2, 0.8, 0.3, 1)`;
     slot.style.animationDelay = `-${delaySeconds.toFixed(2)}s`;
 
     const inner = document.createElement('div');
     inner.className = 'bubble-inner';
+    // each bubble bobs at its own pace
+    inner.style.animationDuration = `${(4.5 + Math.random() * 2.5).toFixed(2)}s`;
+    inner.style.animationDelay = `-${(Math.random() * 6).toFixed(2)}s`;
 
     const bubbleEl = document.createElement('div');
     bubbleEl.className = 'bubble';
-    WOBBLE_SHAPES.forEach((name) => bubbleEl.classList.remove(name));
     bubbleEl.classList.add(WOBBLE_SHAPES[Math.floor(Math.random() * WOBBLE_SHAPES.length)]);
     bubbleEl.style.animationDelay = `-${(Math.random() * 6).toFixed(2)}s`;
 
     const photo = photos[photoIndex % photos.length];
     bubbleEl.innerHTML = `
         <div class="photo"><img src="${photo.src}" alt="${photo.alt || ''}"></div>
-        <div class="glass"></div>
+        <img class="film" src="${BUBBLE_ART.film}" alt="" style="animation-delay: -${(Math.random() * 20).toFixed(1)}s">
+        <img class="glass" src="${BUBBLE_ART.glass}" alt="">
     `;
     const imgEl = bubbleEl.querySelector('.photo img');
     imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = FALLBACK_SRC; };
@@ -149,7 +213,7 @@ function pop(bubble) {
     bubble.popped = true;
     playOneShot(popSoundEl, { rate: 0.85 + Math.random()*0.3 });
 
-    bubble.slot.getAnimations()[0]?.pause();
+    bubble.slot.getAnimations().forEach((a) => a.pause());
 
     scatterParticles(bubble.slot);
     bubble.slot.classList.add('popping');
