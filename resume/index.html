@@ -16,7 +16,11 @@
 <div class="page">
   <div class="bar">
     <a class="back" href="/">[ home page ]</a>
-    <a href="/resume/Tsz_Fei_Wang_Resume.pdf" download>Download PDF</a>
+    <div class="tools">
+      <a class="zoom" id="zoomOut" href="#" aria-label="Smaller text">&minus;</a>
+      <a class="zoom" id="zoomIn" href="#" aria-label="Larger text">+</a>
+      <a href="/resume/Tsz_Fei_Wang_Resume.pdf" download>Download PDF</a>
+    </div>
   </div>
 
   <div class="sheet">
@@ -73,6 +77,18 @@
       <div class="when">Sept 2026</div>
     </div>
 
+    <div class="row entry plain">
+      <div><b>Technova</b> | <em>Hardware Lead</em></div>
+      <div class="when">Oct 2026</div>
+    </div>
+    <ul>
+      <li>Designed the event badge for <b>~300 attendees</b> in <b>KiCad</b>: custom board outline, <b>NFC tag</b> check-in coil, LED ring, and a <b>JLCPCB</b> assembly order package (BOM, placement file, gerbers).</li>
+    </ul>
+    <div class="row entry plain">
+      <div><b>WARG (Waterloo Aerial Robotics Group)</b> | <em>EFS Member</em></div>
+      <div class="when"></div>
+    </div>
+
     <h2>Awards &amp; Honors</h2>
     <div class="row award"><div><b>Gold &amp; Silver Medalist</b>, IT Systems Networking &ndash; Skills Ontario (TDSB Regional &amp; Provincial Finals)</div><div class="when">Mar &ndash; May 2026</div></div>
     <div class="row award"><div><b>National Champion x2 &ndash; 1st in Canada, Cybersecurity</b> &ndash; $1,000 scholarship</div><div class="when">May 2025, Mar 2026</div></div>
@@ -112,5 +128,19 @@
 <script src="scripts/render-koi.js"></script>
 <script src="scripts/render-foliage.js"></script>
 <script src="scripts/render-pond.js"></script>
+<script>
+(function () {
+  var key = 'resumeZoom', z = 1, root = document.documentElement;
+  try { z = parseFloat(localStorage.getItem(key)) || 1; } catch (e) {}
+  function apply() {
+    z = Math.min(1.6, Math.max(0.8, Math.round(z * 100) / 100));
+    root.style.setProperty('--z', z);
+    try { localStorage.setItem(key, z); } catch (e) {}
+  }
+  document.getElementById('zoomIn').addEventListener('click', function (e) { e.preventDefault(); z += 0.1; apply(); });
+  document.getElementById('zoomOut').addEventListener('click', function (e) { e.preventDefault(); z -= 0.1; apply(); });
+  apply();
+})();
+</script>
 </body>
 </html>
