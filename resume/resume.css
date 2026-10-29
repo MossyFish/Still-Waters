@@ -124,9 +124,19 @@ html, body {
 .skills p { margin: 0 0 2px; }
 .award { margin: 2px 0; }
 
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
 @media (max-width: 640px) {
-    .page { padding: 16px 8px 48px; }
-    .sheet { padding: 24px 18px; font-size: 12px; min-height: 0; }
+    .page { padding: 12px 8px 40px; }
+    .sheet { padding: 22px 18px 24px; font-size: 15px; line-height: 1.4; min-height: 0; }
+    .sheet h1 { font-size: 1.9rem; }
+    .contact { display: flex; flex-direction: column; gap: 2px; font-size: 0.95em; }
+    .contact .sep { display: none; }
+    .sheet h2 { font-size: 1.2rem; margin-top: 18px; }
     .row { flex-direction: column; gap: 0; }
-    .row .when { text-align: left; }
+    .row .when { text-align: left; white-space: normal; color: #444; font-size: 0.93em; }
+    .entry { margin-top: 12px; }
+    .sheet ul { padding-left: 1.1em; }
+    .sheet li { margin: 3px 0; }
+    .bar a { font-size: 0.9rem; }
 }

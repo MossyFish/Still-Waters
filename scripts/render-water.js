@@ -20,6 +20,7 @@ function resize() {
 resize();
 window.addEventListener('resize', resize);
 
+const isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 let mouse = { x: W/2, y: H/2, active: false };
 window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; });
 window.addEventListener('mouseleave', () => mouse.active = false);

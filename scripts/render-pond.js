@@ -70,22 +70,24 @@ function loop() {
     lilyPads.forEach(p => { p.update(); p.draw(screenCtx); });
     leaves.forEach(l => { l.update(); l.draw(screenCtx); });
 
-    cursorFish.update();
-    nudgeFoliage(cursorFish.x, cursorFish.y, 4, 0.15);
+    if (!isTouch) {
+        cursorFish.update();
+        nudgeFoliage(cursorFish.x, cursorFish.y, 4, 0.15);
 
-    if (trailX === null) { trailX = cursorFish.x; trailY = cursorFish.y; }
+        if (trailX === null) { trailX = cursorFish.x; trailY = cursorFish.y; }
     
-    if (cursorFish.speed > 1 && Math.hypot(cursorFish.x-trailX, cursorFish.y-trailY) > 26) {
-        spawnRipple(cursorFish.x, cursorFish.y, 0.85, { decay:0.94, maxAge:1.2, rings:1 });
-        trailX = cursorFish.x; trailY = cursorFish.y;
-    }
+        if (cursorFish.speed > 1 && Math.hypot(cursorFish.x-trailX, cursorFish.y-trailY) > 26) {
+            spawnRipple(cursorFish.x, cursorFish.y, 0.85, { decay:0.94, maxAge:1.2, rings:1 });
+            trailX = cursorFish.x; trailY = cursorFish.y;
+        }
     
-    if (overlayCtx) {
-        overlayCtx.clearRect(0, 0, W, H);
-        cursorFish.drawCursorFish(overlayCtx);
-    } 
-    else {
-        cursorFish.drawCursorFish(screenCtx);
+        if (overlayCtx) {
+            overlayCtx.clearRect(0, 0, W, H);
+            cursorFish.drawCursorFish(overlayCtx);
+        } 
+        else {
+            cursorFish.drawCursorFish(screenCtx);
+        }
     }
     
     requestAnimationFrame(loop);
