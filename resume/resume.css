@@ -1,3 +1,8 @@
+@font-face { font-family: 'LM Roman'; src: url('/resume/fonts/lmroman10-regular.otf'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'LM Roman'; src: url('/resume/fonts/lmroman10-bold.otf'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'LM Roman'; src: url('/resume/fonts/lmroman10-italic.otf'); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'LM Caps'; src: url('/resume/fonts/lmromancaps10-regular.otf'); font-display: swap; }
+
 :root {
     --water-deep: #0f2a45;
     --water-light: #6fa0d9;
@@ -45,19 +50,14 @@ html, body {
 }
 
 .bar a {
-    color: var(--cream);
+    color: #fff;
     text-decoration: none;
     font-size: 0.85rem;
     letter-spacing: 0.08em;
-    padding: 8px 14px;
-    border-radius: 8px;
-    background: rgba(8, 14, 20, 0.55);
-    border: 1px solid rgba(243, 239, 228, 0.18);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-    transition: background 0.2s ease, color 0.2s ease;
+    padding: 6px 10px;
+    transition: color 0.2s ease;
 }
-.bar a:hover { background: rgba(8, 14, 20, 0.8); color: #fff; }
+.bar a:hover { color: rgba(255, 255, 255, 0.55); }
 
 /* the resume itself */
 .sheet {
@@ -65,22 +65,23 @@ html, body {
     color: #111;
     min-height: 1056px;
     padding: 32px 44px 28px;
-    font-family: 'Source Serif 4', 'Times New Roman', serif;
-    font-size: 12px;
+    font-family: 'LM Roman', 'Latin Modern Roman', 'Times New Roman', serif;
+    font-size: 13px;
     line-height: 1.3;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
 }
 
 .sheet a { color: inherit; text-decoration: none; }
 .sheet a:hover { color: #1c4a73; }
+.sheet .gh svg { vertical-align: -1px; }
 
 .sheet h1 {
     margin: 0;
     text-align: center;
     font-weight: 700;
     font-size: 2.1rem;
-    font-variant: small-caps;
-    letter-spacing: 0.02em;
+    font-family: 'LM Caps', 'LM Roman', serif;
+    letter-spacing: 0.01em;
     line-height: 1.15;
 }
 
@@ -96,7 +97,7 @@ html, body {
     padding-bottom: 1px;
     border-bottom: 1px solid #111;
     font-weight: 400;
-    font-variant: small-caps;
+    font-family: 'LM Caps', 'LM Roman', serif;
     font-size: 1.12rem;
     letter-spacing: 0.03em;
     line-height: 1.2;
