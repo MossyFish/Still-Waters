@@ -39,12 +39,18 @@ window.isMuted = () => muted;
 function startAmbience(){
   if(ambienceStarted || muted) return;
   ambienceStarted = true;
-  ambience.play().catch(() =>{ });
-  ambience2.play().catch(() => {})
+  Promise.all([ambience.play(), ambience2.play()]).then(() => {
+    ['pointerdown', 'keydown', 'touchstart'].forEach(ev => window.removeEventListener(ev, startAmbience, true));
+  }).catch(() => {
+    // Blocked until the visitor interacts: let the next gesture try again.
+    ambienceStarted = false;
+  });
 }
 
-window.addEventListener('click', startAmbience);
-window.addEventListener('keydown', startAmbience);
+// Try straight away (allowed once the browser trusts the site), and start on
+// the very first gesture otherwise, instead of waiting for a full click.
+startAmbience();
+['pointerdown', 'keydown', 'touchstart'].forEach(ev => window.addEventListener(ev, startAmbience, true));
 
 function playRippleSound(){
   if(muted) return;
