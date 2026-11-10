@@ -46,25 +46,24 @@
       <div class="row"><span class="org">Century Frontier Asset Management</span><span class="when">Jul 2026 &ndash; Aug 2026</span></div>
       <div class="row"><span class="role">Quantitative Research Intern</span><span class="when role">Shenzhen, CN</span></div>
       <ul>
-        <li>Designed a point-in-time backtesting pipeline in <b>Python</b> with <b>pandas</b> and yfinance that only shows each model the data available on its prediction date, removing lookahead bias from LLM-driven equity research.</li>
-        <li>Built a model-agnostic evaluation framework benchmarking stock-preference and inter-stock-relationship predictions from <b>9 LLM architectures</b> across <b>104 tickers</b>.</li>
-        <li>Scored signal quality separately from each model's stated confidence, showing that confidence was a poor guide to whether a prediction held up.</li>
+        <li>Designed a point-in-time backtesting pipeline in <b>Python</b> with <b>pandas</b> and yfinance that only shows each model data from before its prediction date, removing lookahead bias from LLM-driven equity research.</li>
+        <li>Built a model-agnostic evaluation framework benchmarking <b>9 LLM architectures</b> across <b>104 tickers</b>, scoring signal quality separately from stated confidence and showing that confidence was a poor guide to accuracy.</li>
       </ul>
     </div>
     <div class="entry">
       <div class="row"><span class="org">Krembil Research Institute, World Community Grid</span><span class="when">Mar 2026 &ndash; Jun 2026</span></div>
       <div class="row"><span class="role">Software Engineer Intern</span><span class="when role">Toronto, ON</span></div>
       <ul>
-        <li>Designed and built the full-stack data access portal for Catrin, a bioinformatics database of <b>~4 million</b> transcription factor to target gene (TF-TG) associations across <b>33,000 genes</b>.</li>
-        <li>Built most of the portal's frontend: the search, filter and results views researchers use to look up regulatory interactions by gene or transcription factor.</li>
-        <li>Reconciled the schemas of <b>9 independent data sources</b> that describe the same interactions differently, so researchers can search and filter them as one dataset.</li>
+        <li>Designed and built the full-stack data access portal for Catrin, a bioinformatics database of <b>~4 million</b> TF-TG associations across <b>33,000 genes</b>.</li>
+        <li>Built most of the portal's frontend, including the search, filter and results views researchers use to look up genes.</li>
+        <li>Reconciled the schemas of <b>9 independent data sources</b> so researchers can query them as one dataset.</li>
       </ul>
     </div>
     <div class="entry">
       <div class="row"><span class="org">Mackenzie Cybersecurity Team</span><span class="when">Jun 2025 &ndash; Jun 2026</span></div>
       <div class="row"><span class="role">Team Captain, President</span><span class="when role">Toronto, ON</span></div>
       <ul>
-        <li>Captained the team to <b>First in Canada</b> in CyberTitan, Canada's largest cyberdefense competition, securing <b>Windows</b> and <b>Linux</b> systems and <b>Cisco</b> network configurations under time limits.</li>
+        <li>Captained the team to <b>First in Canada</b> in CyberTitan, Canada's largest cyberdefense competition, securing <b>Windows</b>, <b>Linux</b> and <b>Cisco</b> systems.</li>
         <li>Designed and delivered cybersecurity curriculum and class presentations that reached 60+ students.</li>
       </ul>
     </div>
@@ -72,7 +71,9 @@
       <div class="row"><span class="org">Non-Trivial Research Fellowship</span><span class="when">Mar 2025 &ndash; Aug 2025</span></div>
       <div class="row"><span class="role">Machine Learning Research Fellow</span><span class="when role">Remote</span></div>
       <ul>
-        <li>Trained and evaluated a <b>PyTorch</b> audio deepfake classifier in <b>Python</b> on Kaggle that distinguishes real speech from AI-synthesized speech.</li>
+        <li>Selected for Non-Trivial's research fellowship, researching an open real-world problem over several months.</li>
+        <li>Trained and evaluated an audio deepfake classifier in <b>Python</b> with <b>PyTorch</b> that tells real speech from AI-synthesized speech.</li>
+        <li>Researched an emerging digital security problem and wrote a solution proposal for it.</li>
       </ul>
     </div>
 
@@ -80,26 +81,25 @@
     <div class="entry proj">
       <div class="row"><div><a class="title" href="https://github.com/flyingf15h/technova-pcbs" target="_blank" rel="noopener">Technova Hackathon Badge</a> | <em>KiCad, Hardware Lead</em></div><div class="when"><em>Oct 2026</em></div></div>
       <ul>
-        <li>Led hardware design of the attendee badge for ~300 hackers in <b>KiCad</b>: a <b>RISC-V</b> (CH32V203) board with an NFC tag for tap-to-phone check-in, an OLED screen, a D-pad, an addressable LED ring and USB-C LiPo charging.</li>
-        <li>Routed the double-sided board (1,300+ tracks, 100+ vias) to a clean DRC, keeping copper out of the 42 mm NFC antenna coil, and added a boot jumper so the badge can be flashed over USB.</li>
-        <li>Prepared the JLCPCB assembly package (gerbers, LCSC-matched BOM, rotation-corrected placement file), replacing out-of-stock parts and bringing the cost to about $7 per badge.</li>
+        <li>Led hardware design of the attendee badge for ~300 hackers in <b>KiCad</b> from schematic to manufacturing: a <b>RISC-V</b> MCU, NFC check-in, an OLED screen, an LED ring and USB-C charging.</li>
+        <li>Laid out and routed the double-sided PCB (<b>1,300+ tracks</b>) and prepared the JLCPCB assembly files, bringing the cost down to about <b>$7 per badge</b>.</li>
       </ul>
     </div>
     <div class="entry proj">
       <div class="row"><div><a class="title" href="https://github.com/flyingf15h/submerge" target="_blank" rel="noopener">Submerge</a> | <em>GLSL, QML, Python</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
       <ul>
-        <li>Developed an animated deep-ocean koi theme for KDE Plasma 5 and 6 (wallpaper, global theme, panel style, login screen) in <b>GLSL</b> and <b>QML</b>, with ~1,290 downloads on the KDE Store.</li>
-        <li>Implemented a water ripple simulation in the shaders and a live system HUD showing CPU, GPU, memory, network, battery and the top process.</li>
-        <li>Added power-aware frame pacing to keep the animation light on battery, and resolved blank rendering on NVIDIA/Wayland after a user report by porting the shaders to GLSL ES.</li>
+        <li>Developed an animated koi theme for KDE Plasma 5 and 6 in <b>GLSL</b> and <b>QML</b>, with a shader water simulation and a live system HUD, reaching <b>~1,290 downloads</b> on the KDE Store.</li>
+        <li>Added power-aware frame pacing for battery life and fixed blank rendering on NVIDIA/Wayland by porting the shaders to GLSL ES.</li>
       </ul>
     </div>
     <div class="entry proj">
       <div class="row"><div><a class="title" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">Physical Studio</a> | <em>Python, React, Three.js, Docker | Winner, Hack the Valley 11</em></div><div class="when"><em>Oct 2026</em></div></div>
       <ul>
-        <li>Engineered the <b>Python</b> MCP server that lets an LLM design a project from a library of measured parts (dimensions, mounting holes, pins) and check its own design for collisions and clearance, built in a team of three.</li>
-        <li>Implemented GLB scene export to a <b>React Three Fiber</b> viewer that animates each assembly step, and deployed the app with <b>Docker Compose</b> and Caddy on a Vultr server.</li>
+        <li>Engineered the <b>Python</b> MCP server that lets an LLM design a hardware project from a library of measured parts and check its own design for collisions, in a team of three.</li>
+        <li>Built the <b>React Three Fiber</b> viewer that animates each assembly step and deployed it with <b>Docker Compose</b> on Vultr.</li>
       </ul>
     </div>
+
 
 
 
@@ -108,7 +108,6 @@
     <div class="row award"><div><b>Gold &amp; Silver Medalist</b>, IT Systems Networking, Skills Ontario (Regional &amp; Provincial)</div><div class="when">Mar 2026 &ndash; May 2026</div></div>
     <div class="row award"><div><b>National Champion x2</b>, 1st in Canada, Cybersecurity, $1,000 scholarship</div><div class="when">May 2025, Mar 2026</div></div>
     <div class="row award"><div><b>National Finalist</b>, 2nd in Canada, Cybersecurity, $1,600 scholarship</div><div class="when">Mar 2025</div></div>
-    <div class="row award"><div><b>1st Place, Canada</b>, Mirai Project, Technology Innovation in Healthcare, $400 award</div><div class="when">Jan 2025</div></div>
 
   </div>
 </div>
