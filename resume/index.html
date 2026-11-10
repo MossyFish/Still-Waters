@@ -15,7 +15,7 @@
 
 <div class="page">
   <div class="bar">
-    <a class="back" href="/">[ home page ]</a>
+    <a class="back" href="/">[ esc to exit ]</a>
     <div class="tools">
       <span class="label" id="versionName">General</span>
       <a id="pdfLink" href="/resume/versions/general.pdf" download>Download PDF</a>
@@ -419,6 +419,7 @@
   document.addEventListener('keydown', function (e) {
     if (e.key === 'ArrowLeft') { show(current - 1); e.preventDefault(); }
     if (e.key === 'ArrowRight') { show(current + 1); e.preventDefault(); }
+    if (e.key === 'Escape') { location.href = '/'; }
   });
   var start = sheets.findIndex(function (s) { return s.dataset.key === location.hash.slice(1); });
   show(start >= 0 ? start : 0);

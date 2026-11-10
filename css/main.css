@@ -296,17 +296,16 @@ p.body-text {
 }
 
 .exp-item.scroll-active {
-    transform: translateX(4px);
-    transition: transform 0.25s ease;
+    border-bottom-color: transparent;
 }
 
 .exp-item.scroll-active::before {
     content: '';
     position: absolute;
-    inset: -3px -10px -3px -20px;
+    inset: 2px 0;
     border-radius: 10px;
-    background: rgba(64, 140, 220, 0.14);
-    border: 1.5px solid rgba(120, 190, 255, 0.45);
+    background: rgba(64, 140, 220, 0.12);
+    border: 1px solid rgba(120, 190, 255, 0.35);
     box-shadow:
         0 6px 14px rgba(0, 0, 0, 0.3),
         inset 0 0 8px rgba(120, 190, 255, 0.1);

@@ -53,11 +53,11 @@
     <h2 class="section-title">Projects</h2>
      <div class="projects-grid">
       <div class="project-box">
-        <h3>Physical Studio </h3>
-        <p class="project-desc"> Describe a hardware project and get an IKEA-style build guide for it, with a 3D model of every step and a photo check of each step on your real bench. 
-          I built an MCP server with CAD tools for part placement, wiring and collision/clearance checks, which exports GLB scenes to a React Three Fiber viewer. Deployed with Docker Compose on Vultr. Won Hack the Valley 11. </p>
-        <div class="project-image"> <img src="assets/projects/PhysicalStudio.png" alt="Physical Studio preview"> </div>
-        <a class="link" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">link to project</a>
+        <h3>Technova Hacker Badge </h3>
+        <p class="project-desc"> A custom NFC badge for the ~300 hackers at Technova, which I led the hardware design for in KiCad. 
+          It has a RISC-V microcontroller, tap-to-phone NFC check-in, an OLED screen, a D-pad, addressable LEDs and USB-C charging, and I got the cost down from about $11 to $7 per badge by reworking the parts list around in-stock components. </p>
+        <div class="project-image"> <img src="assets/projects/TechnovaBadge.jpg" alt="Technova hacker badge PCB render"> </div>
+        <a class="link" href="https://github.com/flyingf15h/technova-pcbs" target="_blank" rel="noopener">link to project</a>
       </div>
 
       <div class="project-box">
@@ -69,19 +69,19 @@
       </div>
 
       <div class="project-box">
+        <h3>Physical Studio </h3>
+        <p class="project-desc"> Describe a hardware project and get an IKEA-style build guide for it, with a 3D model of every step and a photo check of each step on your real bench. 
+          I built an MCP server with CAD tools for part placement, wiring and collision/clearance checks, which exports GLB scenes to a React Three Fiber viewer. Deployed with Docker Compose on Vultr. Won Hack the Valley 11. </p>
+        <div class="project-image"> <img src="assets/projects/PhysicalStudio.png" alt="Physical Studio preview"> </div>
+        <a class="link" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">link to project</a>
+      </div>
+
+      <div class="project-box">
         <h3>huddle </h3>
         <p class="project-desc"> Lets several Claude Code agents on different machines work in the same repo at once. While one agent edits a file it is locked for the others, their copies go read-only and get its edits streamed in live.
           I wrote the relay server in plain Node.js with no dependencies and run it on Cloudflare Workers, with agent-to-agent chat, a web dashboard and git history sync between checkouts. </p>
         <div class="project-image"> <img src="assets/projects/huddle.png" alt="huddle repository card"> </div>
         <a class="link" href="https://github.com/flyingf15h/huddle" target="_blank" rel="noopener">link to project</a>
-      </div>
-
-      <div class="project-box">
-        <h3>Doppel </h3>
-        <p class="project-desc"> Catches phishing domains the moment their TLS certificate is issued, by scoring new certificates off the public Certificate Transparency stream. 
-          Evidence is matched across languages with hybrid retrieval (BM25 plus dense embeddings, reranked), and an Elastic Agent Builder verdict engine makes the final call behind human approval. Built at Hack the North 2026. </p>
-        <div class="project-image"> <img src="assets/projects/Doppel.png" alt="Doppel preview"> </div>
-        <a class="link" href="https://github.com/Buddhathe18th/phishhunter" target="_blank" rel="noopener">link to project</a>
       </div>
 
       <div class="project-box">
@@ -99,24 +99,17 @@
         <a class="link" href="https://github.com/flyingf15h/bing-bang-dream-adventure" target="_blank" rel="noopener">link to project</a>
       </div>
 
-      <div class="project-box">
-        <h3>202020 Rule Reminder </h3>
-        <p class="project-desc"> A Needy Streamer Overload themed 20-20-20 rule reminder tool. 
-          Includes toggable dark mode, a collapsible settings widget, and minimization to task tray. </p>
-        <div class="project-image"> <img src="assets/projects/202020-preview.png" alt="202020 Rule Reminder app screenshot"> </div>
-        <a class="link" href="https://github.com/MossyFish/202020-Rule-NSO" target="_blank" rel="noopener">link to project</a>
-      </div>
     </div>
   </section>
 
     <section>
     <h2 class="section-title">Resumes</h2>
      <div class="resume-grid">
-      <a class="resume-card" href="/resume/#general"><h3>General</h3><p>Every role</p></a>
-      <a class="resume-card" href="/resume/#frontend"><h3>Frontend</h3><p>UI and web</p></a>
-      <a class="resume-card" href="/resume/#backend"><h3>Backend</h3><p>APIs and infrastructure</p></a>
-      <a class="resume-card" href="/resume/#fullstack"><h3>Full Stack</h3><p>End-to-end web</p></a>
-      <a class="resume-card" href="/resume/#data_ai"><h3>Data / AI</h3><p>ML and research</p></a>
+      <a class="resume-card" href="/resume/#general"><span class="rc-text"><h3>General</h3><p>Every role</p></span><span class="rc-go" aria-hidden="true">&rsaquo;</span></a>
+      <a class="resume-card" href="/resume/#frontend"><span class="rc-text"><h3>Frontend</h3><p>UI and web</p></span><span class="rc-go" aria-hidden="true">&rsaquo;</span></a>
+      <a class="resume-card" href="/resume/#backend"><span class="rc-text"><h3>Backend</h3><p>APIs and infrastructure</p></span><span class="rc-go" aria-hidden="true">&rsaquo;</span></a>
+      <a class="resume-card" href="/resume/#fullstack"><span class="rc-text"><h3>Full Stack</h3><p>End-to-end web</p></span><span class="rc-go" aria-hidden="true">&rsaquo;</span></a>
+      <a class="resume-card" href="/resume/#data_ai"><span class="rc-text"><h3>Data / AI</h3><p>ML and research</p></span><span class="rc-go" aria-hidden="true">&rsaquo;</span></a>
      </div>
     </section>
 
