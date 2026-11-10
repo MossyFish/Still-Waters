@@ -63,7 +63,40 @@ html, body {
     transition: background 0.2s ease, color 0.2s ease;
 }
 .tools { display: flex; align-items: center; gap: 4px; }
-.bar .zoom { min-width: 32px; text-align: center; font-size: 1.1rem; }
+.bar .label {
+    color: var(--cream);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: rgba(8, 14, 20, 0.55);
+    border: 1px solid rgba(243, 239, 228, 0.18);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+.side {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid rgba(243, 239, 228, 0.25);
+    background: rgba(8, 14, 20, 0.55);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    color: var(--cream);
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+.side:hover { background: rgba(8, 14, 20, 0.85); transform: translateY(-50%) scale(1.06); }
+.side.prev { left: 24px; }
+.side.next { right: 24px; }
+.sheet[hidden] { display: none; }
+@media (max-width: 700px) { .side { top: auto; bottom: 16px; transform: none; width: 44px; height: 44px; } .side:hover { transform: none; } }
 .bar a:hover { background: rgba(8, 14, 20, 0.8); color: #fff; }
 
 /* the resume itself */

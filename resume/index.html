@@ -17,25 +17,24 @@
   <div class="bar">
     <a class="back" href="/">[ home page ]</a>
     <div class="tools">
-      <a class="zoom" id="zoomOut" href="#" aria-label="Smaller text">&minus;</a>
-      <a class="zoom" id="zoomIn" href="#" aria-label="Larger text">+</a>
-      <a href="/resume/versions/">All versions</a>
-      <a href="/resume/Tsz_Fei_Wang_Resume.pdf" download>Download PDF</a>
+      <span class="label" id="versionName">General</span>
+      <a id="pdfLink" href="/resume/versions/general.pdf" download>Download PDF</a>
     </div>
   </div>
 
-  <div class="sheet">
+  <button class="side prev" id="prev" aria-label="Previous resume">&#8249;</button>
+  <button class="side next" id="next" aria-label="Next resume">&#8250;</button>
+
+  <div class="sheet" data-key="general" data-name="General" data-pdf="/resume/versions/general.pdf">
     <h1>Tsz Fei Wang</h1>
     <div class="contact">
       Kitchener, Waterloo<span class="sep">|</span><a href="mailto:wangtszfei@gmail.com">wangtszfei@gmail.com</a><span class="sep">|</span><a class="gh" href="https://github.com/flyingf15h" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
     </div>
-
     <h2>Education</h2>
     <div class="row entry">
       <div><b>University of Waterloo</b> | Honours Computer Science (Co-op)</div>
       <div class="when">Sept 2026 &ndash; May 2031 (expected)</div>
     </div>
-
     <h2>Skills &amp; Technologies</h2>
     <div class="skills">
       <p><b>Languages:</b> Python, Java, C, C++, TypeScript, JavaScript, HTML/CSS, SQL, R, GLSL</p>
@@ -47,8 +46,8 @@
       <div class="row"><span class="org">Century Frontier Asset Management</span><span class="when">Jul 2026 &ndash; Aug 2026</span></div>
       <div class="row"><span class="role">Quantitative Research Intern</span><span class="when role">Shenzhen, CN</span></div>
       <ul>
-        <li>Designed a point-in-time backtesting pipeline in <b>Python</b> with <b>pandas</b> and yfinance that only shows each model data from before its prediction date, removing lookahead bias from LLM-driven equity research.</li>
-        <li>Built a model-agnostic evaluation framework benchmarking <b>9 LLM architectures</b> across <b>104 tickers</b>, scoring signal quality separately from stated confidence and showing that confidence was a poor guide to accuracy.</li>
+        <li>Built a point-in-time backtesting pipeline in <b>Python</b> and <b>pandas</b> that eliminated lookahead bias from the firm's LLM-driven equity research across <b>104 tickers</b>.</li>
+        <li>Benchmarked <b>9 LLM architectures</b> on stock-preference and inter-stock-relationship prediction, showing that a model's stated confidence was a poor predictor of its accuracy.</li>
       </ul>
     </div>
     <div class="entry">
@@ -63,52 +62,338 @@
       <div class="row"><span class="org">Mackenzie Cybersecurity Team</span><span class="when">Jun 2025 &ndash; Jun 2026</span></div>
       <div class="row"><span class="role">Team Captain, President</span><span class="when role">Toronto, ON</span></div>
       <ul>
-        <li>Captained the team to <b>First in Canada</b> in CyberTitan, Canada's largest cyberdefense competition, securing Windows, Linux and Cisco systems.</li>
-        <li>Designed and delivered cybersecurity curriculum and class presentations that reached <b>60+ students</b>.</li>
+        <li>Captained the team to <b>First in Canada</b> at CyberTitan, Canada's largest cyberdefense competition, hardening Windows, Linux and Cisco systems under time pressure.</li>
+        <li>Created and taught a cybersecurity curriculum reaching <b>60+ students</b> across the school.</li>
       </ul>
     </div>
     <div class="entry">
       <div class="row"><span class="org">Non-Trivial Research Fellowship</span><span class="when">Mar 2025 &ndash; Aug 2025</span></div>
       <div class="row"><span class="role">Machine Learning Research Fellow</span><span class="when role">Remote</span></div>
       <ul>
-        <li>Built an audio deepfake detector in <b>Python</b> and <b>PyTorch</b>, training a classifier on a Kaggle dataset of real and AI-synthesized speech and evaluating it on held-out clips.</li>
-        <li>Researched AI voice cloning as an emerging security threat and wrote a solution proposal for detecting it.</li>
+        <li>Trained and evaluated a <b>PyTorch</b> audio deepfake classifier in <b>Python</b> on a Kaggle dataset of real and AI-synthesized speech.</li>
+        <li>Researched AI voice cloning as an emerging security threat and proposed a detection-based defence in a written research proposal.</li>
       </ul>
     </div>
-
     <h2>Projects</h2>
     <div class="entry proj">
-      <div class="row"><div><a class="title" href="https://github.com/flyingf15h/technova-pcbs" target="_blank" rel="noopener">Technova Hackathon Badge</a> | <em>KiCad, Hardware Lead</em></div><div class="when"><em>Oct 2026</em></div></div>
+      <div class="row"><div><b><a class="title" href="https://github.com/flyingf15h/technova-pcbs" target="_blank" rel="noopener">Technova Hackathon Badge</a></b> | <em>KiCad, Hardware Lead</em></div><div class="when"><em>Oct 2026</em></div></div>
       <ul>
-        <li>Designed the attendee badge PCB for a <b>~300-person</b> hackathon in <b>KiCad</b>, integrating a RISC-V MCU, NFC tap-to-phone check-in, an OLED display, addressable LEDs and USB-C LiPo charging.</li>
-        <li>Routed the 2-layer board and prepared the JLCPCB assembly files, keeping cost to about <b>$7 per badge</b> with in-stock LCSC parts.</li>
+        <li>Led hardware design of a custom NFC badge for a <b>~300-person</b> hackathon in <b>KiCad</b>, taking it from schematic to a manufacturing-ready JLCPCB assembly order.</li>
+        <li>Cut the per-badge cost from about <b>$11 to $7</b> by reworking the parts list around in-stock LCSC components, while fitting NFC check-in, an OLED display, LEDs and USB-C charging.</li>
       </ul>
     </div>
     <div class="entry proj">
-      <div class="row"><div><a class="title" href="https://github.com/flyingf15h/submerge" target="_blank" rel="noopener">Submerge</a> | <em>GLSL, QML, Python</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
+      <div class="row"><div><b><a class="title" href="https://github.com/flyingf15h/submerge" target="_blank" rel="noopener">Submerge</a></b> | <em>GLSL, QML, Python</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
       <ul>
-        <li>Developed an animated koi theme for KDE Plasma 5 and 6 in <b>GLSL</b> and <b>QML</b>, with a shader water simulation and a live system HUD, reaching <b>~1,290 downloads</b> on the KDE Store.</li>
-        <li>Added power-aware frame pacing for battery life and fixed blank rendering on NVIDIA/Wayland by porting the shaders to GLSL ES.</li>
+        <li>Shipped an animated KDE Plasma theme in <b>GLSL</b> and <b>QML</b> downloaded <b>~1,290 times</b> on the KDE Store, with a shader water simulation and a live system HUD.</li>
+        <li>Resolved a user-reported NVIDIA/Wayland rendering failure by porting the shaders to GLSL ES, and added power-aware frame pacing to save battery.</li>
       </ul>
     </div>
     <div class="entry proj">
-      <div class="row"><div><a class="title" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">Physical Studio</a> | <em>Python, React, Three.js, Docker | <b>Winner</b>, Hack the Valley 11</em></div><div class="when"><em>Oct 2026</em></div></div>
+      <div class="row"><div><b><a class="title" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">Physical Studio</a></b> | <em>Python, React, Three.js, Docker | <b>Winner</b>, Hack the Valley 11</em></div><div class="when"><em>Oct 2026</em></div></div>
       <ul>
-        <li>Engineered the <b>Python</b> MCP server that lets an LLM design hardware projects from a library of measured parts and validate its own designs for collisions and clearance.</li>
-        <li>Built the <b>React Three Fiber</b> viewer that animates each assembly step and deployed it with <b>Docker Compose</b> on Vultr.</li>
+        <li>Won Hack the Valley 11 with a tool that turns a prompt into a step-by-step hardware build guide; engineered the <b>Python</b> MCP server that lets an LLM design from measured parts and check its own work for collisions.</li>
+        <li>Built the <b>React Three Fiber</b> viewer that animates each assembly step and deployed the app with <b>Docker Compose</b> on Vultr.</li>
       </ul>
     </div>
-
-
-
-
-
     <h2>Awards &amp; Honors</h2>
     <div class="row award"><div><b>Gold &amp; Silver Medalist</b>, IT Systems Networking, Skills Ontario (Regional &amp; Provincial)</div><div class="when">Mar 2026 &ndash; May 2026</div></div>
     <div class="row award"><div><b>National Champion x2</b>, 1st in Canada, Cybersecurity, $1,000 scholarship</div><div class="when">May 2025, Mar 2026</div></div>
     <div class="row award"><div><b>National Finalist</b>, 2nd in Canada, Cybersecurity, $1,600 scholarship</div><div class="when">Mar 2025</div></div>
-
   </div>
+
+  <div class="sheet" data-key="frontend" data-name="Frontend" data-pdf="/resume/versions/frontend.pdf" hidden>
+    <h1>Tsz Fei Wang</h1>
+    <div class="contact">
+      Kitchener, Waterloo<span class="sep">|</span><a href="mailto:wangtszfei@gmail.com">wangtszfei@gmail.com</a><span class="sep">|</span><a class="gh" href="https://github.com/flyingf15h" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
+    </div>
+    <h2>Education</h2>
+    <div class="row entry">
+      <div><b>University of Waterloo</b> | Honours Computer Science (Co-op)</div>
+      <div class="when">Sept 2026 &ndash; May 2031 (expected)</div>
+    </div>
+    <h2>Skills &amp; Technologies</h2>
+    <div class="skills">
+      <p><b>Languages &amp; Frameworks:</b> TypeScript, JavaScript, HTML/CSS, Python, Java, SQL, GLSL, React, Next.js, Three.js, Qt/QML</p>
+      <p><b>Tools:</b> Git, Vercel, Firebase, Canvas 2D, WebGL2, Node.js, Docker, GitHub Actions, Playwright, Postman</p>
+    </div>
+    <h2>Experience</h2>
+    <div class="entry">
+      <div class="row"><span class="org">Krembil Research Institute, World Community Grid</span><span class="when">Mar 2026 &ndash; Jun 2026</span></div>
+      <div class="row"><span class="role">Software Engineer Intern</span><span class="when role">Toronto, ON</span></div>
+      <ul>
+        <li>Built the frontend of Catrin's research data portal, giving scientists one place to search, filter and browse <b>~4 million</b> gene regulatory associations across <b>33,000 genes</b>.</li>
+        <li>Unified results from <b>9 independent databases</b> into a single searchable interface, so researchers can query them as one dataset.</li>
+        <li>Credited as a contributor on the Catrin manuscript (in preparation).</li>
+      </ul>
+    </div>
+    <div class="entry">
+      <div class="row"><span class="org">Code 4 Tomorrow</span><span class="when">Apr 2021 &ndash; Present</span></div>
+      <div class="row"><span class="role">Vice President, Web Development Project Lead</span><span class="when role">Remote</span></div>
+      <ul>
+        <li>Launched a <b>JavaScript</b> frameworks course and a new workshop series for a nonprofit coding school, growing enrollment by <b>50+ students</b>.</li>
+        <li>Led web development projects and course operations across <b>20+ courses</b> serving <b>400+ students</b>.</li>
+      </ul>
+    </div>
+    <div class="entry">
+      <div class="row"><span class="org">William Lyon Mackenzie C.I.</span><span class="when">Nov 2024 &ndash; Present</span></div>
+      <div class="row"><span class="role">Web Developer</span><span class="when role">Toronto, ON</span></div>
+      <ul>
+        <li>Maintain the official website of a <b>1,400+ student</b> high school, publishing announcements and keeping every page current for students and staff.</li>
+        <li>Migrated the school's content off a deactivated information portal onto the new site, working with the administration.</li>
+      </ul>
+    </div>
+    <h2>Projects</h2>
+    <div class="entry proj">
+      <div class="row"><div><b><a class="title" href="https://still-waters-khaki.vercel.app" target="_blank" rel="noopener">Still Waters</a></b> | <em>JavaScript, HTML/CSS, WebGL2</em></div><div class="when"><em>Jul 2026 &ndash; Present</em></div></div>
+      <ul>
+        <li>Designed and shipped an interactive koi-pond portfolio in <b>JavaScript</b>, with <b>WebGL2</b> water shaders and layered <b>Canvas 2D</b> animation of koi, foliage and ripples.</li>
+        <li>Made the scene react to visitors: clicks and taps send ripples that scatter the koi, with matching sound effects and ambient audio.</li>
+        <li>Kept animation smooth on HiDPI and touch screens by scaling to the device pixel ratio, pre-rendering to offscreen canvases and pausing when the tab is hidden; deployed on <b>Vercel</b>.</li>
+      </ul>
+    </div>
+    <div class="entry proj">
+      <div class="row"><div><b><a class="title" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">Physical Studio</a></b> | <em>React, Three.js, Python | <b>Winner</b>, Hack the Valley 11</em></div><div class="when"><em>Oct 2026</em></div></div>
+      <ul>
+        <li>Built the <b>React Three Fiber</b> viewer that turns generated hardware designs into animated, step-by-step 3D assembly guides.</li>
+        <li>Engineered the <b>Python</b> MCP server behind it, letting an LLM design projects from a library of measured parts and check its own work for collisions.</li>
+      </ul>
+    </div>
+    <div class="entry proj">
+      <div class="row"><div><b><a class="title" href="https://github.com/flyingf15h/submerge" target="_blank" rel="noopener">Submerge</a></b> | <em>QML, GLSL, Python</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
+      <ul>
+        <li>Shipped a full KDE Plasma theme (wallpaper, panel style, login screen) in <b>QML</b> and <b>GLSL</b>, downloaded <b>~1,290 times</b> on the KDE Store.</li>
+        <li>Built a live system HUD (CPU, GPU, memory, network, battery) and resolved a user-reported NVIDIA/Wayland rendering failure by porting the shaders to GLSL ES.</li>
+      </ul>
+    </div>
+    <h2>Awards &amp; Honors</h2>
+    <div class="row award"><div><b>Gold &amp; Silver Medalist</b>, IT Systems Networking, Skills Ontario (Regional &amp; Provincial)</div><div class="when">Mar 2026 &ndash; May 2026</div></div>
+    <div class="row award"><div><b>National Champion x2</b>, 1st in Canada, Cybersecurity, $1,000 scholarship</div><div class="when">May 2025, Mar 2026</div></div>
+    <div class="row award"><div><b>National Finalist</b>, 2nd in Canada, Cybersecurity, $1,600 scholarship</div><div class="when">Mar 2025</div></div>
+  </div>
+
+  <div class="sheet" data-key="backend" data-name="Backend" data-pdf="/resume/versions/backend.pdf" hidden>
+    <h1>Tsz Fei Wang</h1>
+    <div class="contact">
+      Kitchener, Waterloo<span class="sep">|</span><a href="mailto:wangtszfei@gmail.com">wangtszfei@gmail.com</a><span class="sep">|</span><a class="gh" href="https://github.com/flyingf15h" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
+    </div>
+    <h2>Education</h2>
+    <div class="row entry">
+      <div><b>University of Waterloo</b> | Honours Computer Science (Co-op)</div>
+      <div class="when">Sept 2026 &ndash; May 2031 (expected)</div>
+    </div>
+    <h2>Skills &amp; Technologies</h2>
+    <div class="skills">
+      <p><b>Languages &amp; Frameworks:</b> Python, Java, C++, C, TypeScript, JavaScript, SQL, FastAPI, Node.js, PyTorch, Pandas</p>
+      <p><b>Tools:</b> Linux, Docker, Git, GitHub Actions, REST APIs, Elasticsearch, Firebase, CosmosDB, Cloudflare Workers, Caddy, Postman</p>
+    </div>
+    <h2>Experience</h2>
+    <div class="entry">
+      <div class="row"><span class="org">Century Frontier Asset Management</span><span class="when">Jul 2026 &ndash; Aug 2026</span></div>
+      <div class="row"><span class="role">Quantitative Research Intern</span><span class="when role">Shenzhen, CN</span></div>
+      <ul>
+        <li>Built a point-in-time backtesting pipeline in <b>Python</b> and <b>pandas</b> that eliminated lookahead bias from the firm's LLM-driven equity research across <b>104 tickers</b>.</li>
+        <li>Benchmarked <b>9 LLM architectures</b> on stock-preference and inter-stock-relationship prediction, showing that a model's stated confidence was a poor predictor of its accuracy.</li>
+      </ul>
+    </div>
+    <div class="entry">
+      <div class="row"><span class="org">Krembil Research Institute, World Community Grid</span><span class="when">Mar 2026 &ndash; Jun 2026</span></div>
+      <div class="row"><span class="role">Software Engineer Intern</span><span class="when role">Toronto, ON</span></div>
+      <ul>
+        <li>Built the full-stack data access portal for Catrin, serving <b>~4 million</b> TF-TG associations across <b>33,000 genes</b> to researchers.</li>
+        <li>Reconciled the schemas of <b>9 independent data sources</b> so the portal can query them as one dataset.</li>
+      </ul>
+    </div>
+    <div class="entry">
+      <div class="row"><span class="org">Mackenzie Cybersecurity Team</span><span class="when">Jun 2025 &ndash; Jun 2026</span></div>
+      <div class="row"><span class="role">Team Captain, President</span><span class="when role">Toronto, ON</span></div>
+      <ul>
+        <li>Captained the team to <b>First in Canada</b> at CyberTitan, Canada's largest cyberdefense competition, hardening Windows, Linux and Cisco systems under time pressure.</li>
+        <li>Created and taught a cybersecurity curriculum reaching <b>60+ students</b> across the school.</li>
+      </ul>
+    </div>
+    <div class="entry">
+      <div class="row"><span class="org">Non-Trivial Research Fellowship</span><span class="when">Mar 2025 &ndash; Aug 2025</span></div>
+      <div class="row"><span class="role">Machine Learning Research Fellow</span><span class="when role">Remote</span></div>
+      <ul>
+        <li>Trained and evaluated a <b>PyTorch</b> audio deepfake classifier in <b>Python</b> on a Kaggle dataset of real and AI-synthesized speech.</li>
+        <li>Researched AI voice cloning as an emerging security threat and proposed a detection-based defence in a written research proposal.</li>
+      </ul>
+    </div>
+    <h2>Projects</h2>
+    <div class="entry proj">
+      <div class="row"><div><b><a class="title" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">Physical Studio</a></b> | <em>Python, React, Three.js, Docker | <b>Winner</b>, Hack the Valley 11</em></div><div class="when"><em>Oct 2026</em></div></div>
+      <ul>
+        <li>Won Hack the Valley 11 with a tool that turns a prompt into a step-by-step hardware build guide; engineered the <b>Python</b> MCP server that lets an LLM design from measured parts and check its own work for collisions.</li>
+        <li>Built the <b>React Three Fiber</b> viewer that animates each assembly step and deployed the app with <b>Docker Compose</b> on Vultr.</li>
+      </ul>
+    </div>
+    <div class="entry proj">
+      <div class="row"><div><b><a class="title" href="https://github.com/flyingf15h/huddle" target="_blank" rel="noopener">huddle</a></b> | <em>Node.js, Cloudflare Workers, MCP</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
+      <ul>
+        <li>Designed a coordination layer in <b>JavaScript</b> that lets multiple Claude Code agents on separate machines edit one repository at once, using per-file locks that make other checkouts read-only and stream edits to them live.</li>
+        <li>Implemented a dependency-free <b>Node.js</b> relay server on <b>Cloudflare Workers</b> that brokers locks, chat and live file edits between agents.</li>
+        <li>Added git history sync between checkouts as chunked bundles, branch-scoped locks, and an end-to-end test suite that runs real Claude sessions against the live server.</li>
+      </ul>
+    </div>
+    <div class="entry proj">
+      <div class="row"><div><b><a class="title" href="https://github.com/flyingf15h/submerge" target="_blank" rel="noopener">Submerge</a></b> | <em>GLSL, QML, Python</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
+      <ul>
+        <li>Shipped an animated KDE Plasma theme in <b>GLSL</b> and <b>QML</b> downloaded <b>~1,290 times</b> on the KDE Store, with a shader water simulation and a live system HUD.</li>
+        <li>Resolved a user-reported NVIDIA/Wayland rendering failure by porting the shaders to GLSL ES, and added power-aware frame pacing to save battery.</li>
+      </ul>
+    </div>
+    <h2>Awards &amp; Honors</h2>
+    <div class="row award"><div><b>Gold &amp; Silver Medalist</b>, IT Systems Networking, Skills Ontario (Regional &amp; Provincial)</div><div class="when">Mar 2026 &ndash; May 2026</div></div>
+    <div class="row award"><div><b>National Champion x2</b>, 1st in Canada, Cybersecurity, $1,000 scholarship</div><div class="when">May 2025, Mar 2026</div></div>
+    <div class="row award"><div><b>National Finalist</b>, 2nd in Canada, Cybersecurity, $1,600 scholarship</div><div class="when">Mar 2025</div></div>
+  </div>
+
+  <div class="sheet" data-key="fullstack" data-name="Full Stack" data-pdf="/resume/versions/fullstack.pdf" hidden>
+    <h1>Tsz Fei Wang</h1>
+    <div class="contact">
+      Kitchener, Waterloo<span class="sep">|</span><a href="mailto:wangtszfei@gmail.com">wangtszfei@gmail.com</a><span class="sep">|</span><a class="gh" href="https://github.com/flyingf15h" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
+    </div>
+    <h2>Education</h2>
+    <div class="row entry">
+      <div><b>University of Waterloo</b> | Honours Computer Science (Co-op)</div>
+      <div class="when">Sept 2026 &ndash; May 2031 (expected)</div>
+    </div>
+    <h2>Skills &amp; Technologies</h2>
+    <div class="skills">
+      <p><b>Languages &amp; Frameworks:</b> TypeScript, JavaScript, HTML/CSS, Python, Java, SQL, React, Next.js, Node.js, FastAPI, Three.js</p>
+      <p><b>Tools:</b> Git, Docker, GitHub Actions, Firebase, Elasticsearch, Vercel, Cloudflare Workers, Postman, Playwright, Linux</p>
+    </div>
+    <h2>Experience</h2>
+    <div class="entry">
+      <div class="row"><span class="org">Krembil Research Institute, World Community Grid</span><span class="when">Mar 2026 &ndash; Jun 2026</span></div>
+      <div class="row"><span class="role">Software Engineer Intern</span><span class="when role">Toronto, ON</span></div>
+      <ul>
+        <li>Built most of the frontend for Catrin's full-stack data access portal, including the search, filter and results views researchers use to explore <b>~4 million</b> TF-TG associations across <b>33,000 genes</b>.</li>
+        <li>Reconciled the schemas of <b>9 independent data sources</b> so the portal can query them as one dataset.</li>
+      </ul>
+    </div>
+    <div class="entry">
+      <div class="row"><span class="org">Century Frontier Asset Management</span><span class="when">Jul 2026 &ndash; Aug 2026</span></div>
+      <div class="row"><span class="role">Quantitative Research Intern</span><span class="when role">Shenzhen, CN</span></div>
+      <ul>
+        <li>Built a point-in-time backtesting pipeline in <b>Python</b> and <b>pandas</b> that eliminated lookahead bias from the firm's LLM-driven equity research across <b>104 tickers</b>.</li>
+        <li>Benchmarked <b>9 LLM architectures</b> on stock-preference and inter-stock-relationship prediction, showing that a model's stated confidence was a poor predictor of its accuracy.</li>
+      </ul>
+    </div>
+    <div class="entry">
+      <div class="row"><span class="org">William Lyon Mackenzie C.I. Official Website</span><span class="when">Nov 2024 &ndash; Present</span></div>
+      <div class="row"><span class="role">Web Developer</span><span class="when role">Toronto, ON</span></div>
+      <ul>
+        <li>Maintain the official school website used by <b>1,400+ students</b>, keeping announcements, pages and navigation current for staff and students.</li>
+        <li>Migrated the school's content off a deactivated information portal onto the new site, working with the administration on what to keep and how to organize it.</li>
+      </ul>
+    </div>
+    <h2>Projects</h2>
+    <div class="entry proj">
+      <div class="row"><div><b><a class="title" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">Physical Studio</a></b> | <em>Python, React, Three.js, Docker | <b>Winner</b>, Hack the Valley 11</em></div><div class="when"><em>Oct 2026</em></div></div>
+      <ul>
+        <li>Won Hack the Valley 11 with a tool that turns a prompt into a step-by-step hardware build guide; engineered the <b>Python</b> MCP server that lets an LLM design from measured parts and check its own work for collisions.</li>
+        <li>Built the <b>React Three Fiber</b> viewer that animates each assembly step and deployed the app with <b>Docker Compose</b> on Vultr.</li>
+      </ul>
+    </div>
+    <div class="entry proj">
+      <div class="row"><div><b><a class="title" href="https://github.com/flyingf15h/huddle" target="_blank" rel="noopener">huddle</a></b> | <em>Node.js, Cloudflare Workers, MCP</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
+      <ul>
+        <li>Designed a coordination layer in <b>JavaScript</b> that lets multiple Claude Code agents on separate machines edit one repository at once, using per-file locks that make other checkouts read-only and stream edits to them live.</li>
+        <li>Implemented a dependency-free <b>Node.js</b> relay server on <b>Cloudflare Workers</b> that brokers locks, chat and live file edits between agents.</li>
+        <li>Added git history sync between checkouts as chunked bundles, branch-scoped locks, and an end-to-end test suite that runs real Claude sessions against the live server.</li>
+      </ul>
+    </div>
+    <div class="entry proj">
+      <div class="row"><div><b><a class="title" href="https://github.com/flyingf15h/submerge" target="_blank" rel="noopener">Submerge</a></b> | <em>GLSL, QML, Python</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
+      <ul>
+        <li>Shipped an animated KDE Plasma theme in <b>GLSL</b> and <b>QML</b> downloaded <b>~1,290 times</b> on the KDE Store, with a shader water simulation and a live system HUD.</li>
+        <li>Resolved a user-reported NVIDIA/Wayland rendering failure by porting the shaders to GLSL ES, and added power-aware frame pacing to save battery.</li>
+      </ul>
+    </div>
+    <h2>Awards &amp; Honors</h2>
+    <div class="row award"><div><b>Gold &amp; Silver Medalist</b>, IT Systems Networking, Skills Ontario (Regional &amp; Provincial)</div><div class="when">Mar 2026 &ndash; May 2026</div></div>
+    <div class="row award"><div><b>National Champion x2</b>, 1st in Canada, Cybersecurity, $1,000 scholarship</div><div class="when">May 2025, Mar 2026</div></div>
+    <div class="row award"><div><b>National Finalist</b>, 2nd in Canada, Cybersecurity, $1,600 scholarship</div><div class="when">Mar 2025</div></div>
+  </div>
+
+  <div class="sheet" data-key="data_ai" data-name="Data / AI" data-pdf="/resume/versions/data_ai.pdf" hidden>
+    <h1>Tsz Fei Wang</h1>
+    <div class="contact">
+      Kitchener, Waterloo<span class="sep">|</span><a href="mailto:wangtszfei@gmail.com">wangtszfei@gmail.com</a><span class="sep">|</span><a class="gh" href="https://github.com/flyingf15h" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
+    </div>
+    <h2>Education</h2>
+    <div class="row entry">
+      <div><b>University of Waterloo</b> | Honours Computer Science (Co-op)</div>
+      <div class="when">Sept 2026 &ndash; May 2031 (expected)</div>
+    </div>
+    <h2>Skills &amp; Technologies</h2>
+    <div class="skills">
+      <p><b>Languages &amp; Frameworks:</b> Python, SQL, R, Java, C++, TypeScript</p>
+      <p><b>Tools:</b> PyTorch, NumPy, Pandas, FastAPI, Jupyter, Kaggle, Elasticsearch, Gemini API, Git, Linux, Docker, GitHub Actions</p>
+    </div>
+    <h2>Experience</h2>
+    <div class="entry">
+      <div class="row"><span class="org">Century Frontier Asset Management</span><span class="when">Jul 2026 &ndash; Aug 2026</span></div>
+      <div class="row"><span class="role">Quantitative Research Intern</span><span class="when role">Shenzhen, CN</span></div>
+      <ul>
+        <li>Built a point-in-time backtesting pipeline in <b>Python</b> and <b>pandas</b> that eliminated lookahead bias from the firm's LLM-driven equity research across <b>104 tickers</b>.</li>
+        <li>Benchmarked <b>9 LLM architectures</b> on stock-preference and inter-stock-relationship prediction, showing that a model's stated confidence was a poor predictor of its accuracy.</li>
+      </ul>
+    </div>
+    <div class="entry">
+      <div class="row"><span class="org">Krembil Research Institute, World Community Grid</span><span class="when">Mar 2026 &ndash; Jun 2026</span></div>
+      <div class="row"><span class="role">Software Engineer Intern</span><span class="when role">Toronto, ON</span></div>
+      <ul>
+        <li>Built most of the frontend for Catrin's full-stack data access portal, including the search, filter and results views researchers use to explore <b>~4 million</b> TF-TG associations across <b>33,000 genes</b>.</li>
+        <li>Reconciled the schemas of <b>9 independent data sources</b> so the portal can query them as one dataset.</li>
+        <li>Listed as a contributor on the Catrin manuscript (in preparation).</li>
+      </ul>
+    </div>
+    <div class="entry">
+      <div class="row"><span class="org">Non-Trivial Research Fellowship</span><span class="when">Mar 2025 &ndash; Aug 2025</span></div>
+      <div class="row"><span class="role">Machine Learning Research Fellow</span><span class="when role">Remote</span></div>
+      <ul>
+        <li>Trained and evaluated a <b>PyTorch</b> audio deepfake classifier in <b>Python</b> on a Kaggle dataset of real and AI-synthesized speech.</li>
+        <li>Researched AI voice cloning as an emerging security threat and proposed a detection-based defence in a written research proposal.</li>
+      </ul>
+    </div>
+    <div class="entry">
+      <div class="row"><span class="org">Mackenzie Cybersecurity Team</span><span class="when">Jun 2025 &ndash; Jun 2026</span></div>
+      <div class="row"><span class="role">Team Captain, President</span><span class="when role">Toronto, ON</span></div>
+      <ul>
+        <li>Captained the team to <b>First in Canada</b> at CyberTitan, Canada's largest cyberdefense competition, hardening Windows, Linux and Cisco systems under time pressure.</li>
+        <li>Created and taught a cybersecurity curriculum reaching <b>60+ students</b> across the school.</li>
+      </ul>
+    </div>
+    <h2>Projects</h2>
+    <div class="entry proj">
+      <div class="row"><div><b><a class="title" href="https://github.com/flyingf15h/technova-pcbs" target="_blank" rel="noopener">Technova Hackathon Badge</a></b> | <em>KiCad, Hardware Lead</em></div><div class="when"><em>Oct 2026</em></div></div>
+      <ul>
+        <li>Led hardware design of a custom NFC badge for a <b>~300-person</b> hackathon in <b>KiCad</b>, taking it from schematic to a manufacturing-ready JLCPCB assembly order.</li>
+        <li>Cut the per-badge cost from about <b>$11 to $7</b> by reworking the parts list around in-stock LCSC components, while fitting NFC check-in, an OLED display, LEDs and USB-C charging.</li>
+      </ul>
+    </div>
+    <div class="entry proj">
+      <div class="row"><div><b><a class="title" href="https://github.com/flyingf15h/submerge" target="_blank" rel="noopener">Submerge</a></b> | <em>GLSL, QML, Python</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
+      <ul>
+        <li>Shipped an animated KDE Plasma theme in <b>GLSL</b> and <b>QML</b> downloaded <b>~1,290 times</b> on the KDE Store, with a shader water simulation and a live system HUD.</li>
+        <li>Resolved a user-reported NVIDIA/Wayland rendering failure by porting the shaders to GLSL ES, and added power-aware frame pacing to save battery.</li>
+      </ul>
+    </div>
+    <div class="entry proj">
+      <div class="row"><div><b><a class="title" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">Physical Studio</a></b> | <em>Python, React, Three.js, Docker | <b>Winner</b>, Hack the Valley 11</em></div><div class="when"><em>Oct 2026</em></div></div>
+      <ul>
+        <li>Won Hack the Valley 11 with a tool that turns a prompt into a step-by-step hardware build guide; engineered the <b>Python</b> MCP server that lets an LLM design from measured parts and check its own work for collisions.</li>
+        <li>Built the <b>React Three Fiber</b> viewer that animates each assembly step and deployed the app with <b>Docker Compose</b> on Vultr.</li>
+      </ul>
+    </div>
+    <h2>Awards &amp; Honors</h2>
+    <div class="row award"><div><b>National Champion x2</b>, 1st in Canada, Cybersecurity, $1,000 scholarship</div><div class="when">May 2025, Mar 2026</div></div>
+    <div class="row award"><div><b>National Finalist</b>, 2nd in Canada, Cybersecurity, $1,600 scholarship</div><div class="when">Mar 2025</div></div>
+  </div>
+
 </div>
 
 <script src="scripts/render-water.js"></script>
@@ -117,16 +402,26 @@
 <script src="scripts/render-pond.js"></script>
 <script>
 (function () {
-  var key = 'resumeZoom', z = 1, root = document.documentElement;
-  try { z = parseFloat(localStorage.getItem(key)) || 1; } catch (e) {}
-  function apply() {
-    z = Math.min(1.6, Math.max(0.8, Math.round(z * 100) / 100));
-    root.style.setProperty('--z', z);
-    try { localStorage.setItem(key, z); } catch (e) {}
+  var sheets = [].slice.call(document.querySelectorAll('.sheet'));
+  var label = document.getElementById('versionName'), pdf = document.getElementById('pdfLink');
+  var current = 0;
+  function show(i) {
+    current = (i + sheets.length) % sheets.length;
+    sheets.forEach(function (s, n) { s.hidden = n !== current; });
+    var s = sheets[current];
+    label.textContent = s.dataset.name;
+    pdf.href = s.dataset.pdf;
+    pdf.setAttribute('download', 'Tsz Fei Wang - Resume (' + s.dataset.name + ').pdf');
+    history.replaceState(null, '', '#' + s.dataset.key);
   }
-  document.getElementById('zoomIn').addEventListener('click', function (e) { e.preventDefault(); z += 0.1; apply(); });
-  document.getElementById('zoomOut').addEventListener('click', function (e) { e.preventDefault(); z -= 0.1; apply(); });
-  apply();
+  document.getElementById('prev').addEventListener('click', function () { show(current - 1); });
+  document.getElementById('next').addEventListener('click', function () { show(current + 1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') { show(current - 1); e.preventDefault(); }
+    if (e.key === 'ArrowRight') { show(current + 1); e.preventDefault(); }
+  });
+  var start = sheets.findIndex(function (s) { return s.dataset.key === location.hash.slice(1); });
+  show(start >= 0 ? start : 0);
 })();
 </script>
 </body>
