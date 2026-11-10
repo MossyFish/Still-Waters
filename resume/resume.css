@@ -79,24 +79,20 @@ html, body {
     top: 50%;
     transform: translateY(-50%);
     z-index: 5;
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    border: 1px solid rgba(243, 239, 228, 0.25);
-    background: rgba(8, 14, 20, 0.55);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-    color: var(--cream);
-    font-size: 2rem;
+    padding: 6px 8px;
+    border: none;
+    background: none;
+    color: rgba(243, 239, 228, 0.55);
+    font-size: 1.4rem;
     line-height: 1;
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.2s ease;
+    transition: color 0.2s ease;
 }
-.side:hover { background: rgba(8, 14, 20, 0.85); transform: translateY(-50%) scale(1.06); }
-.side.prev { left: 24px; }
-.side.next { right: 24px; }
+.side:hover, .side:focus-visible { color: #fff; outline: none; }
+.side.prev { left: 14px; }
+.side.next { right: 14px; }
 .sheet[hidden] { display: none; }
-@media (max-width: 700px) { .side { top: auto; bottom: 16px; transform: none; width: 44px; height: 44px; } .side:hover { transform: none; } }
+@media (max-width: 700px) { .side { top: auto; bottom: 14px; transform: none; } }
 .bar a:hover { background: rgba(8, 14, 20, 0.8); color: #fff; }
 
 /* the resume itself */
