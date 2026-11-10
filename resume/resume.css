@@ -72,7 +72,7 @@ html, body {
     color: #111;
     min-height: 1056px;
     padding: 32px 44px 28px;
-    font-family: 'LM Roman', 'Latin Modern Roman', 'Times New Roman', serif;
+    font-family: 'Source Sans 3', 'Source Sans Pro', sans-serif;
     font-size: calc(13px * var(--z, 1));
     line-height: 1.3;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
@@ -87,8 +87,8 @@ html, body {
     text-align: center;
     font-weight: 700;
     font-size: 2.1rem;
-    font-family: 'LM Caps', 'LM Roman', serif;
-    letter-spacing: 0.01em;
+    font-family: 'Source Sans 3', 'Source Sans Pro', sans-serif;
+    letter-spacing: 0;
     line-height: 1.15;
 }
 
@@ -103,8 +103,8 @@ html, body {
     margin: 14px 0 6px;
     padding-bottom: 1px;
     border-bottom: 1px solid #111;
-    font-weight: 400;
-    font-family: 'LM Caps', 'LM Roman', serif;
+    font-weight: 700;
+    font-family: 'Source Sans 3', 'Source Sans Pro', sans-serif;
     font-size: 1.12rem;
     letter-spacing: 0.03em;
     line-height: 1.2;

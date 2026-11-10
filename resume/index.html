@@ -6,7 +6,7 @@
 <base href="/">
 <title>Tsz Fei Wang | Resume</title>
 <meta name="description" content="Resume of Tsz Fei Wang, Computer Science at the University of Waterloo.">
-<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500&family=Source+Sans+3:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/resume/resume.css">
 </head>
 <body>
@@ -37,8 +37,8 @@
 
     <h2>Skills &amp; Technologies</h2>
     <div class="skills">
-      <p><b>Languages &amp; Frameworks:</b> Python, Java, C, C++, C#, TypeScript, JavaScript, HTML/CSS, SQL, R, GLSL, QML, GDScript, React, Next.js, Three.js, FastAPI, PyTorch, NumPy, Pandas</p>
-      <p><b>Tools:</b> Git, Linux, Bash, Docker, GitHub Actions, Firebase, Elasticsearch, CosmosDB, Vercel, Vultr, Railway, Caddy, Playwright, Postman, Jupyter, QuantConnect LEAN, Godot, Qt, KiCad, Arduino, Claude Code</p>
+      <p><b>Languages:</b> Python, Java, C, C++, TypeScript, JavaScript, SQL</p>
+      <p><b>Frameworks &amp; Tools:</b> React, Next.js, Node.js, FastAPI, PyTorch, Pandas, Git, Linux, Docker, GitHub Actions</p>
     </div>
 
     <h2>Experience</h2>
@@ -76,40 +76,41 @@
       <div><b>Off Script &ndash; Waterloo Tech Week</b> | <em>Founder &amp; Host, 120+ registrations</em></div>
       <div class="when">Sept 2026</div>
     </div>
-
-
     <h2>Projects</h2>
+    <div class="entry proj">
+      <div class="row"><div><a class="title" href="https://github.com/flyingf15h/huddle" target="_blank" rel="noopener">huddle</a> | <em>Node.js, Cloudflare Workers, MCP</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
+      <ul>
+        <li>Built a tool that lets several <b>Claude Code</b> agents on different machines work in one repo at once. Added <b>per-file locks</b>, so while one agent edits a file the other copies go read-only and get its edits streamed in live.</li>
+        <li>Wrote the relay server in plain <b>Node.js</b> with no dependencies and deployed it on <b>Cloudflare Workers</b>, then added agent-to-agent chat, a web dashboard and git history sync between checkouts.</li>
+      </ul>
+    </div>
+    <div class="entry proj">
+      <div class="row"><div><a class="title" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">Physical Studio</a> | <em>Python, React, Three.js, Docker</em></div><div class="when"><em>Winner, Hack the Valley 11 &ndash; Oct 2026</em></div></div>
+      <ul>
+        <li>Wrote the <b>MCP server</b> that lets an LLM design a hardware project from a library of measured parts and check its own design for collisions before exporting an animated <b>3D assembly guide</b>.</li>
+        <li>Deployed the app with <b>Docker Compose</b> and Caddy on a Vultr server at physicalstudio.work. Team of three.</li>
+      </ul>
+    </div>
     <div class="entry proj">
       <div class="row"><div><span class="title">Technova Hackathon Badge</span> | <em>KiCad, Hardware Lead</em></div><div class="when"><em>Oct 2026</em></div></div>
       <ul>
-        <li>Led hardware design of a <b>custom NFC event badge</b> for <b>~300 attendees</b> in <b>KiCad</b> (RISC-V MCU, LED ring, USB-C charging); routed the board and built the <b>JLCPCB</b> order package.</li>
-      </ul>
-    </div>
-    <div class="entry proj">
-      <div class="row"><div><a class="title" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">Physical Studio</a> | <em>Python, React, Three.js, Docker</em></div><div class="when"><em>Won Best Use of Vultr, Hack the Valley 11 &ndash; Oct 2026</em></div></div>
-      <ul>
-        <li>Web app that turns a prompt into an IKEA-style build guide for a hardware project, with a 3D model of every step and a photo check of each step on the real bench.</li>
-        <li>Built an <b>MCP server</b> exposing CAD tools on an OpenCascade B-rep kernel for part placement, wiring and collision/clearance checks, streaming GLB scenes to a React Three Fiber viewer on Vultr.</li>
-      </ul>
-    </div>
-    <div class="entry proj">
-      <div class="row"><div><a class="title" href="https://github.com/Buddhathe18th/phishhunter" target="_blank" rel="noopener">Doppel</a> | <em>Python, FastAPI, Elasticsearch</em></div><div class="when"><em>Hack the North &ndash; Sept 2026</em></div></div>
-      <ul>
-        <li>Real-time <b>phishing detection</b> pipeline scoring newly issued TLS certificates off the public Certificate Transparency stream; built a <b>hybrid retrieval</b> system (BM25 + dense embeddings, reranked) for cross-language evidence matching, feeding an Elastic Agent Builder verdict engine gated behind human approval.</li>
-      </ul>
-    </div>
-    <div class="entry proj">
-      <div class="row"><div><a class="title" href="https://github.com/MossyFish/schedule-share" target="_blank" rel="noopener">Schedule Share</a> | <em>Next.js, Firebase, Gemini API</em></div><div class="when"><em>Sept 2026 &ndash; Present</em></div></div>
-      <ul>
-        <li>Full-stack schedule-sharing platform with <b>20+ active users</b>; built a real-time <b>Firebase Auth/Firestore</b> backend for mutual schedule sharing and integrated the Gemini API for screenshot-to-calendar parsing; deployed on Vercel with automated CI/CD and cron-based data lifecycle management.</li>
+        <li>Led the hardware design in <b>KiCad</b> of an NFC event badge for about <b>300 attendees</b> (RISC-V MCU, LED ring, USB-C charging), and routed the double-sided board to a clean DRC.</li>
+        <li>Put together the <b>JLCPCB</b> order (gerbers, BOM matched to LCSC parts, placement file) and priced each option against the per-badge budget.</li>
       </ul>
     </div>
     <div class="entry proj">
       <div class="row"><div><a class="title" href="https://github.com/flyingf15h/submerge" target="_blank" rel="noopener">Submerge</a> | <em>GLSL, QML, Python</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
       <ul>
-        <li>Animated deep-ocean koi theme for KDE Plasma 5 and 6 (wallpaper, global theme, panel style, login screen) written in <b>GLSL</b> shaders and <b>QML</b>; published on the KDE Store with <b>~1,290 downloads</b>.</li>
+        <li>Wrote the <b>GLSL</b> shaders, a small water simulation and a live system HUD for an animated koi theme for KDE Plasma (<b>~1,290 downloads</b>). Fixed blank rendering on NVIDIA/Wayland after a user report by porting the shaders to GLSL ES.</li>
       </ul>
     </div>
+    <div class="entry proj">
+      <div class="row"><div><a class="title" href="https://github.com/flyingf15h/bing-bang-dream-adventure" target="_blank" rel="noopener">Bing Bang Dream Adventure</a> | <em>Godot, GDScript</em></div><div class="when"><em>2nd Place, Horizons Polaris &ndash; Aug 2026</em></div></div>
+      <ul>
+        <li>Wrote the game engine, beatmap system and hit-timing logic for a rhythm game played with custom <b>IMU-based flick controllers</b>, matching each note to the sensor input in real time.</li>
+      </ul>
+    </div>
+
     <h2>Awards &amp; Honors</h2>
     <div class="row award"><div><b>Gold &amp; Silver Medalist</b>, IT Systems Networking &ndash; Skills Ontario (Regional &amp; Provincial)</div><div class="when">Mar &ndash; May 2026</div></div>
     <div class="row award"><div><b>National Champion x2 &ndash; 1st in Canada, Cybersecurity</b> &ndash; $1,000 scholarship</div><div class="when">May 2025, Mar 2026</div></div>
