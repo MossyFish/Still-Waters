@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tsz Fei Wang | Resume versions</title>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; font-family: 'Work Sans', sans-serif; color: #e8eef2;
+         background: radial-gradient(ellipse at top, #1d5f7a 0%, #123a52 55%, #0d2a3d 100%); }
+  .bar { max-width: 1100px; margin: 0 auto; padding: 22px 20px 6px; display: flex; justify-content: space-between; align-items: center; }
+  .bar a { color: #e8eef2; text-decoration: none; letter-spacing: .08em; font-size: .9rem;
+           padding: 8px 14px; border-radius: 8px; background: rgba(10, 30, 45, .55); }
+  .bar a:hover { background: rgba(10, 30, 45, .8); }
+  h1 { max-width: 1100px; margin: 18px auto 4px; padding: 0 20px; font-weight: 500; font-size: 1.5rem; letter-spacing: .04em; }
+  .hint { max-width: 1100px; margin: 0 auto 18px; padding: 0 20px; font-size: .85rem; opacity: .75; }
+  .grid { max-width: 1100px; margin: 0 auto 40px; padding: 0 20px; display: grid; gap: 22px;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .card { background: rgba(10, 30, 45, .55); border: 1px solid rgba(255,255,255,.12); border-radius: 12px;
+          padding: 12px; cursor: pointer; text-align: left; color: inherit; font: inherit; transition: transform .15s, border-color .15s; }
+  .card:hover, .card:focus-visible { transform: translateY(-3px); border-color: rgba(255,255,255,.4); outline: none; }
+  .card img { width: 100%; display: block; border-radius: 4px; background: #fff; }
+  .card span { display: block; margin-top: 10px; font-weight: 500; letter-spacing: .04em; }
+  .viewer { position: fixed; inset: 0; background: rgba(5, 16, 25, .92); display: none; flex-direction: column; align-items: center; z-index: 10; }
+  .viewer.open { display: flex; }
+  .vbar { width: 100%; max-width: 980px; display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; gap: 10px; }
+  .vbar .name { font-weight: 500; letter-spacing: .05em; }
+  .vbar .count { opacity: .6; font-size: .85rem; margin-left: 8px; }
+  .vbar .actions { display: flex; gap: 8px; }
+  .vbar button, .vbar a { color: #e8eef2; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2);
+          border-radius: 8px; padding: 6px 12px; font: inherit; font-size: .85rem; cursor: pointer; text-decoration: none; }
+  .vbar button:hover, .vbar a:hover { background: rgba(255,255,255,.18); }
+  .stage { flex: 1; width: 100%; overflow: auto; display: flex; justify-content: center; padding: 0 16px 24px; }
+  .stage img { width: min(900px, 100%); height: auto; align-self: flex-start; background: #fff; border-radius: 4px; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+</style>
+</head>
+<body>
+<div class="bar">
+  <a href="/resume/">[ resume ]</a>
+  <a href="/">[ home page ]</a>
+</div>
+<h1>Resume versions</h1>
+<p class="hint">Click one to open it. Left and right arrow keys switch versions, Esc closes.</p>
+<div class="grid" id="grid"></div>
+
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Resume viewer">
+  <div class="vbar">
+    <div><span class="name" id="vname"></span><span class="count" id="vcount"></span></div>
+    <div class="actions">
+      <button id="prev" aria-label="Previous version">&larr;</button>
+      <button id="next" aria-label="Next version">&rarr;</button>
+      <a id="vpdf" download>PDF</a>
+      <button id="close" aria-label="Close">Esc</button>
+    </div>
+  </div>
+  <div class="stage"><img id="vimg" alt=""></div>
+</div>
+
+<script>
+const VERSIONS = [
+  ["general", "General"], ["frontend", "Frontend"], ["backend", "Backend"], ["fullstack", "Full Stack"],
+  ["data_ai", "Data / AI"], ["security", "Security"], ["warg", "Hardware (WARG)"],
+];
+const grid = document.getElementById('grid'), viewer = document.getElementById('viewer');
+const vimg = document.getElementById('vimg'), vname = document.getElementById('vname');
+const vcount = document.getElementById('vcount'), vpdf = document.getElementById('vpdf');
+let current = 0;
+
+VERSIONS.forEach(([key, label], i) => {
+  const card = document.createElement('button');
+  card.className = 'card';
+  card.innerHTML = `<img src="${key}.png" alt="${label} resume preview" loading="lazy"><span>${label}</span>`;
+  card.addEventListener('click', () => open(i));
+  grid.appendChild(card);
+});
+
+function show(i) {
+  current = (i + VERSIONS.length) % VERSIONS.length;
+  const [key, label] = VERSIONS[current];
+  vimg.src = `${key}.png`;
+  vimg.alt = `${label} resume`;
+  vname.textContent = label;
+  vcount.textContent = `${current + 1} / ${VERSIONS.length}`;
+  vpdf.href = `${key}.pdf`;
+  vpdf.setAttribute('download', `Tsz Fei Wang - Resume (${label}).pdf`);
+  history.replaceState(null, '', `#${key}`);
+  // Warm the neighbours so arrowing through feels instant.
+  [current - 1, current + 1].forEach(n => { new Image().src = `${VERSIONS[(n + VERSIONS.length) % VERSIONS.length][0]}.png`; });
+}
+function open(i) { show(i); viewer.classList.add('open'); document.body.style.overflow = 'hidden'; }
+function close() { viewer.classList.remove('open'); document.body.style.overflow = ''; history.replaceState(null, '', location.pathname); }
+
+document.getElementById('prev').addEventListener('click', () => show(current - 1));
+document.getElementById('next').addEventListener('click', () => show(current + 1));
+document.getElementById('close').addEventListener('click', close);
+viewer.addEventListener('click', e => { if (e.target === viewer) close(); });
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+    const step = e.key === 'ArrowRight' ? 1 : -1;
+    viewer.classList.contains('open') ? show(current + step) : open(step === 1 ? 0 : VERSIONS.length - 1);
+    e.preventDefault();
+  } else if (e.key === 'Escape' && viewer.classList.contains('open')) {
+    close();
+  }
+});
+
+const start = VERSIONS.findIndex(([key]) => key === location.hash.slice(1));
+if (start >= 0) open(start);
+</script>
+</body>
+</html>
