@@ -37,77 +37,74 @@
 
     <h2>Skills &amp; Technologies</h2>
     <div class="skills">
-      <p><b>Languages:</b> Python, Java, C, C++, C#, TypeScript, JavaScript, HTML/CSS, SQL, Bash, GLSL</p>
+      <p><b>Languages:</b> Python, Java, C, C++, TypeScript, JavaScript, HTML/CSS, SQL, R, GLSL</p>
       <p><b>Frameworks &amp; Libraries:</b> React, Next.js, Node.js, FastAPI, Three.js, PyTorch, NumPy, Pandas, Qt/QML</p>
       <p><b>Tools &amp; Platforms:</b> Git, Linux, Docker, GitHub Actions, Firebase, Elasticsearch, Vercel, Cloudflare Workers, Postman, Jupyter, KiCad</p>
     </div>
-
     <h2>Experience</h2>
     <div class="entry">
       <div class="row"><span class="org">Century Frontier Asset Management</span><span class="when">Jul 2026 &ndash; Aug 2026</span></div>
       <div class="row"><span class="role">Quantitative Research Intern</span><span class="when role">Shenzhen, CN</span></div>
       <ul>
-        <li>Designed and implemented a <b>point-in-time backtesting pipeline</b> (<b>Python</b>, <b>pandas</b>, yfinance), eliminating lookahead bias in <b>LLM-driven</b> equity research.</li>
-        <li>Built a <b>model-agnostic evaluation framework</b> benchmarking stock-preference and inter-stock-relationship predictions across <b>9 LLM architectures</b> and <b>104 tickers</b>, isolating true signal quality from raw model capability.</li>
+        <li>Designed a point-in-time backtesting pipeline in <b>Python</b> with <b>pandas</b> and yfinance that only shows each model the data available on its prediction date, removing lookahead bias from LLM-driven equity research.</li>
+        <li>Built a model-agnostic evaluation framework benchmarking stock-preference and inter-stock-relationship predictions from 9 LLM architectures across 104 tickers.</li>
+        <li>Scored signal quality separately from each model's stated confidence, showing that confidence was a poor guide to whether a prediction held up.</li>
       </ul>
     </div>
     <div class="entry">
       <div class="row"><span class="org">Krembil Research Institute, World Community Grid</span><span class="when">Mar 2026 &ndash; Jun 2026</span></div>
       <div class="row"><span class="role">Software Engineer Intern</span><span class="when role">Toronto, ON</span></div>
       <ul>
-        <li>Built a <b>full-stack web data access portal</b> for Catrin (Catalogue of Transcriptional Regulatory Interactions), unifying <b>~4 million</b> TF-TG associations across <b>33,000 genes</b> from <b>9</b> independent data sources into a single queryable interface.</li>
+        <li>Designed and built the full-stack data access portal for Catrin, a bioinformatics database of ~4 million transcription factor to target gene (TF-TG) associations across 33,000 genes.</li>
+        <li>Reconciled the schemas of 9 independent data sources that describe the same interactions differently, so researchers can search and filter them as one dataset.</li>
       </ul>
     </div>
     <div class="entry">
       <div class="row"><span class="org">Mackenzie Cybersecurity Team</span><span class="when">Jun 2025 &ndash; Jun 2026</span></div>
       <div class="row"><span class="role">Team Captain, President</span><span class="when role">Toronto, ON</span></div>
       <ul>
-        <li>Designed and delivered <b>cybersecurity</b> curriculum and class presentations reaching <b>60+ students</b> to raise digital-safety awareness school-wide.</li>
-        <li><b>Captained team to a national #1 finish</b> in CyberTitan, Canada's largest <b>cyberdefense</b> competition, coordinating strategy and technical training across the roster.</li>
+        <li>Captained the team to a national #1 finish in CyberTitan, Canada's largest cyberdefense competition, securing <b>Windows</b> and <b>Linux</b> systems and <b>Cisco</b> network configurations under time limits.</li>
+        <li>Designed and delivered cybersecurity curriculum and class presentations that reached 60+ students.</li>
       </ul>
     </div>
     <div class="entry">
       <div class="row"><span class="org">Non-Trivial Research Fellowship</span><span class="when">Mar 2025 &ndash; Aug 2025</span></div>
       <div class="row"><span class="role">Machine Learning Research Fellow</span><span class="when role">Remote</span></div>
       <ul>
-        <li>Built an <b>audio deepfake detection</b> model in <b>Python</b> on <b>Kaggle</b>, training and evaluating a classifier that distinguishes real from AI-synthesized speech.</li>
+        <li>Trained and evaluated a <b>PyTorch</b> audio deepfake classifier in <b>Python</b> on Kaggle that distinguishes real speech from AI-synthesized speech.</li>
       </ul>
     </div>
     <div class="row entry plain">
       <div><b>Off Script, Waterloo Tech Week</b> | <em>Founder &amp; Host, 120+ registrations</em></div>
       <div class="when">Sept 2026</div>
     </div>
+
     <h2>Projects</h2>
     <div class="entry proj">
-      <div class="row"><div><a class="title" href="https://github.com/flyingf15h/huddle" target="_blank" rel="noopener">huddle</a> | <em>Node.js, Cloudflare Workers, MCP</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
+      <div class="row"><div><a class="title" href="https://github.com/flyingf15h/technova-pcbs" target="_blank" rel="noopener">Technova Hackathon Badge</a> | <em>KiCad, Hardware Lead</em></div><div class="when"><em>Oct 2026</em></div></div>
       <ul>
-        <li>Designed a coordination layer that lets multiple <b>Claude Code</b> agents on separate machines edit one repository at once, using <b>per-file locks</b> that make other checkouts read-only and stream edits to them live.</li>
-        <li>Implemented a dependency-free <b>Node.js</b> relay server deployed on <b>Cloudflare Workers</b>, with agent-to-agent chat, a web dashboard and git history sync between checkouts.</li>
+        <li>Led hardware design of an NFC event badge for ~300 hackathon attendees in <b>KiCad</b>, with a <b>RISC-V</b> MCU, an LED ring and USB-C charging.</li>
+        <li>Designed an NFC tag with a PCB-trace antenna coil so attendees check in by tapping the badge to a phone.</li>
+        <li>Routed the double-sided board (1,300+ tracks) to a clean DRC using Freerouting with manual fixes.</li>
+        <li>Prepared the JLCPCB manufacturing package (gerbers, LCSC-matched BOM, rotation-corrected placement file) and modelled each option's per-badge cost against the budget.</li>
       </ul>
     </div>
     <div class="entry proj">
       <div class="row"><div><a class="title" href="https://github.com/flyingf15h/submerge" target="_blank" rel="noopener">Submerge</a> | <em>GLSL, QML, Python</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
       <ul>
-        <li>Developed an animated koi theme for KDE Plasma 5 and 6 in <b>GLSL</b> and <b>QML</b>, with a water ripple simulation, a live system HUD and <b>power-aware frame pacing</b>, reaching <b>~1,290 downloads</b> on the KDE Store.</li>
-        <li>Resolved blank rendering on <b>NVIDIA/Wayland</b> after a user report by porting the shaders to GLSL ES.</li>
+        <li>Developed an animated deep-ocean koi theme for KDE Plasma 5 and 6 (wallpaper, global theme, panel style, login screen) in <b>GLSL</b> and <b>QML</b>, with ~1,290 downloads on the KDE Store.</li>
+        <li>Implemented a water ripple simulation in the shaders and a live system HUD showing CPU, GPU, memory, network, battery and the top process.</li>
+        <li>Added power-aware frame pacing to keep the animation light on battery, and resolved blank rendering on NVIDIA/Wayland after a user report by porting the shaders to GLSL ES.</li>
       </ul>
     </div>
     <div class="entry proj">
       <div class="row"><div><a class="title" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">Physical Studio</a> | <em>Python, React, Three.js, Docker | Winner, Hack the Valley 11</em></div><div class="when"><em>Oct 2026</em></div></div>
       <ul>
-        <li>Engineered the <b>MCP server</b> that lets an LLM design a hardware project from a library of measured parts and check its own design for collisions and clearance.</li>
-        <li>Implemented GLB scene export to a <b>React Three Fiber</b> viewer that animates each step of the generated assembly guide.</li>
-        <li>Deployed the app with <b>Docker Compose</b> and Caddy on a Vultr server at physicalstudio.work as part of a team of three.</li>
+        <li>Engineered the <b>Python</b> MCP server that lets an LLM design a project from a library of measured parts (dimensions, mounting holes, pins) and check its own design for collisions and clearance, built in a team of three.</li>
+        <li>Implemented GLB scene export to a <b>React Three Fiber</b> viewer that animates each assembly step, and deployed the app with <b>Docker Compose</b> and Caddy on a Vultr server.</li>
       </ul>
     </div>
-    <div class="entry proj">
-      <div class="row"><div><a class="title" href="https://github.com/flyingf15h/technova-pcbs" target="_blank" rel="noopener">Technova Hackathon Badge</a> | <em>KiCad, Hardware Lead</em></div><div class="when"><em>Oct 2026</em></div></div>
-      <ul>
-        <li>Led hardware design of an <b>NFC event badge</b> for <b>~300 attendees</b> in <b>KiCad</b>, with a RISC-V MCU, LED ring and USB-C charging.</li>
-        <li>Routed the double-sided board (<b>1,300+ tracks</b>) to a clean DRC using Freerouting with manual fixes.</li>
-        <li>Prepared the <b>JLCPCB</b> manufacturing package (gerbers, LCSC-matched BOM, placement file) and modelled the per-badge cost of each option.</li>
-      </ul>
-    </div>
+
 
 
     <h2>Awards &amp; Honors</h2>
