@@ -37,8 +37,9 @@
 
     <h2>Skills &amp; Technologies</h2>
     <div class="skills">
-      <p><b>Languages:</b> Python, Java, C, C++, TypeScript, JavaScript, SQL</p>
-      <p><b>Frameworks &amp; Tools:</b> React, Next.js, Node.js, FastAPI, PyTorch, Pandas, Git, Linux, Docker, GitHub Actions</p>
+      <p><b>Languages:</b> Python, Java, C, C++, C#, TypeScript, JavaScript, HTML/CSS, SQL, Bash, GLSL</p>
+      <p><b>Frameworks &amp; Libraries:</b> React, Next.js, Node.js, FastAPI, Three.js, PyTorch, NumPy, Pandas, Qt/QML</p>
+      <p><b>Tools &amp; Platforms:</b> Git, Linux, Docker, GitHub Actions, Firebase, Elasticsearch, Vercel, Cloudflare Workers, Postman, Jupyter, KiCad</p>
     </div>
 
     <h2>Experience</h2>
@@ -73,49 +74,47 @@
       </ul>
     </div>
     <div class="row entry plain">
-      <div><b>Off Script &ndash; Waterloo Tech Week</b> | <em>Founder &amp; Host, 120+ registrations</em></div>
+      <div><b>Off Script, Waterloo Tech Week</b> | <em>Founder &amp; Host, 120+ registrations</em></div>
       <div class="when">Sept 2026</div>
     </div>
     <h2>Projects</h2>
     <div class="entry proj">
       <div class="row"><div><a class="title" href="https://github.com/flyingf15h/huddle" target="_blank" rel="noopener">huddle</a> | <em>Node.js, Cloudflare Workers, MCP</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
       <ul>
-        <li>Built a tool that lets several <b>Claude Code</b> agents on different machines work in one repo at once. Added <b>per-file locks</b>, so while one agent edits a file the other copies go read-only and get its edits streamed in live.</li>
-        <li>Wrote the relay server in plain <b>Node.js</b> with no dependencies and deployed it on <b>Cloudflare Workers</b>, then added agent-to-agent chat, a web dashboard and git history sync between checkouts.</li>
-      </ul>
-    </div>
-    <div class="entry proj">
-      <div class="row"><div><a class="title" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">Physical Studio</a> | <em>Python, React, Three.js, Docker</em></div><div class="when"><em>Winner, Hack the Valley 11 &ndash; Oct 2026</em></div></div>
-      <ul>
-        <li>Wrote the <b>MCP server</b> that lets an LLM design a hardware project from a library of measured parts and check its own design for collisions before exporting an animated <b>3D assembly guide</b>.</li>
-        <li>Deployed the app with <b>Docker Compose</b> and Caddy on a Vultr server at physicalstudio.work. Team of three.</li>
-      </ul>
-    </div>
-    <div class="entry proj">
-      <div class="row"><div><span class="title">Technova Hackathon Badge</span> | <em>KiCad, Hardware Lead</em></div><div class="when"><em>Oct 2026</em></div></div>
-      <ul>
-        <li>Led the hardware design in <b>KiCad</b> of an NFC event badge for about <b>300 attendees</b> (RISC-V MCU, LED ring, USB-C charging), and routed the double-sided board to a clean DRC.</li>
-        <li>Put together the <b>JLCPCB</b> order (gerbers, BOM matched to LCSC parts, placement file) and priced each option against the per-badge budget.</li>
+        <li>Designed a coordination layer that lets multiple <b>Claude Code</b> agents on separate machines edit one repository at once, using <b>per-file locks</b> that make other checkouts read-only and stream edits to them live.</li>
+        <li>Implemented a dependency-free <b>Node.js</b> relay server deployed on <b>Cloudflare Workers</b>, with agent-to-agent chat, a web dashboard and git history sync between checkouts.</li>
       </ul>
     </div>
     <div class="entry proj">
       <div class="row"><div><a class="title" href="https://github.com/flyingf15h/submerge" target="_blank" rel="noopener">Submerge</a> | <em>GLSL, QML, Python</em></div><div class="when"><em>Oct 2026 &ndash; Present</em></div></div>
       <ul>
-        <li>Wrote the <b>GLSL</b> shaders, a small water simulation and a live system HUD for an animated koi theme for KDE Plasma (<b>~1,290 downloads</b>). Fixed blank rendering on NVIDIA/Wayland after a user report by porting the shaders to GLSL ES.</li>
+        <li>Developed an animated koi theme for KDE Plasma 5 and 6 in <b>GLSL</b> and <b>QML</b>, with a water ripple simulation, a live system HUD and <b>power-aware frame pacing</b>, reaching <b>~1,290 downloads</b> on the KDE Store.</li>
+        <li>Resolved blank rendering on <b>NVIDIA/Wayland</b> after a user report by porting the shaders to GLSL ES.</li>
       </ul>
     </div>
     <div class="entry proj">
-      <div class="row"><div><a class="title" href="https://github.com/flyingf15h/bing-bang-dream-adventure" target="_blank" rel="noopener">Bing Bang Dream Adventure</a> | <em>Godot, GDScript</em></div><div class="when"><em>2nd Place, Horizons Polaris &ndash; Aug 2026</em></div></div>
+      <div class="row"><div><a class="title" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">Physical Studio</a> | <em>Python, React, Three.js, Docker | Winner, Hack the Valley 11</em></div><div class="when"><em>Oct 2026</em></div></div>
       <ul>
-        <li>Wrote the game engine, beatmap system and hit-timing logic for a rhythm game played with custom <b>IMU-based flick controllers</b>, matching each note to the sensor input in real time.</li>
+        <li>Engineered the <b>MCP server</b> that lets an LLM design a hardware project from a library of measured parts and check its own design for collisions and clearance.</li>
+        <li>Implemented GLB scene export to a <b>React Three Fiber</b> viewer that animates each step of the generated assembly guide.</li>
+        <li>Deployed the app with <b>Docker Compose</b> and Caddy on a Vultr server at physicalstudio.work as part of a team of three.</li>
+      </ul>
+    </div>
+    <div class="entry proj">
+      <div class="row"><div><a class="title" href="https://github.com/flyingf15h/technova-pcbs" target="_blank" rel="noopener">Technova Hackathon Badge</a> | <em>KiCad, Hardware Lead</em></div><div class="when"><em>Oct 2026</em></div></div>
+      <ul>
+        <li>Led hardware design of an <b>NFC event badge</b> for <b>~300 attendees</b> in <b>KiCad</b>, with a RISC-V MCU, LED ring and USB-C charging.</li>
+        <li>Routed the double-sided board (<b>1,300+ tracks</b>) to a clean DRC using Freerouting with manual fixes.</li>
+        <li>Prepared the <b>JLCPCB</b> manufacturing package (gerbers, LCSC-matched BOM, placement file) and modelled the per-badge cost of each option.</li>
       </ul>
     </div>
 
+
     <h2>Awards &amp; Honors</h2>
-    <div class="row award"><div><b>Gold &amp; Silver Medalist</b>, IT Systems Networking &ndash; Skills Ontario (Regional &amp; Provincial)</div><div class="when">Mar &ndash; May 2026</div></div>
-    <div class="row award"><div><b>National Champion x2 &ndash; 1st in Canada, Cybersecurity</b> &ndash; $1,000 scholarship</div><div class="when">May 2025, Mar 2026</div></div>
-    <div class="row award"><div><b>National Finalist &ndash; 2nd in Canada, Cybersecurity</b> &ndash; $1,600 scholarship</div><div class="when">Mar 2025</div></div>
-    <div class="row award"><div><b>1st Place, Canada</b>, Mirai Project &ndash; Technology Innovation in Healthcare &ndash; $400 award</div><div class="when">Jan 2025</div></div>
+    <div class="row award"><div><b>Gold &amp; Silver Medalist</b>, IT Systems Networking, Skills Ontario (Regional &amp; Provincial)</div><div class="when">Mar 2026 &ndash; May 2026</div></div>
+    <div class="row award"><div><b>National Champion x2</b>, 1st in Canada, Cybersecurity, $1,000 scholarship</div><div class="when">May 2025, Mar 2026</div></div>
+    <div class="row award"><div><b>National Finalist</b>, 2nd in Canada, Cybersecurity, $1,600 scholarship</div><div class="when">Mar 2025</div></div>
+    <div class="row award"><div><b>1st Place, Canada</b>, Mirai Project, Technology Innovation in Healthcare, $400 award</div><div class="when">Jan 2025</div></div>
 
   </div>
 </div>
