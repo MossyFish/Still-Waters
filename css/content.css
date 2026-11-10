@@ -301,3 +301,30 @@
 .project-box .link:hover {
     text-decoration: underline;
 }
+.resume-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.resume-card {
+    border: 1px solid rgba(243, 239, 228, 0.16);
+    border-radius: 12px;
+    padding: 14px 16px;
+    background: rgba(243, 239, 228, 0.04);
+    color: var(--cream);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.resume-card:hover, .resume-card:focus-visible {
+    border-color: var(--gold);
+    background: rgba(227, 179, 92, 0.08);
+    transform: translateY(-2px);
+    outline: none;
+}
+
+.resume-card h3 { margin: 0 0 4px; font-size: 1rem; }
+.resume-card p { margin: 0; font-size: 0.8rem; opacity: 0.7; }
+
+@media (max-width: 768px) { .resume-grid { grid-template-columns: repeat(2, 1fr); } }
