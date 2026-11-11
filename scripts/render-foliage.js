@@ -448,13 +448,16 @@ class Leaf{
         this.rot = Math.random()*Math.PI*2;
         this.driftT = Math.random()*1000;
         this.offX = 0; this.offY = 0; this.velX = 0; this.velY = 0;
-        this.color = LEAF_GREENS[Math.floor(Math.random()*LEAF_GREENS.length)];
+        const pal = PAD_COLORS[Math.floor(Math.random()*PAD_COLORS.length)];
+        this.palette = pal;
+        this.color = lerpHex(pal[1], pal[2], 0.3);
         this.shadowDir = lightShadowParams(this.x, this.y);
         // a slight bend so they aren't all perfect almonds, and one side of the midrib catching light
         this.bend = (Math.random() - 0.5) * this.len * 0.12;
-        this.lightColor = lerpHex(this.color, '#e4f3c8', 0.3);
-        this.darkColor = lerpHex(this.color, '#16402a', 0.25);
+        this.lightColor = lerpHex(this.palette[0], this.color, 0.4);
+        this.darkColor = lerpHex(this.color, this.palette[2], 0.6);
         this.buildShadowSprite();
+        this.buildSprite();
     }
 
     buildShadowSprite(){
@@ -503,54 +506,134 @@ class Leaf{
         ctx.save();
         ctx.translate(this.x + dx, this.y + dy);
         ctx.rotate(this.rot + Math.sin(this.driftT)*0.15);
-        const L = this.len, b = this.bend;
-
-        // little stem trailing off the base
-        ctx.strokeStyle = hexToRgba(this.darkColor, 0.8);
-        ctx.lineWidth = Math.max(0.7, L*0.035);
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(-L*0.52, b*0.1);
-        ctx.quadraticCurveTo(-L*0.64, b*0.3, -L*0.72, b*0.7 + L*0.04);
-        ctx.stroke();
-
-        // blade: widest a little toward the base, tapering to a point
-        ctx.beginPath();
-        ctx.moveTo(L*0.6, 0);
-        ctx.bezierCurveTo(L*0.3, -L*0.1 + b*0.4, -L*0.25, -L*0.27 + b, -L*0.55, 0);
-        ctx.bezierCurveTo(-L*0.25, L*0.27 + b, L*0.3, L*0.1 + b*0.4, L*0.6, 0);
-        ctx.closePath();
-        const shade = ctx.createLinearGradient(0, -L*0.2, 0, L*0.2);
-        shade.addColorStop(0, this.lightColor);
-        shade.addColorStop(0.5, this.color);
-        shade.addColorStop(1, this.darkColor);
-        ctx.fillStyle = shade;
-        ctx.globalAlpha = 0.94;
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        ctx.strokeStyle = 'rgba(12,44,26,0.28)';
-        ctx.lineWidth = 0.6;
-        ctx.stroke();
-
-        // midrib and a few faint side veins
-        ctx.strokeStyle = 'rgba(228,246,215,0.35)';
-        ctx.lineWidth = 0.7;
-        ctx.beginPath();
-        ctx.moveTo(-L*0.52, b*0.1);
-        ctx.quadraticCurveTo(0, b*0.55, L*0.55, 0);
-        ctx.stroke();
-        ctx.strokeStyle = 'rgba(228,246,215,0.16)';
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        for (const x of [-0.3, -0.08, 0.14]) {
-            const y = b*0.5*(1 - Math.abs(x)*1.5);
-            const reach = L*0.17*(1 - (x + 0.3));
-            ctx.moveTo(x*L, y); ctx.lineTo(x*L + reach*0.9, y - reach*0.75);
-            ctx.moveTo(x*L, y); ctx.lineTo(x*L + reach*0.9, y + reach*0.75);
-        }
-        ctx.stroke();
+        ctx.drawImage(this.sprite, -this.spriteHalf, -this.spriteHalf, this.spriteHalf*2, this.spriteHalf*2);
         ctx.restore();
-    }                     
+    }
+
+    // painted once, the same way as the pads: a soft body colour, blotches of lighter and darker
+    // green worked into it, brush strokes following the blade, the midrib laid in lightly, the rim
+    // darkened and paper grain over the lot. No drawn outline.
+    buildSprite(){
+        const L = this.len, b = this.bend;
+        const half = L*0.8;
+        const c = document.createElement('canvas');
+        c.width = c.height = Math.ceil(half*2*SPRITE_SCALE);
+        const g = c.getContext('2d');
+        g.scale(SPRITE_SCALE, SPRITE_SCALE);
+        g.translate(half, half);
+        const blade = () => {
+            g.beginPath();
+            g.moveTo(L*0.6, 0);
+            g.bezierCurveTo(L*0.3, -L*0.1 + b*0.4, -L*0.25, -L*0.27 + b, -L*0.55, 0);
+            g.bezierCurveTo(-L*0.25, L*0.27 + b, L*0.3, L*0.1 + b*0.4, L*0.6, 0);
+            g.closePath();
+        };
+
+        // stem, softened
+        g.save();
+        g.filter = 'blur(0.4px)';
+        g.strokeStyle = hexToRgba(this.darkColor, 0.75);
+        g.lineWidth = Math.max(0.7, L*0.035);
+        g.lineCap = 'round';
+        g.beginPath();
+        g.moveTo(-L*0.52, b*0.1);
+        g.quadraticCurveTo(-L*0.64, b*0.3, -L*0.72, b*0.7 + L*0.04);
+        g.stroke();
+        g.restore();
+
+        // painted exactly like the pads: a body that darkens toward the edge, a patch of a second
+        // pad colour bleeding in, a soft light near the base, one soft vein, the rim darkened and a
+        // pale highlight along part of one edge
+        const [c0, c1, c2] = this.palette;
+        const bodyColor = lerpHex(c1, c2, 0.2 + Math.random()*0.2);
+        const edgeColor = lerpHex(bodyColor, c2, 0.3);
+        let alt;
+        do { alt = PAD_PALETTES[Math.floor(Math.random()*PAD_PALETTES.length)]; } while (alt === this.palette);
+        const mixColor = lerpHex(alt[Math.floor(Math.random()*alt.length)], bodyColor, 0.1);
+
+        g.save();
+        blade();
+        g.clip();
+        const body = g.createRadialGradient(-L*0.2, b*0.3, 0, -L*0.2, b*0.3, L*0.7);
+        body.addColorStop(0, bodyColor);
+        body.addColorStop(1, edgeColor);
+        g.fillStyle = body;
+        g.fillRect(-half, -half, half*2, half*2);
+        {
+            const mx = (Math.random() - 0.3)*L*0.5, my = (Math.random() < 0.5 ? -1 : 1)*L*0.12;
+            const mr = L*0.35;
+            const mg = g.createRadialGradient(mx, my, 0, mx, my, mr);
+            mg.addColorStop(0, hexToRgba(mixColor, 0.8));
+            mg.addColorStop(0.55, hexToRgba(mixColor, 0.45));
+            mg.addColorStop(1, hexToRgba(mixColor, 0));
+            g.fillStyle = mg;
+            g.fillRect(-half, -half, half*2, half*2);
+        }
+        g.filter = `blur(${Math.max(1, L*0.07).toFixed(1)}px)`;
+        // oil-paint dabs: short soft strokes of lighter colour laid along the blade, no dark patches
+        g.lineCap = 'round';
+        for (let i = 0; i < 9; i++) {
+            const x0 = (Math.random() - 0.6)*L*0.8, y0 = (Math.random() - 0.5)*L*0.16 + b*0.4;
+            const dl = L*(0.12 + Math.random()*0.18);
+            g.filter = `blur(${Math.max(0.5, L*0.025).toFixed(1)}px)`;
+            g.strokeStyle = hexToRgba(lerpHex(c0, i % 3 ? bodyColor : '#e8f5c8', 0.35), 0.12 + Math.random()*0.12);
+            g.lineWidth = Math.max(1, L*(0.05 + Math.random()*0.04));
+            g.beginPath();
+            g.moveTo(x0, y0);
+            g.quadraticCurveTo(x0 + dl*0.5, y0 + (Math.random() - 0.5)*L*0.04, x0 + dl, y0 + (Math.random() - 0.5)*L*0.05);
+            g.stroke();
+        }
+        g.filter = `blur(${Math.max(0.6, L*0.04).toFixed(1)}px)`;
+        g.lineCap = 'round';
+        g.strokeStyle = hexToRgba(lerpHex(c1, c0, 0.7), 0.3);
+        g.lineWidth = Math.max(0.8, L*0.05);
+        g.beginPath();
+        g.moveTo(-L*0.45, b*0.15);
+        g.quadraticCurveTo(0, b*0.55, L*0.4, 0);
+        g.stroke();
+        g.filter = 'none';
+        const rim = g.createLinearGradient(0, -L*0.28, 0, L*0.28);
+        rim.addColorStop(0, 'rgba(0,0,0,0.22)');
+        rim.addColorStop(0.25, 'rgba(0,0,0,0)');
+        rim.addColorStop(0.75, 'rgba(0,0,0,0)');
+        rim.addColorStop(1, 'rgba(0,0,0,0.22)');
+        g.fillStyle = rim;
+        g.fillRect(-half, -half, half*2, half*2);
+        g.restore();
+
+        // pale highlight catching part of the upper edge, like the pads have
+        if (Math.random() < 0.6) {
+            g.save();
+            g.lineCap = 'round';
+            g.strokeStyle = 'rgba(235,250,240,0.3)';
+            g.lineWidth = Math.max(0.6, L*0.04);
+            g.beginPath();
+            const t0 = 0.15 + Math.random()*0.3;
+            for (let i = 0; i <= 10; i++) {
+                const t = t0 + i/10*0.35;
+                const x = L*0.6 - t*L*1.15;
+                const y = -(Math.sin(t*Math.PI))*L*0.2 + b*0.5*Math.sin(t*Math.PI) - 0.6;
+                i ? g.lineTo(x, y) : g.moveTo(x, y);
+            }
+            g.stroke();
+            g.restore();
+        }
+
+        // soften the whole leaf a touch so its edge melts like the pads' do
+        const soft = document.createElement('canvas');
+        soft.width = c.width; soft.height = c.height;
+        const sg = soft.getContext('2d');
+        sg.filter = `blur(${(SPRITE_SCALE*0.6).toFixed(1)}px)`;
+        sg.drawImage(c, 0, 0);
+        g.save();
+        g.setTransform(1, 0, 0, 1, 0, 0);
+        g.clearRect(0, 0, c.width, c.height);
+        g.drawImage(soft, 0, 0);
+        g.restore();
+
+        this.sprite = c;
+        this.spriteHalf = half;
+    }
 }
 
 function foliagePop() {

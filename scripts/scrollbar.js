@@ -253,17 +253,97 @@ document.addEventListener('DOMContentLoaded', () => {
         return canvas;
     }
 
+    // a pad reduced to colour: the pond's pad shape and palette, a second colour bleeding in, a soft
+    // light in the middle and the rim darkened, without veins, ribs or a water bead
+    function buildSimplePad(size) {
+        // the pond's own pad recipe at a small size: an irregular notched outline, a lighter body,
+        // a second colour bleeding in, the pad texture laid on lightly, a soft centre glow and a
+        // pale highlight on part of the rim. No water bead or drawn veins, so it stays painterly
+        const { canvas, ctx } = wcCanvas(size, size);
+        ctx.translate(size / 2, size / 2);
+        const rot = Math.random() * Math.PI * 2;
+        const r = size * 0.42;
+        const palette = PAD_COLORS[Math.floor(Math.random() * PAD_COLORS.length)];
+        const [c0, c1, c2] = palette;
+        const notch = 0.35 + Math.random() * 0.45;
+        const pts = makePadOutline(r, notch, 0.55 + Math.random() * 0.35, 0.06 + Math.random() * 0.07, Math.random() * 10, Math.random() * 10, 40);
+        const bodyColor = lerpHex(c1, c2, Math.random() * 0.4);
+        const edgeColor = lerpHex(bodyColor, c2, 0.35);
+
+        ctx.save();
+        ctx.filter = 'blur(2px)';
+        ctx.translate(1.5, 2);
+        ctx.rotate(rot);
+        blobPath(ctx, pts);
+        ctx.fillStyle = 'rgba(0,8,14,0.18)';
+        ctx.fill();
+        ctx.restore();
+
+        ctx.rotate(rot);
+        ctx.save();
+        ctx.filter = 'blur(0.4px)';
+        blobPath(ctx, pts);
+        ctx.clip();
+        const body = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+        body.addColorStop(0, bodyColor);
+        body.addColorStop(1, edgeColor);
+        ctx.fillStyle = body;
+        ctx.fillRect(-r * 1.3, -r * 1.3, r * 2.6, r * 2.6);
+        let alt;
+        do { alt = PAD_COLORS[Math.floor(Math.random() * PAD_COLORS.length)]; } while (alt === palette && PAD_COLORS.length > 1);
+        const mixColor = lerpHex(alt[Math.floor(Math.random() * 3)], bodyColor, 0.1);
+        const ma = Math.random() * Math.PI * 2;
+        const bx = Math.cos(ma) * r * 0.45, by = Math.sin(ma) * r * 0.45;
+        const mg = ctx.createRadialGradient(bx, by, 0, bx, by, r * 0.75);
+        mg.addColorStop(0, hexToRgba(mixColor, 0.8));
+        mg.addColorStop(0.55, hexToRgba(mixColor, 0.45));
+        mg.addColorStop(1, hexToRgba(mixColor, 0));
+        ctx.fillStyle = mg;
+        ctx.fillRect(-r * 1.3, -r * 1.3, r * 2.6, r * 2.6);
+        ctx.globalAlpha = 0.6;
+        paintPadTexture(ctx, r, palette, Math.atan2(-1, -1) - rot, notch);
+        ctx.globalAlpha = 1;
+        ctx.filter = 'blur(1px)';
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.15, 0, Math.PI * 2);
+        ctx.fillStyle = hexToRgba(lerpHex(c0, '#d1ffdb', 0.15), 0.8);
+        ctx.fill();
+        ctx.filter = 'none';
+        const rim = ctx.createRadialGradient(0, 0, r * 0.55, 0, 0, r);
+        rim.addColorStop(0, 'rgba(0,0,0,0)');
+        rim.addColorStop(1, 'rgba(0,0,0,0.2)');
+        ctx.fillStyle = rim;
+        ctx.fillRect(-r * 1.3, -r * 1.3, r * 2.6, r * 2.6);
+        ctx.restore();
+
+        // pale light along part of the rim
+        const n = pts.length, start = Math.floor(Math.random() * n), span = Math.floor(n * (0.15 + Math.random() * 0.15));
+        ctx.lineCap = 'round';
+        for (let i = 0; i < span; i++) {
+            const p0 = pts[(start + i) % n], p1 = pts[(start + i + 1) % n];
+            const taper = Math.sin(Math.PI * (i + 0.5) / span);
+            ctx.strokeStyle = `rgba(235,250,240,${(0.35 * taper).toFixed(3)})`;
+            ctx.lineWidth = r * 0.07 * (0.3 + 0.7 * taper);
+            ctx.beginPath();
+            ctx.moveTo(p0[0] * 1.08, p0[1] * 1.08);
+            ctx.lineTo(p1[0] * 1.08, p1[1] * 1.08);
+            ctx.stroke();
+        }
+        return canvas;
+    }
+
     // a lotus opening on its pad, seen at a slant the way you'd see one from the bank. Each petal
     // is laid in like oil paint: a muted wash, a shadow scumbled into the side away from the light,
     // a few dry-brush streaks along its length, and no hard outline anywhere
     function buildLotus(size) {
         const { canvas, ctx } = wcCanvas(size, size);
         const c = size / 2;
-        const ps = Math.round(size * 0.66);
-        ctx.drawImage(buildPad(ps), c - ps / 2 + size * 0.04, c - ps / 2 + size * 0.1, ps, ps);
-
         const R = size * 0.27;
-        const cx = c - size * 0.02, cy = c + size * 0.06;
+        const cx = c, cy = c + size * 0.06;
+
+        // an ordinary round pad, the same as the ones in the pond, with the flower in its middle
+        const ps = Math.round(size * 0.7);
+        ctx.drawImage(buildSimplePad(ps), cx - ps / 2, cy - ps / 2 - size * 0.04, ps, ps);
         const rnd = (a) => (Math.random() - 0.5) * a;
         const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
         const css = (col, al) => `rgba(${col.map(Math.round).join(',')},${al})`;
@@ -279,17 +359,19 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.restore();
 
         // petals in 3D: angle round the cup, how far out the tip leans, how high it stands
-        const TILT = 0.55;
+        const TILT = 0.78;
         const petals = [];
         const ringOf = (n, out, up, wid, off, warm) => {
             for (let i = 0; i < n; i++) {
-                const a = off + i / n * Math.PI * 2 + rnd(0.25);
-                petals.push({ a, out: out * (0.9 + Math.random() * 0.2), up, wid, warm });
+                // evenly spaced, every ring the same shape all the way round
+                const a = off + i / n * Math.PI * 2;
+                petals.push({ a, out, up, wid, warm });
             }
         };
-        ringOf(7, R * 1.0, R * 0.25, R * 0.42, 0, 1);
-        ringOf(6, R * 0.62, R * 0.62, R * 0.36, 0.45, 0.6);
-        ringOf(5, R * 0.32, R * 0.72, R * 0.28, 0.2, 0.3);
+        const turn = Math.random() * Math.PI;
+        ringOf(8, R * 0.95, R * 0.22, R * 0.4, turn, 1);
+        ringOf(8, R * 0.62, R * 0.5, R * 0.34, turn + Math.PI / 8, 0.6);
+        ringOf(5, R * 0.3, R * 0.62, R * 0.26, turn, 0.3);
         petals.forEach(p => { p.depth = Math.sin(p.a) * p.out; });
         petals.sort((p, q) => p.depth - q.depth);
 
@@ -306,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.save();
             ctx.translate(bx, by);
             ctx.rotate(Math.atan2(ty - by, tx - bx) + Math.PI / 2);
-            const bend = rnd(len * 0.12);
+            const bend = 0;
             const path = petalPath(ctx, len, p.wid, bend);
 
             ctx.filter = 'blur(0.7px)';
