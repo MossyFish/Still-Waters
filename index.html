@@ -54,16 +54,16 @@
      <div class="projects-grid">
       <div class="project-box">
         <h3>Technova Hacker Badge </h3>
-        <p class="project-desc"> A custom NFC badge for the ~300 hackers at Technova, which I led the hardware design for in KiCad. 
-          It has a RISC-V microcontroller, tap-to-phone NFC check-in, an OLED screen, a D-pad, addressable LEDs and USB-C charging. I routed the double-sided board and put together the JLCPCB assembly order. </p>
-        <div class="project-image"> <img src="assets/projects/TechnovaBadge.jpg" alt="Technova hacker badge PCB render"> </div>
+        <p class="project-desc"> Two boards for the ~300 hackers at Technova, designed in KiCad. The planet badge has a RISC-V microcontroller, tap-to-phone NFC check-in, an OLED screen, a D-pad, addressable LEDs and USB-C charging, on a double-sided board ready for JLCPCB assembly.
+          The star clip draws Orion in red LEDs, driven by an ATtiny202 off a coin cell, with one button for modes. </p>
+        <div class="project-image"> <img src="assets/projects/TechnovaBoards.jpg" alt="Renders of the Technova planet badge and star clip PCBs"> </div>
         <a class="link" href="https://github.com/flyingf15h/technova-pcbs" target="_blank" rel="noopener">link to project</a>
       </div>
 
       <div class="project-box">
         <h3>Submerge </h3>
         <p class="project-desc"> An animated cyber/deep ocean koi theme for KDE Plasma 5 and 6, with around 1,290 downloads on the KDE Store across all versions. 
-          I wrote the GLSL shaders and a small water simulation for the ripples. There's also a live system HUD (CPU, GPU, memory, network, battery) and frame pacing that backs off to save power. </p>
+          GLSL shaders and a small water simulation drive the ripples, alongside a live system HUD (CPU, GPU, memory, network, battery) and frame pacing that backs off to save power. </p>
         <div class="project-image"> <img src="assets/projects/Submerge.jpg" alt="Submerge KDE Plasma desktop screenshot"> </div>
         <a class="link" href="https://github.com/flyingf15h/submerge" target="_blank" rel="noopener">link to project</a>
       </div>
@@ -71,7 +71,7 @@
       <div class="project-box">
         <h3>Physical Studio </h3>
         <p class="project-desc"> Describe a hardware project and get an IKEA-style build guide for it, with a 3D model of every step and a photo check of each step on your real bench. 
-          I built an MCP server with CAD tools for part placement, wiring and collision/clearance checks, which exports GLB scenes to a React Three Fiber viewer. Deployed with Docker Compose on Vultr. Won Hack the Valley 11. </p>
+          An MCP server with CAD tools for part placement, wiring and collision/clearance checks exports GLB scenes to a React Three Fiber viewer. Deployed with Docker Compose on Vultr. Won Hack the Valley 11. </p>
         <div class="project-image"> <img src="assets/projects/PhysicalStudio.png" alt="Physical Studio preview"> </div>
         <a class="link" href="https://github.com/flyingf15h/Physical-Studio-Code" target="_blank" rel="noopener">link to project</a>
       </div>
@@ -79,7 +79,7 @@
       <div class="project-box">
         <h3>huddle </h3>
         <p class="project-desc"> Lets several Claude Code agents on different machines work in the same repo at once. While one agent edits a file it is locked for the others, their copies go read-only and get its edits streamed in live.
-          I wrote the relay server in plain Node.js with no dependencies and run it on Cloudflare Workers, with agent-to-agent chat, a web dashboard and git history sync between checkouts. </p>
+          The relay server is plain Node.js with no dependencies, running on Cloudflare Workers, with agent-to-agent chat, a web dashboard and git history sync between checkouts. </p>
         <div class="project-image"> <img src="assets/projects/huddle.png" alt="huddle repository card"> </div>
         <a class="link" href="https://github.com/flyingf15h/huddle" target="_blank" rel="noopener">link to project</a>
       </div>
