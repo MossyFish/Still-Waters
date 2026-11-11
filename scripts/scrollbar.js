@@ -261,14 +261,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // pale highlight on part of the rim. No water bead or drawn veins, so it stays painterly
         const { canvas, ctx } = wcCanvas(size, size);
         ctx.translate(size / 2, size / 2);
-        const rot = Math.random() * Math.PI * 2;
+        const rot = -Math.PI / 2; // notch pointing up
         const r = size * 0.42;
         const palette = PAD_COLORS[Math.floor(Math.random() * PAD_COLORS.length)];
         const [c0, c1, c2] = palette;
         const notch = 0.35 + Math.random() * 0.45;
         const pts = makePadOutline(r, notch, 0.55 + Math.random() * 0.35, 0.06 + Math.random() * 0.07, Math.random() * 10, Math.random() * 10, 40);
-        const bodyColor = lerpHex(c1, c2, Math.random() * 0.4);
-        const edgeColor = lerpHex(bodyColor, c2, 0.35);
+        const bodyColor = lerpHex(c1, c0, 0.2);
+        const edgeColor = lerpHex(c1, c2, 0.25);
 
         ctx.save();
         ctx.filter = 'blur(2px)';
@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mg.addColorStop(1, hexToRgba(mixColor, 0));
         ctx.fillStyle = mg;
         ctx.fillRect(-r * 1.3, -r * 1.3, r * 2.6, r * 2.6);
-        ctx.globalAlpha = 0.6;
+        ctx.globalAlpha = 0.35;
         paintPadTexture(ctx, r, palette, Math.atan2(-1, -1) - rot, notch);
         ctx.globalAlpha = 1;
         ctx.filter = 'blur(1px)';
@@ -311,39 +311,26 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.filter = 'none';
         const rim = ctx.createRadialGradient(0, 0, r * 0.55, 0, 0, r);
         rim.addColorStop(0, 'rgba(0,0,0,0)');
-        rim.addColorStop(1, 'rgba(0,0,0,0.2)');
+        rim.addColorStop(1, 'rgba(0,0,0,0.1)');
         ctx.fillStyle = rim;
         ctx.fillRect(-r * 1.3, -r * 1.3, r * 2.6, r * 2.6);
         ctx.restore();
 
-        // pale light along part of the rim
-        const n = pts.length, start = Math.floor(Math.random() * n), span = Math.floor(n * (0.15 + Math.random() * 0.15));
-        ctx.lineCap = 'round';
-        for (let i = 0; i < span; i++) {
-            const p0 = pts[(start + i) % n], p1 = pts[(start + i + 1) % n];
-            const taper = Math.sin(Math.PI * (i + 0.5) / span);
-            ctx.strokeStyle = `rgba(235,250,240,${(0.35 * taper).toFixed(3)})`;
-            ctx.lineWidth = r * 0.07 * (0.3 + 0.7 * taper);
-            ctx.beginPath();
-            ctx.moveTo(p0[0] * 1.08, p0[1] * 1.08);
-            ctx.lineTo(p1[0] * 1.08, p1[1] * 1.08);
-            ctx.stroke();
-        }
         return canvas;
     }
 
     // a lotus opening on its pad, seen at a slant the way you'd see one from the bank. Each petal
     // is laid in like oil paint: a muted wash, a shadow scumbled into the side away from the light,
     // a few dry-brush streaks along its length, and no hard outline anywhere
-    function buildLotus(size) {
+    function buildLotus(size, withPad = true) {
         const { canvas, ctx } = wcCanvas(size, size);
         const c = size / 2;
         const R = size * 0.27;
         const cx = c, cy = c + size * 0.06;
 
         // an ordinary round pad, the same as the ones in the pond, with the flower in its middle
-        const ps = Math.round(size * 0.7);
-        ctx.drawImage(buildSimplePad(ps), cx - ps / 2, cy - ps / 2 - size * 0.04, ps, ps);
+        const ps = Math.round(size * 0.63);
+        const pad = buildSimplePad(ps);
         const rnd = (a) => (Math.random() - 0.5) * a;
         const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
         const css = (col, al) => `rgba(${col.map(Math.round).join(',')},${al})`;
@@ -458,8 +445,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!podDone) paintPod();
 
         grainify(canvas, ctx, 0.3);
-        return canvas;
+        if (!withPad) return canvas;
+        const out = wcCanvas(size, size);
+        out.ctx.drawImage(pad, cx - ps / 2, cy - ps / 2 - size * 0.04, ps, ps);
+        out.ctx.drawImage(canvas, 0, 0, size, size);
+        return out.canvas;
     }
+
+    try {
+        document.documentElement.style.setProperty('--tiny-lotus', `url(${buildLotus(26, false).toDataURL()})`);
+    } catch (e) { /* the marker just won't show */ }
 
     document.querySelectorAll('.exp-block').forEach((block) => {
         const list = block.querySelector('.scroll-list');
