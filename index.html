@@ -47,6 +47,10 @@
     <section>
       <h2 class="section-title"> About </h2>
       <p class="body-text">Hi, I'm Fei!</p>
+      <div class="now-playing">
+        <div class="np-label">currently listening to</div>
+        <iframe class="np-embed" title="Spotify playlist" src="https://open.spotify.com/embed/playlist/3CEii4YPcjAZ2fsRIUubNu?utm_source=generator&amp;theme=0" height="152" allow="clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
     </section>
 
     <section> 
@@ -57,6 +61,10 @@
         <p class="project-desc"> Two boards for the ~300 hackers at Technova, designed in KiCad. The planet badge has a RISC-V microcontroller, tap-to-phone NFC check-in, an OLED screen, a D-pad, addressable LEDs and USB-C charging, on a double-sided board ready for JLCPCB assembly.
           The star clip draws Orion in red LEDs, driven by an ATtiny202 off a coin cell, with one button for modes. </p>
         <div class="project-image"> <img src="assets/projects/TechnovaBoards.jpg" alt="Renders of the Technova planet badge and star clip PCBs"> </div>
+        <div class="project-extra">
+          <figure><img src="assets/projects/TechnovaBadgeSchematic.jpg" alt="Planet badge schematic" loading="lazy"><figcaption>planet badge schematic</figcaption></figure>
+          <figure><img src="assets/projects/TechnovaStarSchematic.jpg" alt="Star clip schematic" loading="lazy"><figcaption>star clip schematic</figcaption></figure>
+        </div>
         <a class="link" href="https://github.com/flyingf15h/technova-pcbs" target="_blank" rel="noopener">link to project</a>
       </div>
 
@@ -104,13 +112,18 @@
 
     <section>
     <h2 class="section-title">Resumes</h2>
-     <div class="resume-grid">
-      <a class="resume-card" href="/resume/#general"><span class="rc-text"><h3>General</h3><p>Every role</p></span><span class="rc-go" aria-hidden="true">&rsaquo;</span></a>
-      <a class="resume-card" href="/resume/#frontend"><span class="rc-text"><h3>Frontend</h3><p>UI and web</p></span><span class="rc-go" aria-hidden="true">&rsaquo;</span></a>
-      <a class="resume-card" href="/resume/#backend"><span class="rc-text"><h3>Backend</h3><p>APIs and infrastructure</p></span><span class="rc-go" aria-hidden="true">&rsaquo;</span></a>
-      <a class="resume-card" href="/resume/#fullstack"><span class="rc-text"><h3>Full Stack</h3><p>End-to-end web</p></span><span class="rc-go" aria-hidden="true">&rsaquo;</span></a>
-      <a class="resume-card" href="/resume/#data_ai"><span class="rc-text"><h3>Data / AI</h3><p>ML and research</p></span><span class="rc-go" aria-hidden="true">&rsaquo;</span></a>
+     <div class="resume-tabs" role="tablist" aria-label="Resume versions">
+      <button type="button" role="tab" data-key="general" aria-selected="true">General</button>
+      <button type="button" role="tab" data-key="frontend">Frontend</button>
+      <button type="button" role="tab" data-key="backend">Backend</button>
+      <button type="button" role="tab" data-key="fullstack">Full Stack</button>
+      <button type="button" role="tab" data-key="data_ai">Data / AI</button>
+      <span class="rt-ripple" aria-hidden="true"></span>
      </div>
+     <a class="resume-preview" id="resumePreview" href="/resume/#general">
+      <canvas aria-label="First page of the selected resume"></canvas>
+      <span class="rp-open">open the full resume &rsaquo;</span>
+     </a>
     </section>
 
 
@@ -127,7 +140,7 @@
           <div class="exp-date">Oct 2026 – Present</div>
           <div class="exp-detail">
             <h3>Hardware Lead</h3>
-            <div class="company">Technova · Waterloo, ON</div>
+            <div class="company">Technova Hackathon Organizer · Waterloo, ON</div>
           </div>
         </div>
         <div class="exp-item">
@@ -309,5 +322,7 @@
 <script src="scripts/transition.js"></script>
 
 <script src="scripts/scrollbar.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="scripts/resume-tabs.js"></script>
 <script type="text/javascript" async src="https://cdn.credly.com/assets/utilities/embed.js"></script></body>
 </html>

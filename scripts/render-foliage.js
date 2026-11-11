@@ -74,9 +74,11 @@ function isExcluded(x, y, r, rect) {
 // tracker so they don't overlap too much 
 const placedFoliage = [];
 const OVERLAP = 0.3;
+// pads only just touch each other; leaves can still drift over them
+const PAD_OVERLAP = 0.03;
 const TRIES = 40;
 
-function findSpot(spread, r) {
+function findSpot(spread, r, kind) {
     let best = null, bestFrac = Infinity;
     let attempts = 0, validAttempts = 0;
     const maxAttempts = TRIES * 3;
@@ -87,23 +89,17 @@ function findSpot(spread, r) {
         if (isExcluded(p.x, p.y, r, introExclusionRect)) continue;
         validAttempts++;
 
+        // how far past its allowance this spot overlaps anything already placed
         let worstFrac = 0;
-        // overlap check
         for (const other of placedFoliage) {
             const d = Math.hypot(p.x - other.x, p.y - other.y);
-            const minR = Math.min(r, other.r);
             if (d >= r + other.r) continue;
-            if (d <= Math.abs(r - other.r)) {
-                worstFrac = 1;
-                break;
-            }
-            const depth = (r + other.r - d) / 2;
-            const frac = Math.min(1, depth / minR);
-            
-            if (frac > worstFrac) worstFrac = frac;
+            const allowed = kind === 'pad' && other.kind === 'pad' ? PAD_OVERLAP : OVERLAP;
+            const frac = d <= Math.abs(r - other.r) ? 1 : Math.min(1, (r + other.r - d) / 2 / Math.min(r, other.r));
+            worstFrac = Math.max(worstFrac, frac - allowed);
         }
 
-        if (worstFrac <= OVERLAP) return p;
+        if (worstFrac <= 0) return p;
         if (worstFrac < bestFrac) {
             bestFrac = worstFrac;
             best = p;
@@ -232,9 +228,9 @@ function paintPadTexture(ctx, r, palette, lightAngle, notchWidth) {
 class LilyPad {
     constructor(){
         this.r = 16 + Math.random()*18;
-        const p = findSpot(85, this.r);
+        const p = findSpot(115, this.r, 'pad');
         this.x = p.x; this.y = p.y;
-        this.placedEntry = {x:this.x, y:this.y, r:this.r};
+        this.placedEntry = {x:this.x, y:this.y, r:this.r, kind:'pad'};
         placedFoliage.push(this.placedEntry);
         this.rot = Math.random()*Math.PI*2;
         this.driftT = Math.random()*1000;
@@ -254,8 +250,8 @@ class LilyPad {
         this.edgeColor = lerpHex(this.bodyColor, c2, 0.3+Math.random()*0.7);
         this.veinColor = lerpHex(c1, c0, 0.5+Math.random()*0.4);
         this.centerLight = lerpHex(c0, '#d1ffdb', 0.1+Math.random()*0.2);
-        this.sparkleR = 0.04 + Math.random() * 0.065;
-        this.sparkleAlpha = 0.8 + Math.random() * 0.95;
+        this.sparkleR = 0.03 + Math.random() * 0.03;
+        this.sparkleAlpha = 0.35 + Math.random() * 0.3;
         let altPalette;
         do { altPalette = PAD_PALETTES[Math.floor(Math.random()*PAD_PALETTES.length)]; }
 
@@ -396,7 +392,7 @@ class LilyPad {
                 const segAngle = ((startIdx + i + 0.5)/n) * Math.PI*2;
                 const backness = angularDistance(segAngle, 0)/Math.PI;
                 const thicknessScale = 0.065 + (0.095 - 0.065)*backness;
-                sctx.strokeStyle = `rgba(255,255,255,${(0.6*taper).toFixed(3)})`;
+                sctx.strokeStyle = `rgba(235,250,240,${(0.35*taper).toFixed(3)})`;
                 sctx.lineWidth = this.r * thicknessScale*(0.3 + 0.7*taper);
                 sctx.beginPath();
                 sctx.moveTo(p0[0]*outset, p0[1]*outset);
@@ -445,15 +441,19 @@ class Leaf{
     constructor(){
         this.len = 15 + Math.random()*17;
         const r = this.len*0.5;
-        const p = findSpot(70, r);
+        const p = findSpot(70, r, 'leaf');
         this.x = p.x; this.y = p.y;
-        this.placedEntry = {x:this.x, y:this.y, r};
+        this.placedEntry = {x:this.x, y:this.y, r, kind:'leaf'};
         placedFoliage.push(this.placedEntry);
         this.rot = Math.random()*Math.PI*2;
         this.driftT = Math.random()*1000;
         this.offX = 0; this.offY = 0; this.velX = 0; this.velY = 0;
         this.color = LEAF_GREENS[Math.floor(Math.random()*LEAF_GREENS.length)];
         this.shadowDir = lightShadowParams(this.x, this.y);
+        // a slight bend so they aren't all perfect almonds, and one side of the midrib catching light
+        this.bend = (Math.random() - 0.5) * this.len * 0.12;
+        this.lightColor = lerpHex(this.color, '#e4f3c8', 0.3);
+        this.darkColor = lerpHex(this.color, '#16402a', 0.25);
         this.buildShadowSprite();
     }
 
@@ -503,21 +503,51 @@ class Leaf{
         ctx.save();
         ctx.translate(this.x + dx, this.y + dy);
         ctx.rotate(this.rot + Math.sin(this.driftT)*0.15);
+        const L = this.len, b = this.bend;
+
+        // little stem trailing off the base
+        ctx.strokeStyle = hexToRgba(this.darkColor, 0.8);
+        ctx.lineWidth = Math.max(0.7, L*0.035);
+        ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.moveTo(this.len*0.6,0);
-        ctx.quadraticCurveTo(0, -this.len*0.4, -this.len*0.6, 0);
-        ctx.quadraticCurveTo(0, this.len*0.4, this.len*0.6, 0); 
+        ctx.moveTo(-L*0.52, b*0.1);
+        ctx.quadraticCurveTo(-L*0.64, b*0.3, -L*0.72, b*0.7 + L*0.04);
+        ctx.stroke();
+
+        // blade: widest a little toward the base, tapering to a point
+        ctx.beginPath();
+        ctx.moveTo(L*0.6, 0);
+        ctx.bezierCurveTo(L*0.3, -L*0.1 + b*0.4, -L*0.25, -L*0.27 + b, -L*0.55, 0);
+        ctx.bezierCurveTo(-L*0.25, L*0.27 + b, L*0.3, L*0.1 + b*0.4, L*0.6, 0);
         ctx.closePath();
-        ctx.fillStyle = this.color;
-        ctx.globalAlpha = 0.92; 
+        const shade = ctx.createLinearGradient(0, -L*0.2, 0, L*0.2);
+        shade.addColorStop(0, this.lightColor);
+        shade.addColorStop(0.5, this.color);
+        shade.addColorStop(1, this.darkColor);
+        ctx.fillStyle = shade;
+        ctx.globalAlpha = 0.94;
         ctx.fill();
         ctx.globalAlpha = 1;
-        
-        ctx.strokeStyle = 'rgba(14,50,26,0.4)';
-        ctx.lineWidth = 0.8;
+        ctx.strokeStyle = 'rgba(12,44,26,0.28)';
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+
+        // midrib and a few faint side veins
+        ctx.strokeStyle = 'rgba(228,246,215,0.35)';
+        ctx.lineWidth = 0.7;
         ctx.beginPath();
-        ctx.moveTo(this.len*0.55, 0);
-        ctx.lineTo(-this.len*0.55, 0);
+        ctx.moveTo(-L*0.52, b*0.1);
+        ctx.quadraticCurveTo(0, b*0.55, L*0.55, 0);
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(228,246,215,0.16)';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        for (const x of [-0.3, -0.08, 0.14]) {
+            const y = b*0.5*(1 - Math.abs(x)*1.5);
+            const reach = L*0.17*(1 - (x + 0.3));
+            ctx.moveTo(x*L, y); ctx.lineTo(x*L + reach*0.9, y - reach*0.75);
+            ctx.moveTo(x*L, y); ctx.lineTo(x*L + reach*0.9, y + reach*0.75);
+        }
         ctx.stroke();
         ctx.restore();
     }                     

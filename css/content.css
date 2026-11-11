@@ -31,11 +31,19 @@
     max-width: 880px;
     margin: 0 auto;
     position: relative;
-    background: var(--panel);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(243, 239, 228, 0.08);
-    border-radius: 18px;
+    /* deeper, stiller water rather than a grey card: teal that thins toward the edges, the pond
+       blurred through it, a faint light along the top like the surface catching the sky */
+    background:
+        radial-gradient(120% 70% at 50% 0%, rgba(120, 190, 205, 0.07), rgba(120, 190, 205, 0) 60%),
+        linear-gradient(180deg, rgba(10, 34, 48, 0.58), rgba(7, 24, 36, 0.66));
+    -webkit-backdrop-filter: blur(10px) saturate(1.25);
+    backdrop-filter: blur(10px) saturate(1.25);
+    border: 1px solid rgba(170, 220, 230, 0.07);
+    border-radius: 26px;
+    box-shadow:
+        inset 0 1px 0 rgba(200, 235, 240, 0.09),
+        inset 0 0 60px rgba(4, 16, 24, 0.35),
+        0 30px 90px rgba(2, 12, 20, 0.35);
     padding: 48px clamp(24px, 5vw, 64px);
     color: var(--cream);
     --panel-pad-x: clamp(24px, 5vw, 64px);
@@ -358,3 +366,191 @@
 .resume-card p { margin: 0; font-size: 0.78rem; opacity: 0.65; }
 .rc-go { font-size: 1.4rem; color: var(--water-light); opacity: 0.5; transition: opacity 0.2s ease, transform 0.2s ease; }
 .resume-card:hover .rc-go { opacity: 1; transform: translateX(3px); }
+
+
+/* projects: two at a time, drifting to the next pair on their own; the whole demo image shows */
+.projects-grid {
+    --gap: 18px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: calc((100% - var(--gap)) / 2);
+    column-gap: var(--gap);
+    align-items: start;
+    overflow-x: auto;
+    padding: 6px 0 8px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+}
+.projects-grid::-webkit-scrollbar { display: none; }
+.projects-grid .project-box { scroll-snap-align: start; }
+@media (max-width: 600px) {
+    .projects-grid { grid-auto-columns: 100%; }
+}
+.project-box:not(.expanded) .project-image {
+    aspect-ratio: auto;
+}
+.project-box:not(.expanded) .project-image::after { display: none; }
+.project-box:not(.expanded) .project-image img { position: static; }
+
+.project-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+/* arrows sit out in the panel's margin, either side of the cards */
+.project-carousel { position: relative; }
+.pn-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    padding: 0 0 3px;
+    border: 1px solid rgba(243, 239, 228, 0.14);
+    border-radius: 50%;
+    background: rgba(8, 24, 34, 0.35);
+    font-size: 1.35rem;
+    line-height: 1;
+    color: rgba(243, 239, 228, 0.55);
+    transform: translateY(-50%);
+    transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+}
+.pn-arrow.prev { left: calc(-1 * var(--panel-pad-x) / 2 - 17px); }
+.pn-arrow.next { right: calc(-1 * var(--panel-pad-x) / 2 - 17px); }
+.pn-arrow:hover, .pn-arrow:focus-visible {
+    color: var(--cream);
+    background: rgba(8, 24, 34, 0.7);
+    border-color: rgba(243, 239, 228, 0.35);
+    outline: none;
+}
+@media (max-width: 700px) {
+    .pn-arrow.prev { left: -6px; }
+    .pn-arrow.next { right: -6px; }
+}
+
+/* schematics only come up once a project is opened */
+.project-extra { display: none; }
+.project-box.expanded .project-extra {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 4px 0 8px;
+}
+.project-extra figure { margin: 0; }
+.project-extra img { display: block; width: 100%; border-radius: 8px; background: #fff; }
+.project-extra figcaption {
+    margin-top: 6px;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    color: rgba(243, 239, 228, 0.55);
+}
+@media (max-width: 600px) { .project-box.expanded .project-extra { grid-template-columns: 1fr; } }
+.project-dots button {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: rgba(243, 239, 228, 0.22);
+    transition: width 0.35s ease, background 0.35s ease;
+}
+.project-dots button.on { width: 22px; background: rgba(243, 239, 228, 0.75); }
+
+/* about: what's playing, as a Spotify card that only plays when pressed */
+.now-playing { margin-top: 18px; max-width: 520px; }
+.np-label {
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--water-light);
+    margin-bottom: 8px;
+}
+.np-embed {
+    display: block;
+    width: 100%;
+    border: 0;
+    border-radius: 14px;
+    box-shadow: 0 10px 28px rgba(0, 10, 20, 0.35);
+}
+
+/* resumes: one tab per version, a soft light gliding under the chosen one, and the first page of
+   that resume underneath like a sheet resting just under the water */
+.resume-tabs {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 22px;
+    margin-bottom: 16px;
+}
+.resume-tabs button {
+    padding: 6px 2px 10px;
+    border: none;
+    background: none;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: rgba(243, 239, 228, 0.5);
+    transition: color 0.3s ease;
+}
+.resume-tabs button:hover { color: rgba(243, 239, 228, 0.8); }
+.resume-tabs button[aria-selected="true"] { color: var(--cream); }
+.rt-ripple {
+    position: absolute;
+    bottom: 0;
+    height: 6px;
+    /* a small ripple line that keeps drifting, fading out at both ends */
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='6' viewBox='0 0 24 6'%3E%3Cpath d='M0 3 Q6 0.6 12 3 T24 3' fill='none' stroke='rgb(170,218,232)' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E") repeat-x 0 50% / 24px 6px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent);
+    filter: drop-shadow(0 0 3px rgba(150, 215, 235, 0.5));
+    opacity: 0.85;
+    animation: rt-drift 2.4s linear infinite;
+    transition: left 0.45s cubic-bezier(0.34, 1.3, 0.5, 1), width 0.45s cubic-bezier(0.34, 1.3, 0.5, 1);
+    pointer-events: none;
+}
+@keyframes rt-drift { to { background-position: 24px 50%; } }
+
+.resume-preview {
+    position: relative;
+    display: block;
+    max-width: 560px;
+    height: 170px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #f6f3ec;
+    box-shadow: 0 14px 34px rgba(0, 10, 20, 0.4);
+    text-decoration: none;
+    transition: transform 0.4s ease, box-shadow 0.4s ease, opacity 0.25s ease, filter 0.25s ease;
+}
+.resume-preview canvas { display: block; }
+.resume-preview.turning { opacity: 0.35; filter: blur(2px); }
+.resume-preview:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(0, 10, 20, 0.45); }
+/* the bottom of the page fades back into the water */
+.resume-preview::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 70%;
+    background: linear-gradient(to bottom, rgba(10, 30, 46, 0), rgba(10, 30, 46, 0.92));
+    pointer-events: none;
+}
+.rp-open {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 12px;
+    z-index: 1;
+    text-align: center;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    color: var(--cream);
+    transition: color 0.25s ease;
+}
+.resume-preview:hover .rp-open { color: #f2b7c9; }

@@ -98,26 +98,284 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ctx.filter = 'blur(1px)';
         ctx.beginPath();
-        ctx.arc(0, 0, r * 0.16, 0, Math.PI * 2);
-        ctx.fillStyle = hexToRgba(centerLight, 0.9);
+        ctx.arc(0, 0, r * 0.14, 0, Math.PI * 2);
+        ctx.fillStyle = hexToRgba(centerLight, 0.55);
         ctx.fill();
         ctx.filter = 'none';
 
         ctx.beginPath();
-        ctx.arc(0, 0, r * 0.07, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.arc(0, 0, r * 0.04, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
         ctx.fill();
+
+        // a bead of water sitting on the leaf: a faint lens, darker at the bottom, with a glint
+        {
+            const bx = r * 0.32, by = r * 0.3, br = r * 0.11;
+            const bead = ctx.createRadialGradient(bx - br * 0.3, by - br * 0.3, 0, bx, by, br);
+            bead.addColorStop(0, 'rgba(235,255,240,0.35)');
+            bead.addColorStop(0.7, 'rgba(160,215,180,0.12)');
+            bead.addColorStop(1, 'rgba(10,40,25,0.35)');
+            ctx.beginPath();
+            ctx.arc(bx, by, br, 0, Math.PI * 2);
+            ctx.fillStyle = bead;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(bx - br * 0.35, by - br * 0.35, br * 0.28, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,0.85)';
+            ctx.fill();
+        }
         ctx.restore();
 
+
+        return canvas;
+    }
+
+    // ---- watercolour flowers: soft washes with the pigment pooling darker at the drying edge,
+    // like the painted water and fish ----
+    function wcCanvas(w, h) {
+        const canvas = document.createElement('canvas');
+        const scale = window.devicePixelRatio || 1;
+        canvas.width = w * scale;
+        canvas.height = h * scale;
+        canvas.style.width = `${w}px`;
+        canvas.style.height = `${h}px`;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(scale, scale);
+        return { canvas, ctx };
+    }
+    function wash(ctx, path, fill, edge, edgeW) {
         ctx.save();
-        ctx.shadowColor = 'rgba(160,220,180,0.55)';
-        ctx.shadowBlur = 6;
-        blobPath(ctx, outlinePts);
-        ctx.strokeStyle = 'rgba(200,255,210,0.3)';
-        ctx.lineWidth = 1;
+        path();
+        ctx.fillStyle = fill;
+        ctx.fill();
+        path();
+        ctx.clip();
+        ctx.filter = `blur(${Math.max(0.5, edgeW * 0.45).toFixed(1)}px)`;
+        path();
+        ctx.strokeStyle = edge;
+        ctx.lineWidth = edgeW;
+        ctx.stroke();
+        ctx.restore();
+    }
+    // a petal from its base at the origin to a point at (bend, -len)
+    function petalPath(ctx, len, wid, bend = 0) {
+        return () => {
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(wid, -len * 0.25, wid * 0.8 + bend, -len * 0.78, bend, -len);
+            ctx.bezierCurveTo(-wid * 0.8 + bend, -len * 0.78, -wid, -len * 0.25, 0, 0);
+            ctx.closePath();
+        };
+    }
+    function grad(ctx, x0, y0, x1, y1, stops) {
+        const g = ctx.createLinearGradient(x0, y0, x1, y1);
+        stops.forEach(([t, c]) => g.addColorStop(t, c));
+        return g;
+    }
+    function veins(ctx, len, n, color) {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < n; i++) {
+            const x = (i - (n - 1) / 2) * 1.6;
+            ctx.beginPath();
+            ctx.moveTo(x * 0.3, -len * 0.08);
+            ctx.quadraticCurveTo(x, -len * 0.5, x * 0.4, -len * 0.88);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    // the soft paper grain the pond pads have, laid over a finished flower and trimmed to its shape
+    function grainify(canvas, ctx, amount) {
+        const copy = document.createElement('canvas');
+        copy.width = canvas.width;
+        copy.height = canvas.height;
+        copy.getContext('2d').drawImage(canvas, 0, 0);
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.globalCompositeOperation = 'overlay';
+        ctx.globalAlpha = amount;
+        ctx.fillStyle = padGrainPattern(ctx);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'destination-in';
+        ctx.drawImage(copy, 0, 0);
+        ctx.restore();
+    }
+
+    // one petal painted softly: no outline, colour deepening toward the tip, a paler streak down
+    // the middle where the light catches it
+    function softPetal(ctx, len, wid, bend, base, mid, tip, blur) {
+        ctx.save();
+        ctx.filter = `blur(${blur}px)`;
+        petalPath(ctx, len, wid, bend)();
+        ctx.fillStyle = grad(ctx, 0, 0, 0, -len, [[0, base], [0.5, mid], [1, tip]]);
+        ctx.fill();
+        ctx.filter = `blur(${(blur * 2).toFixed(1)}px)`;
+        ctx.beginPath();
+        ctx.ellipse(bend * 0.3, -len * 0.5, wid * 0.28, len * 0.3, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,244,246,0.35)';
+        ctx.fill();
+        ctx.restore();
+    }
+
+    // a closed lotus bud from the side, painted: green sepals with a pink tip showing
+    function buildBud(w, h) {
+        const { canvas, ctx } = wcCanvas(w, h);
+        const cx = w / 2, base = h * 0.76, L = h * 0.7, W = w * 0.42;
+
+        ctx.save();
+        ctx.filter = 'blur(0.4px)';
+        ctx.strokeStyle = 'rgba(120,150,86,0.85)';
+        ctx.lineWidth = 1.3;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(cx, base);
+        ctx.quadraticCurveTo(cx + 0.8, h * 0.88, cx - 0.3, h * 0.99);
         ctx.stroke();
         ctx.restore();
 
+        ctx.save();
+        ctx.translate(cx, base);
+        ctx.rotate((Math.random() - 0.5) * 0.14);
+        softPetal(ctx, L, W * 0.6, 0, 'rgba(246,222,206,0.95)', 'rgba(240,170,188,0.95)', 'rgba(214,96,136,0.95)', 0.5);
+        softPetal(ctx, L * 0.86, W, -0.5, 'rgba(96,138,70,0.95)', 'rgba(134,176,96,0.95)', 'rgba(176,204,128,0.9)', 0.55);
+        softPetal(ctx, L * 0.78, W * 0.8, 0.5, 'rgba(110,150,80,0.9)', 'rgba(160,196,112,0.9)', 'rgba(198,218,150,0.85)', 0.55);
+        // a little pink bleeding into the green near the tip
+        ctx.filter = 'blur(1.2px)';
+        ctx.beginPath();
+        ctx.ellipse(0, -L * 0.72, W * 0.5, L * 0.12, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(214,110,140,0.25)';
+        ctx.fill();
+        ctx.restore();
+        grainify(canvas, ctx, 0.2);
+        return canvas;
+    }
+
+    // a lotus opening on its pad, seen at a slant the way you'd see one from the bank. Each petal
+    // is laid in like oil paint: a muted wash, a shadow scumbled into the side away from the light,
+    // a few dry-brush streaks along its length, and no hard outline anywhere
+    function buildLotus(size) {
+        const { canvas, ctx } = wcCanvas(size, size);
+        const c = size / 2;
+        const ps = Math.round(size * 0.66);
+        ctx.drawImage(buildPad(ps), c - ps / 2 + size * 0.04, c - ps / 2 + size * 0.1, ps, ps);
+
+        const R = size * 0.27;
+        const cx = c - size * 0.02, cy = c + size * 0.06;
+        const rnd = (a) => (Math.random() - 0.5) * a;
+        const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+        const css = (col, al) => `rgba(${col.map(Math.round).join(',')},${al})`;
+        const CREAM = [246, 236, 228], ROSE = [228, 176, 188], DUSK = [196, 126, 148], SHADE = [120, 74, 96];
+
+        // its shadow on the pad
+        ctx.save();
+        ctx.filter = 'blur(3px)';
+        ctx.beginPath();
+        ctx.ellipse(cx + 3, cy + 3, R * 1.05, R * 0.55, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(10,26,20,0.35)';
+        ctx.fill();
+        ctx.restore();
+
+        // petals in 3D: angle round the cup, how far out the tip leans, how high it stands
+        const TILT = 0.55;
+        const petals = [];
+        const ringOf = (n, out, up, wid, off, warm) => {
+            for (let i = 0; i < n; i++) {
+                const a = off + i / n * Math.PI * 2 + rnd(0.25);
+                petals.push({ a, out: out * (0.9 + Math.random() * 0.2), up, wid, warm });
+            }
+        };
+        ringOf(7, R * 1.0, R * 0.25, R * 0.42, 0, 1);
+        ringOf(6, R * 0.62, R * 0.62, R * 0.36, 0.45, 0.6);
+        ringOf(5, R * 0.32, R * 0.72, R * 0.28, 0.2, 0.3);
+        petals.forEach(p => { p.depth = Math.sin(p.a) * p.out; });
+        petals.sort((p, q) => p.depth - q.depth);
+
+        function paintPetal(p) {
+            const bx = cx + Math.cos(p.a) * R * 0.12, by = cy + Math.sin(p.a) * R * 0.12 * TILT;
+            const tx = cx + Math.cos(p.a) * p.out, ty = cy + Math.sin(p.a) * p.out * TILT - p.up;
+            const len = Math.hypot(tx - bx, ty - by);
+            const front = Math.sin(p.a) > 0;           // facing us we see the petal's darker back
+            const lit = 0.5 + 0.5 * Math.cos(p.a + Math.PI * 0.75); // light from the top left
+            const tipCol = mix(DUSK, ROSE, lit * 0.6 + (front ? 0 : 0.35));
+            const midCol = mix(ROSE, CREAM, lit * 0.35 + (front ? 0 : 0.3));
+            const baseCol = mix(CREAM, ROSE, front ? 0.25 : 0.05);
+
+            ctx.save();
+            ctx.translate(bx, by);
+            ctx.rotate(Math.atan2(ty - by, tx - bx) + Math.PI / 2);
+            const bend = rnd(len * 0.12);
+            const path = petalPath(ctx, len, p.wid, bend);
+
+            ctx.filter = 'blur(0.7px)';
+            path();
+            ctx.fillStyle = grad(ctx, 0, 0, 0, -len, [[0, css(baseCol, 0.96)], [0.55, css(midCol, 0.95)], [1, css(tipCol, 0.92)]]);
+            ctx.fill();
+
+            ctx.save();
+            path();
+            ctx.clip();
+            // shadow scumbled into the side turned from the light, deeper on the front petals
+            ctx.filter = 'blur(2.2px)';
+            ctx.beginPath();
+            ctx.ellipse(p.wid * 0.55, -len * 0.45, p.wid * 0.55, len * 0.55, 0, 0, Math.PI * 2);
+            ctx.fillStyle = css(SHADE, front ? 0.28 : 0.14);
+            ctx.fill();
+            // a cool reflection of the water low on the petal
+            ctx.beginPath();
+            ctx.ellipse(-p.wid * 0.2, -len * 0.18, p.wid * 0.5, len * 0.2, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(176,206,214,0.12)';
+            ctx.fill();
+            // dry-brush streaks running base to tip
+            ctx.filter = 'blur(0.35px)';
+            ctx.lineCap = 'round';
+            for (let k = 0; k < 4; k++) {
+                const x = (k / 3 - 0.5) * p.wid * 0.9 + rnd(p.wid * 0.15);
+                ctx.beginPath();
+                ctx.moveTo(x * 0.3, -len * 0.08);
+                ctx.quadraticCurveTo(x, -len * 0.5, x * 0.4 + bend * 0.6, -len * (0.82 + Math.random() * 0.1));
+                ctx.strokeStyle = k % 2 ? css(CREAM, 0.22 + lit * 0.2) : css(DUSK, 0.12);
+                ctx.lineWidth = 0.5 + Math.random() * 0.6;
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // the edge picks up a little light rather than being outlined
+            ctx.filter = 'blur(0.6px)';
+            path();
+            ctx.strokeStyle = css(CREAM, front ? 0.18 : 0.3);
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        let podDone = false;
+        const paintPod = () => {
+            // the seed head, mostly hidden in the inner petals: muted green-gold, soft stamens round it
+            ctx.save();
+            ctx.filter = 'blur(0.9px)';
+            ctx.fillStyle = 'rgba(214,176,96,0.75)';
+            for (let i = 0; i < 14; i++) {
+                const a = i / 14 * Math.PI * 2;
+                ctx.beginPath();
+                ctx.ellipse(cx + Math.cos(a) * R * 0.2, cy - R * 0.55 + Math.sin(a) * R * 0.2 * TILT, 1.1, 1.6, a, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.beginPath();
+            ctx.ellipse(cx, cy - R * 0.58, R * 0.15, R * 0.15 * TILT + 0.6, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(190,190,112,0.9)';
+            ctx.fill();
+            ctx.restore();
+        };
+        petals.forEach(p => {
+            if (!podDone && p.depth > -R * 0.05 && p.out < R * 0.5) { paintPod(); podDone = true; }
+            paintPetal(p);
+        });
+        if (!podDone) paintPod();
+
+        grainify(canvas, ctx, 0.3);
         return canvas;
     }
 
@@ -126,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const track = block.querySelector('.fake-scrollbar-track');
         const thumb = block.querySelector('.fake-scrollbar-thumb');
         if (!list || !track || !thumb) return;
-        thumb.appendChild(buildPad(48));
+        thumb.appendChild(buildLotus(60));
 
         const items = Array.from(list.querySelectorAll('.exp-item'));
         if (!items.length) return;
@@ -136,6 +394,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const ticks = items.map(() => {
             const tick = document.createElement('div');
             tick.className = 'fake-scrollbar-tick';
+            // each entry gets its own tiny pad; the big one floats over to whichever is selected
+            const pad = buildBud(12, 24);
+            pad.style.animationDelay = `-${(Math.random() * 7).toFixed(1)}s`;
+            tick.appendChild(pad);
             track.insertBefore(tick, thumb);
             return tick;
         });
@@ -162,7 +424,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index === currentIndex) return;
             if (currentIndex >= 0) items[currentIndex].classList.remove('scroll-active');
             items[index].classList.add('scroll-active');
-            ticks.forEach((tick, i) => tick.classList.toggle('active', i === index));
+            ticks.forEach((tick, i) => {
+                tick.classList.toggle('active', i === index);
+                // the buds either side of the flower stand a little taller
+                const d = Math.abs(i - index);
+                tick.classList.toggle('near', d === 1);
+                tick.classList.toggle('near2', d === 2);
+            });
             currentIndex = index;
             if (!silent) {
                 playTick();

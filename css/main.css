@@ -5,7 +5,7 @@
     --lily: #2f6b45;
     --gold: #e3b35c;
     --cream: #f3efe4;
-    --panel: rgba(8, 14, 20, 0.74);
+    --panel: rgba(9, 30, 42, 0.62);
 }
 
 * {
@@ -195,6 +195,7 @@ p.body-text {
 /* a lily stem: lighter down the middle, fading out at both ends. It's drawn on its own layer
    because the fade mask would clip the pad and dots too */
 .fake-scrollbar-track::after {
+    display: none; /* no stem: the pads float on their own like stepping stones */
     content: '';
     position: absolute;
     inset: 0;
@@ -217,19 +218,33 @@ p.body-text {
 .fake-scrollbar-tick {
     position: absolute;
     left: 50%;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
+    width: 12px;
+    height: 24px;
     transform: translate(-50%, -50%);
-    background: rgba(190, 230, 205, 0.45);
-    box-shadow: 0 0 4px rgba(150, 220, 190, 0.3);
-    transition: background 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.34, 1.4, 0.5, 1);
     pointer-events: none;
 }
+.fake-scrollbar-tick canvas {
+    display: block;
+    opacity: 0.92;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+    transform-origin: 50% 90%;
+    animation: bud-sway 6s ease-in-out infinite;
+}
+@keyframes bud-sway {
+    0%, 100% { transform: rotate(-3deg); }
+    50%      { transform: rotate(3deg); }
+}
 
+/* far buds stay small; they swell toward the flower: lotus, biggest, middle, small, small... */
+.fake-scrollbar-tick { transform: translate(-50%, -50%) scale(0.7); }
+.fake-scrollbar-tick.near2 { transform: translate(-50%, -50%) scale(1.1); }
+.fake-scrollbar-tick.near {
+    transform: translate(-50%, -50%) scale(1.55);
+}
 .fake-scrollbar-tick.active {
-    background: var(--gold);
-    transform: translate(-50%, -50%) scale(1.3);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
 }
 
 .fake-scrollbar-thumb {
@@ -247,6 +262,7 @@ p.body-text {
 .fake-scrollbar-thumb canvas {
     position: relative;
     display: block;
+    margin: -5px;
     filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
     animation: pad-bob 7s ease-in-out infinite;
 }

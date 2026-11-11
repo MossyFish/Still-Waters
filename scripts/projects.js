@@ -87,6 +87,67 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // two projects at a time, moving on to the next pair every few seconds unless you're reading one
+    const grid = document.querySelector('.projects-grid');
+    if (grid) {
+        const dots = document.createElement('div');
+        dots.className = 'project-dots';
+        const carousel = document.createElement('div');
+        carousel.className = 'project-carousel';
+        grid.before(carousel);
+        carousel.appendChild(grid);
+        const arrow = (dir, label, glyph) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'pn-arrow';
+            b.setAttribute('aria-label', label);
+            b.innerHTML = glyph;
+            b.addEventListener('click', () => { go(page + dir); restart(); });
+            return b;
+        };
+        const prev = arrow(-1, 'Previous projects', '&#8249;');
+        const next = arrow(1, 'Next projects', '&#8250;');
+        prev.classList.add('prev');
+        next.classList.add('next');
+        carousel.append(prev, next);
+        dots.classList.add('project-nav');
+        carousel.after(dots);
+        let page = 0;
+        let timer = null;
+        const perView = () => (window.innerWidth <= 600 ? 1 : 2);
+        const pageCount = () => Math.max(1, Math.ceil(grid.querySelectorAll('.project-box').length / perView()));
+        const step = () => grid.clientWidth + parseFloat(getComputedStyle(grid).columnGap || 0);
+        const mark = () => [...dots.children].forEach((d, i) => d.classList.toggle('on', i === page));
+        function go(p) {
+            const n = pageCount();
+            page = (p + n) % n;
+            grid.scrollTo({ left: page * step(), behavior: 'smooth' });
+            mark();
+        }
+        function restart() {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                if (!grid.matches(':hover') && !openBox && document.getElementById('content')?.classList.contains('visible')) go(page + 1);
+            }, 4000);
+        }
+        function buildDots() {
+            dots.innerHTML = '';
+            for (let i = 0; i < pageCount(); i++) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.setAttribute('aria-label', `Projects ${i * perView() + 1} to ${Math.min((i + 1) * perView(), grid.children.length)}`);
+                b.addEventListener('click', () => { go(i); restart(); });
+                dots.appendChild(b);
+            }
+            go(Math.min(page, pageCount() - 1));
+        }
+        // swiping by hand keeps the dots in step
+        grid.addEventListener('scrollend', () => { page = Math.round(grid.scrollLeft / step()); mark(); });
+        buildDots();
+        restart();
+        window.addEventListener('resize', buildDots);
+    }
+
     window.hasOpenProject = () => !!openBox;
     window.collapseOpenProject = () => { if (openBox) collapse(openBox); };
 })
